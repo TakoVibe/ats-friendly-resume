@@ -1,0 +1,546 @@
+/* Resume CSS - Simple styles for PDF export */
+@import "/print.css";
+
+/* Variables */
+:root {
+    --resume-primary: #1e3a8a;
+    --resume-dark: #111827;
+    --resume-gray: #374151;
+    --resume-light-gray: #4b5563;
+    --resume-border: #e5e7eb;
+    --resume-heading-size: 12pt;
+    --resume-base-size: 10pt;
+    --resume-body-size: 9pt;
+    --resume-small-size: 8pt;
+}
+
+/* Layout Utilities */
+.resume-w-full {
+    width: 100%;
+}
+
+.resume-relative {
+    position: relative;
+}
+
+.resume-flex {
+    display: flex;
+}
+
+.resume-flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.resume-items-center {
+    align-items: center;
+}
+
+.resume-justify-center {
+    justify-content: center;
+}
+
+.resume-justify-between {
+    justify-content: space-between;
+}
+
+.resume-items-baseline {
+    align-items: baseline;
+}
+
+.resume-items-start {
+    align-items: flex-start;
+}
+
+.resume-text-center {
+    text-align: center;
+}
+
+.resume-text-right {
+    text-align: right;
+}
+
+.resume-text-justify {
+    text-align: justify;
+}
+
+/* Basic Reset since we are not using Tailwind Preflight */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+li {
+    margin: 0;
+    padding: 0;
+}
+
+/* Spacing */
+.resume-mb-1 {
+    margin-bottom: 1pt;
+}
+
+.resume-mb-2 {
+    margin-bottom: 2pt;
+}
+
+.resume-mb-4 {
+    margin-bottom: 4pt;
+}
+
+.resume-mb-5 {
+    margin-bottom: 5pt;
+}
+
+.resume-mb-8 {
+    margin-bottom: 8pt;
+}
+
+.resume-mb-12 {
+    margin-bottom: 12pt;
+}
+
+.resume-mt-1 {
+    margin-top: 1pt;
+}
+
+.resume-gap-1 {
+    gap: 4pt;
+}
+
+/* approx */
+.resume-gap-2 {
+    gap: 8pt;
+}
+
+.resume-mx-1 {
+    margin-left: 4pt;
+    margin-right: 4pt;
+}
+
+.resume-mr-1 {
+    margin-right: 4pt;
+}
+
+/* Colors */
+.resume-text-primary {
+    color: var(--resume-primary);
+}
+
+.resume-text-dark {
+    color: var(--resume-dark);
+}
+
+.resume-text-gray {
+    color: var(--resume-gray);
+}
+
+.resume-text-light-gray {
+    color: var(--resume-light-gray);
+}
+
+/* Typography */
+.resume-font-bold {
+    font-weight: 700;
+}
+
+.resume-font-extrabold {
+    font-weight: 800;
+}
+
+.resume-font-medium {
+    font-weight: 500;
+}
+
+.resume-font-light {
+    font-weight: 300;
+}
+
+.resume-uppercase {
+    text-transform: uppercase;
+}
+
+.resume-leading-none {
+    line-height: 1;
+}
+
+.resume-leading-tight {
+    line-height: 1.3;
+}
+
+.resume-leading-relaxed {
+    line-height: 1.4;
+}
+
+/* Header Component */
+.resume-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8pt;
+    position: relative;
+    width: 100%;
+}
+
+.resume-name {
+    font-size: 22pt;
+    font-weight: 800;
+    color: var(--resume-dark);
+    text-transform: uppercase;
+    letter-spacing: -0.025em;
+    margin-bottom: 2pt;
+    line-height: 1.1;
+}
+
+.resume-title-box {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 4pt;
+    border: none;
+    /* Removed border from here, moving to standalone separator */
+}
+
+.resume-title {
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 1.2pt;
+    /* Spaced out title */
+    text-transform: uppercase;
+    color: var(--resume-primary);
+    line-height: 1;
+}
+
+.resume-header-separator {
+    width: 100%;
+    margin-top: 2pt;
+    margin-bottom: 8pt;
+    height: 0.5pt;
+    /* Thin line */
+    background-color: var(--resume-light-gray);
+    opacity: 0.5;
+}
+
+.resume-header-contact-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 6pt;
+}
+
+.resume-contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    font-size: 9pt;
+    color: var(--resume-dark);
+    line-height: 1.5;
+}
+
+.resume-social-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    font-size: 9pt;
+    color: var(--resume-dark);
+    line-height: 1.5;
+}
+
+.resume-header-bullet {
+    margin-left: 8pt;
+    margin-right: 8pt;
+    font-weight: bold;
+    color: var(--resume-primary);
+    font-size: 10pt;
+    /* Slightly larger bullet */
+}
+
+/* Icons */
+.resume-icon {
+    width: 9pt;
+    height: 9pt;
+}
+
+.resume-icon-gray {
+    color: #4b5563;
+}
+
+/* Section Title */
+.resume-section-title-box {
+    margin-bottom: 4pt;
+    position: relative;
+}
+
+.resume-section-title {
+    font-size: 12pt;
+    /* Default fallback */
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111827;
+    /* gray-900 */
+    margin-bottom: 2pt;
+}
+
+.resume-separator {
+    height: 0.5pt;
+    width: 100%;
+    background-color: #1f2937;
+    /* gray-800 */
+}
+
+/* List Items (Experience, Education etc) */
+.resume-list-none {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.resume-list-item {
+    display: flex;
+    align-items: flex-start;
+}
+
+.resume-bullet {
+    width: 10pt;
+    /* Fixed width for perfect alignment */
+    display: inline-block;
+    text-align: center;
+    margin-right: 4pt;
+    font-size: 11pt;
+    line-height: 1;
+    margin-top: -1pt;
+    flex-shrink: 0;
+    /* Prevent shrinking */
+}
+
+/* Links */
+.resume-link {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Skills */
+.resume-skills-content {
+    font-size: 9.5pt;
+    color: var(--resume-gray);
+    line-height: 1.4;
+}
+
+.resume-skill-group {
+    margin-bottom: 4pt;
+    /* Increased spacing */
+}
+
+.resume-skill-label {
+    font-weight: 700;
+    color: #1f2937;
+    margin-right: 4pt;
+    /* Ensure label carries its own spacing */
+}
+
+/* Experience & Projects */
+.resume-role {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.resume-duration {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.resume-company {
+    font-size: 9pt;
+    font-weight: 500;
+    color: #374151;
+}
+
+.resume-tech-stack {
+    font-size: 9pt;
+    color: #4b5563;
+    margin-bottom: 3pt;
+    margin-top: 2pt;
+}
+
+.resume-details-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 9pt;
+    color: #374151;
+    line-height: 1.4;
+    margin-top: 1pt;
+}
+
+/* Spacer Utilities */
+.resume-section {
+    margin-bottom: 12pt;
+}
+
+.resume-section-mb-12 {
+    margin-bottom: 12pt;
+}
+
+.resume-space-y-4 {
+    display: flex;
+    flex-direction: column;
+    gap: 4pt;
+}
+
+.resume-space-y-6 {
+    display: flex;
+    flex-direction: column;
+    gap: 6pt;
+}
+
+.resume-space-y-0-5 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5pt;
+}
+
+/* Education Specifics */
+.resume-location-text {
+    font-size: 9pt;
+    font-weight: 500;
+    color: #4b5563;
+    /* display: block; removed for flex usage */
+}
+
+.resume-duration-gray {
+    font-size: 9pt;
+    color: #4b5563;
+    display: block;
+}
+
+.resume-degree {
+    font-size: 9.5pt;
+    font-weight: 500;
+    color: #374151;
+}
+
+.resume-score {
+    font-size: 9pt;
+    color: #4b5563;
+}
+
+.resume-pl-1 {
+    padding-left: 4pt;
+}
+
+/* Project Specifics */
+.resume-space-y-5 {
+    display: flex;
+    flex-direction: column;
+    gap: 5pt;
+}
+
+.resume-project-name {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.resume-link-text {
+    font-size: 9pt;
+    color: #1e3a8a;
+    cursor: text;
+    text-decoration: none;
+    min-width: 60pt;
+    display: inline-block;
+}
+
+.resume-link-text:empty:before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.resume-link-text:hover {
+    text-decoration: underline;
+}
+
+.resume-project-description {
+    font-size: 9pt;
+    color: #374151;
+    line-height: 1.3;
+    margin-bottom: 1pt;
+    text-align: justify;
+}
+
+.resume-ml-4-pt {
+    margin-left: 4pt;
+}
+
+.resume-bg-white {
+    background-color: white;
+}
+
+/* Summary */
+.resume-summary-text {
+    font-size: 9.5pt;
+    color: #374151;
+    line-height: 1.5;
+    text-align: justify;
+    min-height: 20px;
+}
+
+/* Achievements & Certifications */
+.resume-achievements-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5pt;
+    font-size: 9.5pt;
+    color: #374151;
+    line-height: 1.35;
+}
+
+.resume-flex-1 {
+    flex: 1 1 0%;
+}
+
+.resume-pl-4 {
+    padding-left: 12pt;
+}
+
+.resume-font-normal {
+    font-weight: 400;
+}
+
+/* Custom Section */
+.resume-custom-item {
+    font-size: 9.5pt;
+    color: #374151;
+    line-height: 1.35;
+}
+
+.resume-custom-date {
+    color: #4b5563;
+    font-size: 9pt;
+    margin-left: 12pt;
+    white-space: nowrap;
+}
+
+.resume-pl-0 {
+    padding-left: 0;
+}
+
+/* Edit Buttons (keep hidden in print via print.css, but style them for editor) */
+.resume-break-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* Edit Buttons usually handled by Tailwind in editor or ignored in print */

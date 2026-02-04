@@ -1,0 +1,41 @@
+---
+export const prerender = true;
+import { ResumeBuilder } from "../components/ResumeBuilder";
+import SEO from "../components/SEO.astro";
+import "../styles/global.css";
+// resume.css is now loaded via link tag to work with PDF service
+// import "../styles/resume.css";
+---
+
+<html lang="en">
+	<head>
+		<SEO />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="preload"
+			as="style"
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Merriweather:wght@300;400;700;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Merriweather:wght@300;400;700;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap"
+			rel="stylesheet"
+			media="print"
+			onload="this.media='all'"
+		/>
+		<noscript>
+			<link
+				href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Merriweather:wght@300;400;700;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap"
+				rel="stylesheet"
+			/>
+		</noscript>
+		<link rel="stylesheet" href="/resume.css" />
+	</head>
+	<body>
+		<h1 class="sr-only">
+			ResumeVibe - Professional ATS-Friendly Resume Builder & AI
+			Optimization Tool
+		</h1>
+		<ResumeBuilder client:only="react" />
+	</body>
+</html>

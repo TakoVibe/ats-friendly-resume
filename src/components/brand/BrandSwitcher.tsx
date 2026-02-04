@@ -1,0 +1,118 @@
+import { useState, useRef } from 'react';
+import { ChevronDown, ExternalLink, Sparkles, Globe } from 'lucide-react';
+
+export function BrandSwitcher() {
+    const [isOpen, setIsOpen] = useState(false);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleMouseEnter = () => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+        setIsOpen(true);
+    };
+
+    const handleMouseLeave = () => {
+        timerRef.current = setTimeout(() => {
+            setIsOpen(false);
+        }, 300);
+    };
+
+    const tools = [
+        {
+            name: 'TakoVibe Blog',
+            description: 'Technical articles & career advice',
+            url: 'https://takovibe.com',
+            icon: <Globe className="w-4 h-4" />
+        },
+        {
+            name: 'ResumeVibe',
+            description: 'Professional resume suite',
+            url: '#',
+            current: true,
+            icon: <Sparkles className="w-4 h-4" />
+        }
+    ];
+
+    return (
+        <div className="relative flex items-center gap-2 group">
+            <div
+                className="flex items-center gap-1 px-1 sm:px-1.5 py-1 rounded-full bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-[var(--border-color)]/20 hover:bg-[var(--bg-input)]/80 transition-all duration-300 cursor-pointer shadow-inner"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] rounded-full shadow-lg shadow-purple-500/30 group-hover:scale-105 transition-transform duration-500">
+                    <a
+                        href="https://takovibe.com"
+                        className="text-[10px] font-bold uppercase tracking-ultra text-white"
+                    >
+                        Takovibe
+                    </a>
+                </div>
+
+                <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:pr-4 text-[var(--text-main)]">
+                    <h1 className="text-xs sm:text-sm font-bold whitespace-nowrap tracking-tight">ResumeVibe</h1>
+                    <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--text-muted)] transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#a78bfa]' : ''}`} />
+                </div>
+
+                {/* Dropdown Menu */}
+                {isOpen && (
+                    <div className="absolute top-[120%] left-0 w-80 bg-[var(--glass-bg)] backdrop-blur-3xl border border-[var(--border-color)] rounded-[2rem] shadow-[var(--shadow)] overflow-hidden z-[70] animate-in fade-in slide-in-from-top-4 duration-500 ease-out">
+                        <div className="px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-card)]/30">
+                            <h2 className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-ultra flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shadow-[0_0_8px_var(--accent)]"></div>
+                                Ecosystem
+                            </h2>
+                        </div>
+                        <div className="p-3 space-y-1.5">
+                            {tools.map((tool) => (
+                                <a
+                                    key={tool.name}
+                                    href={tool.url}
+                                    target={tool.current ? undefined : "_blank"}
+                                    rel={tool.current ? undefined : "noopener noreferrer"}
+                                    className={`relative group/item flex items-start gap-4 px-4 py-4 rounded-2xl transition-all duration-300 ${tool.current
+                                        ? 'bg-[var(--accent)]/5 border border-[var(--accent)]/10 shadow-inner'
+                                        : 'hover:bg-[var(--bg-input)] border border-transparent hover:border-[var(--border-color)]'
+                                        }`}
+                                >
+                                    <div className={`p-2.5 rounded-xl transition-all duration-300 ${tool.current ? 'bg-[var(--accent)] text-white shadow-lg shadow-purple-500/30' : 'bg-[var(--bg-input)] text-[var(--text-muted)] group-hover/item:text-[var(--accent)] group-hover/item:scale-110'}`}>
+                                        {tool.icon}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className={`text-[13px] font-bold tracking-tight ${tool.current ? 'text-[var(--text-main)]' : 'text-[var(--text-main)] group-hover/item:text-[var(--accent)]'}`}>
+                                                {tool.name}
+                                            </span>
+                                            {!tool.current && <ExternalLink size={12} className="text-[var(--text-muted)] group-hover/item:translate-x-0.5 group-hover/item:translate-y-[-0.5px] transition-transform" />}
+                                        </div>
+                                        <p className="text-[11px] font-medium text-[var(--text-muted)] mt-1 leading-snug opacity-70 group-hover/item:opacity-100 transition-opacity">
+                                            {tool.description}
+                                        </p>
+                                    </div>
+                                    {tool.current && (
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 translate-x-1">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shadow-[0_0_10px_var(--accent)]"></div>
+                                        </div>
+                                    )}
+                                </a>
+                            ))}
+                        </div>
+                        <div className="px-6 py-5 bg-[var(--bg-input)]/20 border-t border-[var(--border-color)]">
+                            <a
+                                href="https://takovibe.com/about"
+                                className="group/about flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                            >
+                                <span>The Engineering Mission</span>
+                                <div className="w-6 h-6 rounded-full bg-[var(--bg-input)] flex items-center justify-center group-hover/about:bg-[var(--accent)] group-hover/about:text-white transition-all">
+                                    <ChevronDown className="w-3 h-3 -rotate-90" />
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

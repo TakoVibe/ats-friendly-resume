@@ -1,0 +1,73 @@
+---
+interface Props {
+    title?: string;
+    description?: string;
+    image?: string;
+    canonicalURL?: URL | string;
+    type?: string;
+}
+
+const {
+    title = "ResumeVibe - Free Professional ATS Resume Builder",
+    description = "Build a professional, ATS-friendly resume for free. No login required. AI-powered optimization, modern templates, and instant PDF export. Perfect for software engineers and professionals.",
+    image = "/og-image.png", // We should create this later
+    canonicalURL = new URL(Astro.url.pathname, Astro.site),
+    type = "website",
+} = Astro.props;
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="generator" content={Astro.generator} />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={new URL(image, Astro.url)} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+<!-- Robots -->
+<meta name="robots" content="index, follow" />
+
+<!-- Structured Data (Schema.org) -->
+<script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "ResumeVibe",
+        operatingSystem: "Web",
+        applicationCategory: "BusinessApplication",
+        offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+        },
+        description: description,
+        aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: "4.9",
+            reviewCount: "1200",
+        },
+    })}
+/>

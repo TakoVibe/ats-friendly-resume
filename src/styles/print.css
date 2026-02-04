@@ -1,0 +1,76 @@
+/* Print-specific styles for PDF generation */
+@media print {
+
+    /* Page setup - Zero margins, allow the container to define spacing */
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    /* Reset body */
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    /* Hide non-printable elements */
+    .no-print,
+    button,
+    .editor-controls,
+    nav {
+        display: none !important;
+    }
+
+    /* Wrap adjustment */
+    #resume-preview-content {
+        margin: 0 !important;
+        box-shadow: none !important;
+        /* Ensure no extra scaling happens in print */
+        transform: none !important;
+        width: 210mm !important;
+        min-height: 297mm !important;
+        padding: 30pt !important;
+    }
+
+    /* Prevent page breaks inside elements */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    li,
+    section {
+        page-break-inside: avoid;
+    }
+
+    a {
+        color: #1e3a8a;
+        text-decoration: none;
+    }
+
+    /* Remove shadows and transitions */
+    * {
+        box-shadow: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+
+    /* Hide editable placeholders and highlights */
+    [contenteditable],
+    [data-placeholder] {
+        outline: none !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    [data-placeholder]:empty:before {
+        content: none !important;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

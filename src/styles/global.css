@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+:root {
+    /* Dark Theme (Default) - Premium Midnight */
+    --bg-main: #09090b;
+    --bg-card: #111114;
+    --bg-input: rgba(255, 255, 255, 0.04);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-main: #fafafa;
+    --text-muted: #a1a1aa;
+    --accent: #8b5cf6;
+    --accent-hover: #7c3aed;
+    --shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+    --glass-bg: rgba(17, 17, 20, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+:root.light {
+    /* Light Theme Overlay - Soft Slate & Pearl */
+    --bg-main: #f4f7fa;
+    --bg-card: #ffffff;
+    --bg-input: #f1f3f6;
+    --border-color: #e2e8f0;
+    --text-main: #09090b;
+    --text-muted: #64748b;
+    --accent: #6d28d9;
+    --accent-hover: #5b21b6;
+    --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.05);
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button,
+nav,
+.ui-font {
+    font-family: 'Outfit', 'Plus Jakarta Sans', 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+.tracking-premium {
+    letter-spacing: 0.05em;
+}
+
+.tracking-ultra {
+    letter-spacing: 0.2em;
+}
+
+/* Cross-browser zoom support */
+@supports not (zoom: 1) {
+    .zoom-0-5 {
+        transform: scale(0.5);
+        transform-origin: top left;
+        width: 200%;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(128, 128, 128, 0.2) transparent;
+}
+
+@media print {
+    @page {
+        margin: 0;
+        size: auto;
+    }
+
+    body {
+        background-color: white !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
+/* Resume Specific Styles - Force Light Mode */
+.resume-root {
+    --bg-main: #f4f7fa;
+    --bg-card: #ffffff;
+    --bg-input: #f1f3f6;
+    --border-color: #e2e8f0;
+    --text-main: #09090b;
+    --text-muted: #64748b;
+    --accent: #6d28d9;
+    --accent-hover: #5b21b6;
+    --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.05);
+    background-color: white !important;
+    color: #09090b !important;
+}
+
+.resume-root a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+/* Resume Root Children Inheritance */
+.resume-root * {
+    font-family: inherit !important;
+    color: inherit;
+}
+
+.resume-root h1,
+.resume-root h2,
+.resume-root h3,
+.resume-root h4,
+.resume-root h5,
+.resume-root h6,
+.resume-root p,
+.resume-root span,
+.resume-root div,
+.resume-root li,
+.resume-root a {
+    font-family: inherit !important;
+    color: inherit;
+}
+
+/* Dark mode overrides for common components if needed */
+.dark-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
