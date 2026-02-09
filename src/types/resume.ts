@@ -34,7 +34,7 @@ export interface ResumeSchema {
     projects: Array<{
         id: string;
         name: string;
-        description: string;
+        description?: string;
         techStack?: string[];
         techStackLabel?: string;
         link?: string;
@@ -44,7 +44,7 @@ export interface ResumeSchema {
     openSource?: Array<{
         id: string;
         name: string;
-        description: string;
+        description?: string;
         link?: string;
         metrics?: BulletItem[];
     }>;

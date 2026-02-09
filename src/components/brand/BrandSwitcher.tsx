@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { ChevronDown, ExternalLink, Sparkles, Globe } from 'lucide-react';
+import { Logo } from '../ui/Logo';
 
 export function BrandSwitcher() {
     const [isOpen, setIsOpen] = useState(false);
@@ -42,17 +43,23 @@ export function BrandSwitcher() {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
             >
-                <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] rounded-full shadow-lg shadow-purple-500/30 group-hover:scale-105 transition-transform duration-500">
+                <div className="hidden sm:flex items-center gap-2 group/logo transition-all duration-500">
+                    <div className="p-1 bg-purple-500/10 rounded-full backdrop-blur-md border border-purple-500/20 group-hover/logo:scale-110 transition-transform duration-500 shadow-lg">
+                        <Logo className="w-5 h-5" />
+                    </div>
                     <a
                         href="https://takovibe.com"
-                        className="text-[10px] font-bold uppercase tracking-ultra text-white"
+                        className="text-[10px] font-black uppercase tracking-ultra text-[var(--text-main)] opacity-70 group-hover/logo:opacity-100 transition-opacity"
                     >
-                        Takovibe
+                        TakoVibe
                     </a>
                 </div>
 
                 <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:pr-4 text-[var(--text-main)]">
-                    <h1 className="text-xs sm:text-sm font-bold whitespace-nowrap tracking-tight">ResumeVibe</h1>
+                    <div className="flex items-baseline gap-1.5">
+                        <h1 className="text-xs sm:text-sm font-bold whitespace-nowrap tracking-tight">ResumeVibe</h1>
+                        <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-md bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 translate-y-[-1px]">Beta</span>
+                    </div>
                     <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--text-muted)] transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#a78bfa]' : ''}`} />
                 </div>
 

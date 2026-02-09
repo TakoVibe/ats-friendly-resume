@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useResume } from '../hooks/useResume';
 import { ResumePreview } from './ResumePreview';
-import { Download, RotateCcw, FileText, Eye, Edit, Loader2, Sparkles, UserCheck } from 'lucide-react';
+import { Download, RotateCcw, FileText, Eye, Edit, Loader2, Sparkles, UserCheck, Zap } from 'lucide-react';
 import { ThemeProvider } from '../context/ThemeContext';
 import { TextPreview } from './parser/TextPreview';
 import { EditorToolbar } from './ui/EditorToolbar';
+import { Logo } from './ui/Logo';
 
 import { PersonalInfoModal } from './editor/PersonalInfoModal';
 import { ResumeProvider } from '../context/ResumeContext';
@@ -153,7 +154,6 @@ function ResumeBuilderContent() {
             setShowSuccessModal(true);
         } catch (error) {
             console.error('Error downloading PDF:', error);
-            alert('Failed to generate PDF. Please ensure the PDF service is running.');
         } finally {
             setIsGenerating(false);
         }
@@ -255,7 +255,13 @@ function ResumeBuilderContent() {
             <nav className="hidden md:flex sticky top-0 z-[60] justify-between items-center px-8 py-4 bg-[var(--glass-bg)] backdrop-blur-2xl border-b border-[var(--border-color)] text-[var(--text-main)] shadow-2xl">
                 <div className="flex items-center gap-3 md:gap-6">
                     <BrandSwitcher />
-
+                    <a
+                        href="/why-resumevibe"
+                        className="hidden lg:flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-purple-500 transition-colors"
+                    >
+                        <Zap size={14} className="text-purple-500" />
+                        Why ResumeVibe?
+                    </a>
                 </div>
 
                 {/* Mobile Tab Switcher Centered on Mobile */}
@@ -326,11 +332,11 @@ function ResumeBuilderContent() {
                     </button>
 
                     <button
-                        className="flex items-center gap-2 px-3 md:px-6 py-2 text-xs bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold uppercase tracking-[0.1em] shadow-lg shadow-purple-500/25 border border-white/10"
-                        onClick={() => setShowShareModal(true)}
+                        className="hidden md:hidden lg:hidden xl:hidden flex items-center gap-2 px-3 md:px-6 py-2 text-xs bg-[var(--bg-input)] text-[var(--text-muted)] rounded-xl font-bold uppercase tracking-[0.1em] border border-[var(--border-color)] opacity-60 cursor-not-allowed"
+                        disabled
                     >
-                        <Sparkles size={14} className="animate-pulse" />
-                        Share
+                        <Sparkles size={14} />
+                        Upcoming
                     </button>
 
                     <button
@@ -346,10 +352,11 @@ function ResumeBuilderContent() {
 
             {/* Top Bar - Mobile - Simplified */}
             <nav className="flex md:hidden sticky top-0 z-[60] justify-between items-center px-3 py-3 bg-[var(--glass-bg)] backdrop-blur-2xl border-b border-[var(--border-color)] text-[var(--text-main)] shadow-sm">
-                <button className="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-main)]">
-                    {/* Placeholder for Back if needed in future, or Menu */}
-                    <div className="w-5 h-5 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-[10px]">T</div>
-                </button>
+                <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 p-1 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                        <Logo className="w-full h-full" />
+                    </div>
+                </div>
 
                 <div className="flex-1 text-center font-bold text-sm truncate px-2">
                     {data.personalInfo.fullName || 'Untitled Resume'}
@@ -411,7 +418,7 @@ function ResumeBuilderContent() {
                         </div>
                     )}
                     {activeTab === 'editor' && (
-                        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col items-center bg-[var(--bg-main)] scroll-smooth pb-32">
+                        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col items-center bg-[var(--bg-main)] scroll-smooth pt-24 pb-32">
                             {/* Mobile-optimized Container - Fits Width Automatically */}
                             <div className="w-full md:w-auto relative mt-4 md:mt-8 px-2 md:px-0 flex justify-center">
                                 {/* Only apply transform scale on non-mobile, on mobile we use CSS Zoom or Width constraints */}
@@ -485,13 +492,12 @@ function ResumeBuilderContent() {
                         />
                     )}
 
-                    {showShareModal && (
-                        <ShareModal
-                            isOpen={showShareModal}
-                            onClose={() => setShowShareModal(false)}
-                            resumeId={data.personalInfo.fullName.toLowerCase().replace(/\s+/g, '-')}
-                        />
-                    )}
+                    <ShareModal
+                        isOpen={showShareModal}
+                        onClose={() => setShowShareModal(false)}
+                        resumeId={data.personalInfo.fullName.toLowerCase().replace(/\s+/g, '-')}
+                        fullName={data.personalInfo.fullName}
+                    />
 
                     {showGuidanceModal && (
                         <CareerGuidanceModal

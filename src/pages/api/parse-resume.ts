@@ -2,28 +2,28 @@ import type { APIRoute } from 'astro';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-    apiKey: import.meta.env.OPENAI_API_KEY,
+  apiKey: import.meta.env.OPENAI_API_KEY,
 });
 
 export const POST: APIRoute = async ({ request }) => {
-    try {
-        const { text } = await request.json();
+  try {
+    const { text } = await request.json();
 
-        if (!text || typeof text !== 'string') {
-            return new Response(
-                JSON.stringify({ error: 'Resume text is required' }),
-                { status: 400 }
-            );
-        }
+    if (!text || typeof text !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Resume text is required' }),
+        { status: 400 }
+      );
+    }
 
-        if (!import.meta.env.OPENAI_API_KEY) {
-            return new Response(
-                JSON.stringify({ error: 'OpenAI API key not configured' }),
-                { status: 500 }
-            );
-        }
+    if (!import.meta.env.OPENAI_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'OpenAI API key not configured' }),
+        { status: 500 }
+      );
+    }
 
-        const prompt = `You are an expert resume parser. Parse the following resume text and extract structured information into a clean JSON format.
+    const prompt = `You are an expert resume parser. Parse the following resume text and extract structured information into a clean JSON format.
 
 Return a JSON object with this exact structure:
 {
@@ -44,7 +44,8 @@ Return a JSON object with this exact structure:
       "duration": "string",
       "location": "string",
       "metrics": ["bullet point 1", "bullet point 2"],
-      "techStack": ["tech1", "tech2"]
+      "techStack": ["tech1", "tech2"],
+      "techStackLabel": "string (e.g., 'Technologies Used:', 'Stack:')"
     }
   ],
   "education": [
@@ -68,12 +69,12 @@ Return a JSON object with this exact structure:
   "projects": [
     {
       "id": "string (generate unique id: proj-1, proj-2...)",
-      "name": "string",
-      "description": "string",
-      "techStack": ["tech1", "tech2"],
-      "link": "string (optional)",
-      "date": "string (optional)",
-      "metrics": ["achievement 1", "achievement 2"]
+      "name": "string (Project Name)",
+      "techStack": ["tech1", "tech2", "tech3"],
+      "techStackLabel": "string (e.g., 'Technologies:', 'Backend/Frontend Stack:')",
+      "link": "string (URL if any)",
+      "date": "string (Period/Date)",
+      "metrics": ["Full descriptive paragraph as the first bullet point", "Specific achievement or feature 2"]
     }
   ],
   "certifications": [
@@ -88,75 +89,79 @@ Return a JSON object with this exact structure:
 
 Important Rules:
 - Generate unique IDs for each item.
-- Extract ALL information available.
+- Extract ALL information available. Do not skip any details.
+- DO NOT MERGE separate work experience entries or projects even if they have the same job title or similar dates. Each distinct heading must be a separate entry.
+- Ensure chronological order matches the source.
+- PROJECTS: Look for sections titled "Projects", "Relevant Projects", "Personal Projects", "Academic Projects".
+- ANY project description or paragraph following the title should be added as the FIRST bullet point in the 'metrics' array. DO NOT use a separate 'description' field.
+- Extract technology names, tools, version control (e.g., Git, Bitbucket), and infrastructure (e.g., AWS, Docker) into techStack arrays.
+- Preserve the exact achievements, descriptions, and bullet points. Do not rewrite them into a summary unless they are very messy; keep the original tone and details.
 - If a section is missing, return an empty array [].
-- Preserve the exact achievements and bullet points.
-- Extract technology names into techStack arrays where applicable.
 - Return ONLY the JSON object, do not include markdown blocks or any other text.
 
 Resume Text:
 ${text}`;
 
-        const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [
-                { role: 'system', content: 'You are a professional resume parsing service. Output only valid JSON.' },
-                { role: 'user', content: prompt }
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.1,
-        });
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: 'You are a professional resume parsing service. Output only valid JSON.' },
+        { role: 'user', content: prompt }
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.1,
+    });
 
-        const generatedText = completion.choices[0]?.message?.content;
+    const generatedText = completion.choices[0]?.message?.content;
 
-        if (!generatedText) {
-            throw new Error('No response from AI');
-        }
-
-        const parsedResume = JSON.parse(generatedText);
-
-        // Add default config and visibility settings
-        const completeResume = {
-            ...parsedResume,
-            achievements: parsedResume.achievements || [],
-            openSource: parsedResume.openSource || [],
-            customSections: parsedResume.customSections || [],
-            config: {
-                baseFontSize: 10,
-                fontFamily: 'Inter',
-                margins: 'standard',
-                lineHeight: 1.35
-            },
-            sectionOrder: [
-                'summary',
-                'experience',
-                'projects',
-                'skills',
-                'education',
-                'certifications'
-            ],
-            visibleSections: {
-                summary: !!parsedResume.summary,
-                experience: (parsedResume.experience?.length || 0) > 0,
-                education: (parsedResume.education?.length || 0) > 0,
-                skills: (parsedResume.skills?.length || 0) > 0,
-                projects: (parsedResume.projects?.length || 0) > 0,
-                certifications: (parsedResume.certifications?.length || 0) > 0
-            }
-        };
-
-        return new Response(JSON.stringify(completeResume), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
-    } catch (error) {
-        console.error('Error parsing resume:', error);
-        return new Response(
-            JSON.stringify({
-                error: 'Failed to parse resume',
-                details: error instanceof Error ? error.message : 'Unknown error'
-            }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
+    if (!generatedText) {
+      throw new Error('No response from AI');
     }
+
+    const parsedResume = JSON.parse(generatedText);
+
+    // Add default config and visibility settings
+    const completeResume = {
+      ...parsedResume,
+      achievements: parsedResume.achievements || [],
+      openSource: parsedResume.openSource || [],
+      customSections: parsedResume.customSections || [],
+      config: {
+        baseFontSize: 10,
+        fontFamily: 'Inter',
+        margins: 'standard',
+        lineHeight: 1.35
+      },
+      sectionOrder: [
+        'summary',
+        'experience',
+        'projects',
+        'skills',
+        'education',
+        'certifications'
+      ],
+      visibleSections: {
+        summary: !!parsedResume.summary,
+        experience: (parsedResume.experience?.length || 0) > 0,
+        education: (parsedResume.education?.length || 0) > 0,
+        skills: (parsedResume.skills?.length || 0) > 0,
+        projects: (parsedResume.projects?.length || 0) > 0,
+        certifications: (parsedResume.certifications?.length || 0) > 0
+      }
+    };
+
+    return new Response(JSON.stringify(completeResume), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Error parsing resume:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to parse resume',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 };

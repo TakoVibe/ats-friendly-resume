@@ -79,6 +79,7 @@ export function Skills({ skills, isEditable = false, onUpdate, title = "Key Skil
                         onMoveDown={() => moveSkillGroup(index, 'down')}
                         onDelete={() => deleteSkillGroup(index)}
                         isEditable={isEditable}
+                        className="!py-0"
                     >
                         <div className={`resume-skill-group resume-break-avoid ${isMobile ? 'flex flex-col gap-2' : ''}`}>
                             <span className={`resume-skill-label ${isMobile ? 'text-[var(--text-main)] font-bold text-sm mb-1 uppercase tracking-wide' : ''}`}>

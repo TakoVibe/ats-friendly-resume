@@ -12,6 +12,7 @@ import { CustomSection } from './resume/CustomSection';
 import { SectionControls } from './ui/SectionControls';
 import { Plus, Type, Eye } from 'lucide-react';
 import { THEME_PRESETS } from '../styles/themes';
+import { useTheme } from '../context/ThemeContext';
 
 interface Props {
     data: ResumeSchema;
@@ -133,6 +134,8 @@ export function ResumePreview({ data, id, isEditable = false, onUpdate, onEditHe
 
     // Mobile specific overrides
 
+    const { isDarkMode } = useTheme();
+
     // Map margins to padding
     const marginMap = {
         compact: '30pt', // 0.4in
@@ -154,6 +157,9 @@ export function ResumePreview({ data, id, isEditable = false, onUpdate, onEditHe
 
     const theme = THEME_PRESETS.standard;
 
+    // Apply dark mode only in editor (isEditable)
+    const applyDarkMode = isEditable && isDarkMode;
+
     const resumeStyle = {
         width: isMobile ? '100%' : '210mm',
         minHeight: isMobile ? 'auto' : '297mm',
@@ -166,18 +172,26 @@ export function ResumePreview({ data, id, isEditable = false, onUpdate, onEditHe
                             'Helvetica, Arial, sans-serif',
         lineHeight: lineHeight,
         boxSizing: 'border-box',
-        background: theme.styles['--resume-bg'],
-        color: theme.styles['--resume-text'],
-        backgroundImage: theme.styles['--resume-gradient'],
-        // In mobile mode, we enforce larger, legible base sizes regardless of config
+        background: applyDarkMode ? 'var(--bg-card)' : theme.styles['--resume-bg'],
+        color: applyDarkMode ? 'var(--text-main)' : theme.styles['--resume-text'],
+        backgroundImage: applyDarkMode ? 'none' : theme.styles['--resume-gradient'],
         // In mobile mode, we enforce larger, legible base sizes regardless of config
         '--resume-base': isMobile ? `${Math.max(13, baseFontSize * 1.3)}px` : `${baseFontSize}pt`,
         '--resume-body': isMobile ? `${Math.max(12, baseFontSize * 1.25)}px` : `${baseFontSize * 0.95}pt`,
         '--resume-heading': isMobile ? `${Math.max(14, baseFontSize * 1.4)}px` : `${baseFontSize * 1.1}pt`,
         '--resume-h1': isMobile ? `${Math.max(20, baseFontSize * 2.0)}px` : `${baseFontSize * 2.2}pt`,
         '--resume-sub': isMobile ? `${Math.max(11, baseFontSize * 1.1)}px` : `${baseFontSize * 0.9}pt`,
-        ...theme.styles,
-    } as React.CSSProperties;
+        ...(applyDarkMode ? {
+            '--resume-bg': 'var(--bg-card)',
+            '--resume-text': 'var(--text-main)',
+            '--resume-dark': 'var(--text-main)',
+            '--resume-gray': 'var(--text-muted)',
+            '--resume-light-gray': 'rgba(255,255,255,0.4)',
+            '--resume-border': 'rgba(255,255,255,0.1)',
+            '--resume-accent': 'var(--accent)',
+            '--resume-primary': 'var(--accent)',
+        } : theme.styles),
+    } as any;
 
     const moveSection = (index: number, direction: 'up' | 'down') => {
         if (!onUpdate) return;
@@ -389,7 +403,7 @@ export function ResumePreview({ data, id, isEditable = false, onUpdate, onEditHe
 
             <div
                 id={id}
-                className={`mx-auto print:shadow-none print:m-0 resume-root ${isEditable ? 'rounded-b-lg rounded-t-none' : ''} ${viewMode === 'mobile' ? '!shadow-none !w-full !max-w-none' : ''}`}
+                className={`mx-auto print:shadow-none print:m-0 resume-root ${isEditable ? 'rounded-b-lg rounded-t-none' : ''} ${viewMode === 'mobile' ? '!shadow-none !w-full !max-w-none' : ''} ${applyDarkMode ? 'dark-mode-editor' : ''}`}
                 style={{
                     boxShadow: theme.styles['--resume-card-shadow'] || '0 25px 50px -12px rgb(0 0 0 / 0.25)',
                     backdropFilter: theme.styles['--resume-glass-blur'] ? `blur(${theme.styles['--resume-glass-blur']})` : 'none',

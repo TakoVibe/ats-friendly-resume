@@ -213,7 +213,7 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                     {isMobile ? (
                                         <>
                                             {(job.techStack || []).map((tech, i) => (
-                                                <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                                <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[var(--resume-bg-sub,rgba(128,128,128,0.1))] text-[var(--resume-gray)] border border-[var(--resume-border)]">
                                                     {isEditable ? (
                                                         <EditableField
                                                             value={tech}
@@ -299,7 +299,7 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                     <li className="flex justify-center mt-1 opacity-0 group-hover/item-content:opacity-100 transition-opacity">
                                         <button
                                             onClick={() => addMetric(job.id)}
-                                            className="text-[9pt] text-[#2563eb] hover:underline flex items-center gap-1"
+                                            className="text-[9pt] text-[var(--accent)] hover:underline flex items-center gap-1"
                                         >
                                             <Plus size={12} /> Add Point
                                         </button>

@@ -186,7 +186,7 @@ export function EditableField({
                             />
                         )}
                         {actions && (
-                            <div className="flex items-center gap-1 bg-white shadow-lg border border-[var(--border-color)] rounded-lg p-1">
+                            <div className="flex items-center gap-1 bg-[var(--bg-card)] shadow-lg border border-[var(--border-color)] rounded-lg p-1">
                                 {actions}
                             </div>
                         )}

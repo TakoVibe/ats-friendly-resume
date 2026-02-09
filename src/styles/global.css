@@ -109,7 +109,7 @@ nav,
     }
 }
 
-/* Resume Specific Styles - Force Light Mode */
+/* Resume Specific Styles - Force Light Mode by default */
 .resume-root {
     --bg-main: #f4f7fa;
     --bg-card: #ffffff;
@@ -122,8 +122,31 @@ nav,
     --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: rgba(0, 0, 0, 0.05);
-    background-color: white !important;
-    color: #09090b !important;
+    --resume-bg-sub: rgba(241, 243, 246, 0.8);
+    background-color: white;
+    color: #09090b;
+}
+
+/* Dark mode override for the editor view */
+.resume-root.dark-mode-editor {
+    --bg-main: #09090b;
+    --bg-card: #111114;
+    --bg-input: rgba(255, 255, 255, 0.04);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-main: #fafafa;
+    --text-muted: #a1a1aa;
+    --accent: #8b5cf6;
+    --accent-hover: #7c3aed;
+
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+
+    --resume-bg: var(--bg-card);
+    --resume-bg-sub: rgba(255, 255, 255, 0.05);
+    --resume-text: var(--text-main);
+    --resume-dark: var(--text-main);
+    --resume-gray: var(--text-muted);
+    --resume-border: var(--border-color);
 }
 
 .resume-root a {

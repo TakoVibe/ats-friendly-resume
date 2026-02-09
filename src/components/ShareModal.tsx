@@ -5,9 +5,10 @@ interface ShareModalProps {
     isOpen: boolean;
     onClose: () => void;
     resumeId: string;
+    fullName: string;
 }
 
-export function ShareModal({ isOpen, onClose, resumeId }: ShareModalProps) {
+export function ShareModal({ isOpen, onClose, resumeId, fullName }: ShareModalProps) {
     const [copied, setCopied] = useState(false);
     const mockPublicUrl = `https://resumevibe.com/v/${resumeId || 'user-123'}`;
 
@@ -61,31 +62,22 @@ export function ShareModal({ isOpen, onClose, resumeId }: ShareModalProps) {
                     <div className="space-y-3">
                         <div className="flex justify-between items-center px-1">
                             <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-60">Personal Portfolio Link</label>
-                            <button
-                                onClick={() => window.open('/?view=public', '_blank')}
-                                className="text-[9px] font-black uppercase tracking-widest text-purple-500 hover:underline flex items-center gap-1"
+                            <span
+                                className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-40 flex items-center gap-1 cursor-not-allowed"
                             >
-                                <Globe size={10} /> Live Preview
-                            </button>
+                                <Globe size={10} /> Live Preview (Upcoming)
+                            </span>
                         </div>
-                        <div className="relative group">
-                            <div className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-2xl pl-12 pr-32 py-4 flex items-center group-focus-within:border-purple-500/40 transition-all shadow-inner">
-                                <Link size={18} className="absolute left-4 text-[var(--text-muted)] group-focus-within:text-purple-500 transition-colors" />
-                                <span className="text-sm font-bold text-[var(--text-main)] truncate select-all">{mockPublicUrl}</span>
+                        <div className="relative group grayscale">
+                            <div className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-2xl pl-12 pr-32 py-4 flex items-center opacity-50 transition-all shadow-inner">
+                                <Link size={18} className="absolute left-4 text-[var(--text-muted)] transition-colors" />
+                                <span className="text-sm font-bold text-[var(--text-muted)] truncate select-all">{mockPublicUrl}</span>
                             </div>
                             <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    handleCopy();
-                                }}
-                                className={`absolute right-2 top-2 bottom-2 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg z-30 ${copied
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-[var(--text-main)] text-[var(--bg-main)] hover:bg-purple-600 hover:text-white'
-                                    }`}
+                                disabled
+                                className="absolute right-2 top-2 bottom-2 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg z-30 bg-[var(--border-color)] text-[var(--text-muted)] cursor-not-allowed"
                             >
-                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                                {copied ? 'Copied' : 'Copy Link'}
+                                Upcoming
                             </button>
                         </div>
                     </div>
@@ -95,11 +87,24 @@ export function ShareModal({ isOpen, onClose, resumeId }: ShareModalProps) {
                         <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1 opacity-60">Instant Reach</label>
                         <div className="grid grid-cols-3 gap-3">
                             {[
-                                { icon: Mail, label: 'Email', color: 'blue', bg: 'bg-blue-500/10', text: 'text-blue-500' },
-                                { icon: MessageCircle, label: 'WhatsApp', color: 'green', bg: 'bg-green-500/10', text: 'text-green-500' },
-                                { icon: Sparkles, label: 'LinkedIn', color: 'purple', bg: 'bg-purple-500/10', text: 'text-purple-500' }
+                                {
+                                    icon: Mail, label: 'Email', color: 'blue', bg: 'bg-blue-500/10', text: 'text-blue-500',
+                                    url: `mailto:?subject=Professional Portfolio - ${fullName}&body=Hello, I'd like to share my professional portfolio with you: ${mockPublicUrl}`
+                                },
+                                {
+                                    icon: MessageCircle, label: 'WhatsApp', color: 'green', bg: 'bg-green-500/10', text: 'text-green-500',
+                                    url: `https://wa.me/?text=${encodeURIComponent(`Check out my professional portfolio: ${mockPublicUrl}`)}`
+                                },
+                                {
+                                    icon: Sparkles, label: 'LinkedIn', color: 'purple', bg: 'bg-purple-500/10', text: 'text-purple-500',
+                                    url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(mockPublicUrl)}`
+                                }
                             ].map((social, i) => (
-                                <button key={i} className="flex flex-col items-center justify-center p-4 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl gap-2 transition-all group hover:border-[var(--accent)]/30 hover:-translate-y-1">
+                                <button
+                                    key={i}
+                                    onClick={() => window.open(social.url, '_blank')}
+                                    className="flex flex-col items-center justify-center p-4 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl gap-2 transition-all group hover:border-[var(--accent)]/30 hover:-translate-y-1"
+                                >
                                     <div className={`p-3 ${social.bg} rounded-xl group-hover:scale-110 transition-transform`}>
                                         <social.icon size={20} className={social.text} />
                                     </div>

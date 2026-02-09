@@ -75,7 +75,7 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
                 isEditable={isEditable}
                 onChange={onTitleChange}
             />
-            <div className="resume-achievements-list">
+            <ul className="resume-details-list">
                 {certifications.map((cert, index) => (
                     <ItemControls
                         key={cert.id}
@@ -88,7 +88,7 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
                         isEditable={isEditable}
                         forceMobileControls={viewMode === 'mobile'}
                     >
-                        <div className="resume-list-item group/item-content">
+                        <li className="resume-list-item resume-text-justify group/item-content resume-relative">
                             <span className="resume-bullet">•</span>
                             <div className="resume-flex-1 resume-break-avoid">
                                 <div className="resume-flex resume-justify-between resume-items-baseline">
@@ -124,10 +124,10 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </li>
                     </ItemControls>
                 ))}
-            </div>
+            </ul>
 
             {isEditable && (
                 <button

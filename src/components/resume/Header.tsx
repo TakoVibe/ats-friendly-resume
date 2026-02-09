@@ -78,15 +78,24 @@ export function Header({ personalInfo, isEditable = false, onUpdate, onEdit, vie
                     <div className={`${isMobile ? 'flex flex-col gap-0.5 items-start' : 'resume-contact-row resume-text-dark'}`}>
                         {contactFields.map((field, idx) => (
                             <div key={field.id} className="flex items-center">
-                                { /* On Desktop showing bullets */}
-                                {!isMobile && idx > 0 && <span className="resume-header-bullet mx-2">•</span>}
-                                { /* On Mobile showing icons potentially or just list */}
-                                <EditableField
-                                    value={field.value}
-                                    onSave={(val) => updateField(field.id as any, val)}
-                                    isEditable={isEditable}
-                                    className="min-w-[10px]"
-                                />
+                                {!isMobile && idx > 0 && <span className="resume-header-bullet">•</span>}
+                                {field.id === 'email' ? (
+                                    <a href={`mailto:${field.value}`} className="resume-link hover:underline">
+                                        <EditableField
+                                            value={field.value}
+                                            onSave={(val) => updateField(field.id as any, val)}
+                                            isEditable={isEditable}
+                                            className="min-w-[10px]"
+                                        />
+                                    </a>
+                                ) : (
+                                    <EditableField
+                                        value={field.value}
+                                        onSave={(val) => updateField(field.id as any, val)}
+                                        isEditable={isEditable}
+                                        className="min-w-[10px]"
+                                    />
+                                )}
                             </div>
                         ))}
                     </div>
@@ -96,8 +105,8 @@ export function Header({ personalInfo, isEditable = false, onUpdate, onEdit, vie
                 {personalInfo.profiles && personalInfo.profiles.length > 0 && (
                     <div className={`${isMobile ? 'flex flex-wrap gap-2 mt-2' : 'resume-social-row resume-text-dark'}`}>
                         {personalInfo.profiles.filter(p => p.url?.trim()).map((profile, idx) => (
-                            <div key={idx} className={`${isMobile ? 'inline-flex' : 'resume-flex resume-items-center'} group/link`}>
-                                {!isMobile && idx > 0 && <span className="resume-header-bullet mx-2">•</span>}
+                            <div key={idx} className="flex items-center">
+                                {!isMobile && idx > 0 && <span className="resume-header-bullet">•</span>}
                                 <a href={profile.url} target="_blank" rel="noreferrer" className="resume-link hover:underline">
                                     <span>{formatUrl(profile.url)}</span>
                                 </a>

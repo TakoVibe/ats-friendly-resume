@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Sparkles, AlertCircle, CheckCircle2, TrendingUp, Search, UserCheck, MessageSquare, Cpu, BarChart, Bug, Zap, Info, BarChart3, Settings2, X, ChevronDown, ChevronUp, Target } from 'lucide-react';
+import { Logo } from './ui/Logo';
 import type { ResumeSchema } from '../types/resume';
 
 interface RecruiterPanelProps {
@@ -51,8 +52,8 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
     // Autopilot: Audit + Optimize
     const handleAutopilot = async () => {
-        await handleDeepAudit();
         onOpenOptimizer?.();
+        handleDeepAudit();
     };
 
     useEffect(() => {
@@ -271,8 +272,8 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
             <div className="flex-1 overflow-y-auto p-4 scrollbar-hide space-y-6">
                 {!data.targetJD ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in zoom-in duration-500">
-                        <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-purple-500/20 mb-6 group hover:scale-110 transition-transform">
-                            <Sparkles size={32} className="text-white animate-pulse" />
+                        <div className="w-20 h-20 p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/20 mb-6 group hover:scale-110 transition-transform">
+                            <Logo className="w-full h-full" />
                         </div>
                         <h3 className="text-sm font-black text-[var(--text-main)] uppercase tracking-widest mb-2">Ready for Autopilot?</h3>
                         <p className="text-[10px] text-[var(--text-muted)] font-medium max-w-[200px] mb-8 leading-relaxed">
@@ -460,8 +461,8 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
             {/* JD Input Overlay */}
             {showJDInput && (
-                <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-md animate-in fade-in duration-300 flex items-start justify-center pt-10 px-4">
-                    <div className="w-full bg-[var(--bg-card)] rounded-3xl border border-purple-500/30 shadow-2xl p-6 animate-in zoom-in-95 duration-200">
+                <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-md animate-in fade-in duration-150 flex items-start justify-center pt-10 px-4">
+                    <div className="w-full bg-[var(--bg-card)] rounded-3xl border border-purple-500/30 shadow-2xl p-6 animate-in zoom-in-95 duration-100">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-[11px] font-black uppercase tracking-widest text-purple-500 flex items-center gap-2">
                                 <Search size={14} /> Target Job Description

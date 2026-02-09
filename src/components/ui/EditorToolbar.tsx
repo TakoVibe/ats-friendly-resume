@@ -70,7 +70,7 @@ export function EditorToolbar({ onAddSection, isMobile = false }: { onAddSection
 
     const containerClasses = isMobile
         ? "w-full flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1"
-        : "sticky top-4 z-[55] mx-auto w-[95%] sm:w-fit bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)] shadow-[var(--shadow)] rounded-2xl p-1.5 sm:px-4 sm:py-2 flex items-center justify-start sm:justify-center gap-2 sm:gap-4 select-none animate-in slide-in-from-top-4 duration-500 sm:overflow-visible";
+        : "absolute top-6 left-1/2 -translate-x-1/2 z-[55] w-fit max-w-[95%] sm:max-w-screen-md bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)] shadow-[var(--shadow)] rounded-2xl p-1.5 sm:px-4 sm:py-2 flex items-center justify-center gap-2 sm:gap-4 select-none animate-in fade-in slide-in-from-top-4 duration-500 sm:overflow-visible";
 
     return (
         <div className={containerClasses}>

@@ -62,9 +62,8 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
         const newItem = {
             id: Math.random().toString(36).substr(2, 9),
             name: 'Project Name',
-            description: '',
             techStack: ['Tech 1', 'Tech 2'],
-            metrics: ['Key feature or achievement...']
+            metrics: ['Project summary or key feature...']
         };
         onUpdate([...projects, newItem]);
     };
@@ -200,7 +199,7 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                     {isMobile ? (
                                         <>
                                             {project.techStack.map((tech, i) => (
-                                                <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                                <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[var(--resume-bg-sub,rgba(128,128,128,0.1))] text-[var(--resume-gray)] border border-[var(--resume-border)]">
                                                     {isEditable ? (
                                                         <EditableField
                                                             value={tech}
@@ -243,11 +242,12 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                             const hasBullet = typeof metric === 'string' ? true : (metric.hasBullet !== false);
 
                                             return (
-                                                <li key={idx} className={`resume-list-item resume-bg-white group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1 resume-pl-1'}`}>
-                                                    {hasBullet && <span className="resume-bullet resume-text-light-gray">•</span>}
+                                                <li key={idx} className={`resume-list-item resume-text-justify group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1'}`}>
+                                                    {hasBullet && <span className="resume-bullet">•</span>}
                                                     <div className="resume-flex-1">
                                                         <EditableField
                                                             tagName="span"
+                                                            mode="html"
                                                             value={metricText}
                                                             onSave={(val) => {
                                                                 if (!onUpdate) return;
@@ -314,7 +314,7 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                         <li className="flex justify-center mt-1 opacity-0 group-hover/item-content:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => addMetric(project.id)}
-                                                className="text-[9pt] text-[#2563eb] hover:underline flex items-center gap-1"
+                                                className="text-[9pt] text-[var(--accent)] hover:underline flex items-center gap-1"
                                             >
                                                 <Plus size={12} /> Add Point
                                             </button>

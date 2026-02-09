@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { ResumeSchema } from '../types/resume';
-import { initialResume } from '../data/rahul-resume';
+import { initialResume } from '../data/sample-resume';
 
 const STORAGE_KEY = 'resume-data-v3';
 

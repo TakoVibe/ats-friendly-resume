@@ -51,7 +51,7 @@ export function SuccessModal({ onClose, fileName }: SuccessModalProps) {
                             rel="noopener noreferrer"
                             className="flex items-center justify-center w-full px-6 py-3.5 bg-[var(--text-main)] hover:opacity-90 text-[var(--bg-main)] rounded-xl font-bold text-sm transition-all shadow-xl active:scale-95 no-underline"
                         >
-                            Visit Takovibe <ArrowRight size={16} className="ml-2" />
+                            Visit TakoVibe <ArrowRight size={16} className="ml-2" />
                         </a>
 
                         <button
@@ -64,7 +64,7 @@ export function SuccessModal({ onClose, fileName }: SuccessModalProps) {
                 </div>
 
                 <div className="bg-[var(--bg-input)] p-4 border-t border-[var(--border-color)] flex items-center justify-center gap-2">
-                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] opacity-60">Powered by Takovibe</span>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] opacity-60">Powered by TakoVibe</span>
                 </div>
             </div>
         </div>

@@ -193,7 +193,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                             const hasBullet = typeof detail === 'string' ? true : (detail.hasBullet !== false);
 
                                             return (
-                                                <li key={idx} className={`resume-list-item group/metric resume-relative ${hasBullet ? '' : 'resume-pl-1'}`}>
+                                                <li key={idx} className={`resume-list-item resume-text-justify group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1'}`}>
                                                     {hasBullet && <span className="resume-bullet">•</span>}
                                                     <div className="resume-flex-1">
                                                         <EditableField
@@ -236,7 +236,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                         <li className="flex justify-center mt-1 opacity-0 group-hover/item-content:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => addDetail(edu.id)}
-                                                className="text-[9pt] text-[#2563eb] hover:underline flex items-center gap-1"
+                                                className="text-[9pt] text-[var(--accent)] hover:underline flex items-center gap-1"
                                             >
                                                 <Plus size={12} /> Add Point
                                             </button>

@@ -18,6 +18,8 @@
 
 .resume-root {
     font-size: var(--resume-base);
+    background-color: var(--resume-bg, #ffffff);
+    color: var(--resume-text, #1a1a1a);
 }
 
 /* Layout Utilities */
@@ -210,11 +212,12 @@ li {
 }
 
 .resume-title {
-    font-size: 1em;
+    font-size: 10pt;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 1.2pt;
+    /* Spaced out title */
     text-transform: uppercase;
-    color: var(--resume-primary);
+    color: var(--resume-dark);
     line-height: 1;
 }
 
@@ -256,10 +259,11 @@ li {
 }
 
 .resume-header-bullet {
-    margin-left: 0.8em;
-    margin-right: 0.8em;
+    margin-left: 0.4em;
+    margin-right: 0.4em;
     font-weight: bold;
-    color: var(--resume-primary);
+    color: var(--resume-dark);
+    opacity: 0.3;
     font-size: 1em;
 }
 
@@ -303,26 +307,31 @@ li {
 .resume-list-item {
     display: flex;
     align-items: flex-start;
+    line-height: inherit;
 }
 
 .resume-bullet {
-    width: 1em;
+    width: 1.2ch;
     display: inline-block;
     text-align: center;
-    margin-right: 0.4em;
-    font-size: 1em;
-    line-height: 1;
-    margin-top: -0.1em;
+    margin-right: 0.4ch;
+    font-size: 1.1em;
+    line-height: inherit;
+    margin-top: 0;
     flex-shrink: 0;
 }
 
 /* Links */
 .resume-link {
-    color: inherit;
+    color: var(--resume-primary);
     text-decoration: none;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.4em;
+    gap: 4px;
+}
+
+.resume-link:hover {
+    text-decoration: underline;
 }
 
 /* Skills */
@@ -333,7 +342,7 @@ li {
 }
 
 .resume-skill-group {
-    margin-bottom: 0.8em;
+    margin-bottom: 2pt;
 }
 
 .resume-skill-label {
@@ -449,10 +458,11 @@ li {
 }
 
 .resume-link-text {
-    font-size: 0.9em;
-    color: #1e3a8a;
-    cursor: text;
+    font-size: 9pt;
+    color: var(--resume-primary);
+    cursor: pointer;
     text-decoration: none;
+    display: inline-block;
 }
 
 .resume-link-text:hover {
@@ -461,7 +471,7 @@ li {
 
 .resume-project-description {
     font-size: 0.95em;
-    color: #374151;
+    color: var(--resume-gray);
     line-height: 1.3;
     margin-bottom: 0.2em;
     text-align: justify;
@@ -478,7 +488,7 @@ li {
 /* Summary */
 .resume-summary-text {
     font-size: 0.95em;
-    color: #374151;
+    color: var(--resume-gray);
     line-height: 1.5;
     text-align: justify;
     min-height: 20px;
@@ -491,7 +501,7 @@ li {
     flex-direction: column;
     gap: 0.3em;
     font-size: 0.95em;
-    color: #374151;
+    color: var(--resume-gray);
     line-height: 1.35;
 }
 
@@ -510,7 +520,7 @@ li {
 /* Custom Section */
 .resume-custom-item {
     font-size: 0.95em;
-    color: #374151;
+    color: var(--resume-gray);
     line-height: 1.35;
 }
 

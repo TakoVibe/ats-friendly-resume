@@ -45,7 +45,7 @@ const ResumeSchemaZod = z.object({
     projects: z.array(z.object({
         id: z.string(),
         name: z.string(),
-        description: z.string(),
+        description: z.string().optional(),
         techStack: z.array(z.string()).optional(),
         techStackLabel: z.string().optional(),
         link: z.string().optional(),
@@ -55,7 +55,7 @@ const ResumeSchemaZod = z.object({
     openSource: z.array(z.object({
         id: z.string(),
         name: z.string(),
-        description: z.string(),
+        description: z.string().optional(),
         link: z.string().optional(),
         metrics: z.array(BulletItemSchema).optional()
     })).optional(),

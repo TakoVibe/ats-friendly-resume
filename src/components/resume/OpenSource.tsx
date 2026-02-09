@@ -64,9 +64,10 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                 showSeparator={showSeparator}
                 onToggleSeparator={onToggleSeparator}
             />
-            <div className="resume-achievements-list">
+            <ul className="resume-details-list">
                 {safeOpenSource.map((item, index) => (
-                    <div key={item.id} className="resume-list-item group/item-content relative pr-8">
+                    <li key={item.id} className="resume-list-item resume-text-justify group/item-content resume-relative pr-8">
+                        {/* hasBullet logic not present here, keeping simple dot for now or adding condition if needed */}
                         <span className="resume-bullet">•</span>
                         <div className="resume-flex-1">
                             <span className="resume-font-bold resume-text-dark">
@@ -108,9 +109,9 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                                 />)</span>
                             )}
                         </div>
-                    </div>
+                    </li>
                 ))}
-            </div>
+            </ul>
 
             {isEditable && (
                 <button

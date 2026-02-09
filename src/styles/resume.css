@@ -210,7 +210,7 @@ li {
     letter-spacing: 1.2pt;
     /* Spaced out title */
     text-transform: uppercase;
-    color: var(--resume-primary);
+    color: var(--resume-dark);
     line-height: 1;
 }
 
@@ -253,12 +253,12 @@ li {
 }
 
 .resume-header-bullet {
-    margin-left: 8pt;
-    margin-right: 8pt;
+    margin-left: 4pt;
+    margin-right: 4pt;
     font-weight: bold;
-    color: var(--resume-primary);
+    color: var(--resume-dark);
+    opacity: 0.3;
     font-size: 10pt;
-    /* Slightly larger bullet */
 }
 
 /* Icons */
@@ -304,28 +304,31 @@ li {
 .resume-list-item {
     display: flex;
     align-items: flex-start;
+    line-height: inherit;
 }
 
 .resume-bullet {
-    width: 10pt;
-    /* Fixed width for perfect alignment */
+    width: 1.2ch;
     display: inline-block;
     text-align: center;
-    margin-right: 4pt;
-    font-size: 11pt;
-    line-height: 1;
-    margin-top: -1pt;
+    margin-right: 0.4ch;
+    font-size: 1.1em;
+    line-height: inherit;
+    margin-top: 0;
     flex-shrink: 0;
-    /* Prevent shrinking */
 }
 
 /* Links */
 .resume-link {
-    color: inherit;
+    color: var(--resume-primary);
     text-decoration: none;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 4px;
+}
+
+.resume-link:hover {
+    text-decoration: underline;
 }
 
 /* Skills */
@@ -336,8 +339,7 @@ li {
 }
 
 .resume-skill-group {
-    margin-bottom: 4pt;
-    /* Increased spacing */
+    margin-bottom: 2pt;
 }
 
 .resume-skill-label {
@@ -454,11 +456,14 @@ li {
 
 .resume-link-text {
     font-size: 9pt;
-    color: #1e3a8a;
-    cursor: text;
+    color: var(--resume-primary);
+    cursor: pointer;
     text-decoration: none;
-    min-width: 60pt;
     display: inline-block;
+}
+
+.resume-link-text:hover {
+    text-decoration: underline;
 }
 
 .resume-link-text:empty:before {

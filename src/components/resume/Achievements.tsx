@@ -89,7 +89,7 @@ export function Achievements({ achievements, isEditable = false, onUpdate, title
                 showSeparator={showSeparator}
                 onToggleSeparator={onToggleSeparator}
             />
-            <div className="resume-achievements-list">
+            <ul className="resume-details-list">
                 {safeAchievements.map((achievement, idx) => {
                     const achievementText = typeof achievement === 'string' ? achievement : achievement.text;
                     const hasBullet = typeof achievement === 'string' ? true : (achievement.hasBullet !== false);
@@ -106,11 +106,11 @@ export function Achievements({ achievements, isEditable = false, onUpdate, title
                             isEditable={isEditable}
                             forceMobileControls={viewMode === 'mobile'}
                         >
-                            <div className={`resume-list-item group/item-content resume-relative`}>
+                            <li className={`resume-list-item resume-text-justify group/item-content resume-relative`}>
                                 {hasBullet && <span className="resume-bullet">•</span>}
                                 <div className="resume-flex-1">
                                     <EditableField
-                                        tagName="div"
+                                        tagName="span"
                                         mode="html"
                                         value={achievementText}
                                         onSave={(val) => updateAchievement(idx, val)}
@@ -141,11 +141,11 @@ export function Achievements({ achievements, isEditable = false, onUpdate, title
                                         }
                                     />
                                 </div>
-                            </div>
+                            </li>
                         </ItemControls>
                     );
                 })}
-            </div>
+            </ul>
 
             {isEditable && (
                 <button

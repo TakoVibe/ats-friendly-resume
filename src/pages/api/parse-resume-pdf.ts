@@ -62,7 +62,8 @@ Return a JSON object with this exact structure:
       "duration": "string",
       "location": "string",
       "metrics": ["bullet point 1", "bullet point 2"],
-      "techStack": ["tech1", "tech2"]
+      "techStack": ["tech1", "tech2"],
+      "techStackLabel": "string (e.g., 'Technologies Used:', 'Stack:')"
     }
   ],
   "education": [
@@ -86,12 +87,12 @@ Return a JSON object with this exact structure:
   "projects": [
     {
       "id": "string (generate unique id: proj-1, proj-2...)",
-      "name": "string",
-      "description": "string",
-      "techStack": ["tech1", "tech2"],
-      "link": "string (optional)",
-      "date": "string (optional)",
-      "metrics": ["achievement 1", "achievement 2"]
+      "name": "string (Project Name)",
+      "techStack": ["tech1", "tech2", "tech3"],
+      "techStackLabel": "string (e.g., 'Technologies:', 'Backend/Frontend Stack:')",
+      "link": "string (URL if any)",
+      "date": "string (Period/Date)",
+      "metrics": ["Full descriptive paragraph as the first bullet point", "Specific achievement or feature 2"]
     }
   ],
   "certifications": [
@@ -106,18 +107,22 @@ Return a JSON object with this exact structure:
 
 Important Rules:
 - Generate unique IDs for each item.
-- Extract ALL information available.
+- Extract ALL information available. Do not skip any details.
+- DO NOT MERGE separate work experience entries or projects even if they have the same job title or similar dates. Each distinct heading must be a separate entry.
+- Ensure chronological order matches the source.
+- PROJECTS: Look for sections titled "Projects", "Relevant Projects", "Personal Projects", "Academic Projects".
+- ANY project description or paragraph following the title should be added as the FIRST bullet point in the 'metrics' array. DO NOT use a separate 'description' field.
+- Extract technology names, tools, version control (e.g., Git, Bitbucket), and infrastructure (e.g., AWS, Docker) into techStack arrays.
+- Preserve the exact achievements, descriptions, and bullet points. Do not rewrite them into a summary unless they are very messy; keep the original tone and details.
 - If a section is missing, return an empty array [].
-- Preserve the exact achievements and bullet points.
-- Extract technology names into techStack arrays where applicable.
-- The text may have formatting artifacts from PDF extraction - be smart about parsing.
+- The text may have formatting artifacts from PDF extraction - be smart about identifying section boundaries.
 - Return ONLY the JSON object, do not include markdown blocks or any other text.
 
 Resume Text:
 ${extractedText}`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: 'You are a professional resume parsing service. Output only valid JSON.' },
         { role: 'user', content: prompt }
