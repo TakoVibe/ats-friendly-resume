@@ -29,29 +29,29 @@ const ResumeSchemaZod = z.object({
     summary: z.string(),
     skills: z.array(z.object({
         id: z.string(),
-        name: z.string(),
-        items: z.array(z.string())
-    })),
+        name: z.string().default(''),
+        items: z.array(z.string()).default([])
+    })).default([]),
     experience: z.array(z.object({
         id: z.string(),
-        company: z.string(),
-        role: z.string(),
-        duration: z.string(),
+        company: z.string().default(''),
+        role: z.string().default(''),
+        duration: z.string().default(''),
         location: z.string().optional(),
-        metrics: z.array(BulletItemSchema),
+        metrics: z.array(BulletItemSchema).default([]),
         techStack: z.array(z.string()).optional(),
         techStackLabel: z.string().optional()
-    })),
+    })).default([]),
     projects: z.array(z.object({
         id: z.string(),
         name: z.string(),
-        description: z.string().optional(),
+        description: z.string().default(''),
         techStack: z.array(z.string()).optional(),
         techStackLabel: z.string().optional(),
         link: z.string().optional(),
         date: z.string().optional(),
-        metrics: z.array(BulletItemSchema).optional()
-    })),
+        metrics: z.array(BulletItemSchema).default([])
+    })).default([]),
     openSource: z.array(z.object({
         id: z.string(),
         name: z.string(),
@@ -114,7 +114,7 @@ Your task is to rewrite the user's resume to align perfectly with the target job
 **OUTPUT REQUIREMENTS:**
 - You MUST respond with ONLY a valid JSON object, no additional text or explanation
 - Return a complete, valid ResumeSchema JSON object
-- Ensure all required fields are present
+- Ensure all required fields are present (never omit fields like 'company', 'role', 'metrics', or 'description' - use empty strings or arrays if needed)
 - Maintain all existing IDs
 - Keep the same sectionOrder and visibleSections unless optimization requires changes`;
 

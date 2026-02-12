@@ -497,11 +497,43 @@ function ResumeBuilderContent() {
 
                 <div className="flex items-center gap-1">
                     <button
+                        onClick={() => setShowRecruiterAI(!showRecruiterAI)}
+                        className={`p-2 rounded-lg transition-all relative group ${showRecruiterAI ? 'text-purple-500 bg-purple-500/10' : 'text-[var(--text-muted)]'}`}
+                    >
+                        {showRecruiterAI && <div className="absolute inset-0 rounded-lg animate-ping bg-purple-500 opacity-20 pointer-events-none"></div>}
+                        <Zap size={18} className={showRecruiterAI ? 'fill-purple-500/20' : ''} />
+                    </button>
+                    <button
                         onClick={() => setActiveTab(activeTab === 'editor' ? 'preview' : 'editor')}
                         className={`p-2 rounded-lg transition-all ${activeTab === 'preview' ? 'text-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text-muted)]'}`}
                     >
                         {activeTab === 'editor' ? <Eye size={18} /> : <Edit size={18} />}
                     </button>
+
+                    {isAuthenticated ? (
+                        <div className="flex items-center gap-2 ml-1">
+                            {user?.profile_image ? (
+                                <img
+                                    src={user.profile_image}
+                                    alt="Profile"
+                                    className="w-7 h-7 rounded-full border border-[var(--border-color)]"
+                                    onClick={logout}
+                                />
+                            ) : (
+                                <button onClick={logout} className="p-2 text-red-500">
+                                    <LogIn size={18} className="rotate-180" />
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setShowLoginModal(true)}
+                            className="p-2 text-[var(--accent)] transition-colors"
+                        >
+                            <LogIn size={18} />
+                        </button>
+                    )}
+
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
@@ -530,20 +562,24 @@ function ResumeBuilderContent() {
 
                     {/* Mobile Bottom Toolbar Spacer to prevent content overlapping */}
                     {activeTab === 'editor' && (
-                        <div className="block xl:hidden fixed bottom-28 right-4 z-50 flex flex-col gap-3">
+                        <div className="block xl:hidden fixed bottom-28 right-4 z-50 flex flex-col gap-4">
+                            {/* Premium HUD FAB for AI Cockpit */}
                             <button
                                 onClick={() => setShowRecruiterAI(true)}
-                                className="w-12 h-12 bg-white text-purple-600 border border-purple-200 rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-all group"
+                                className="w-14 h-14 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-[20px] shadow-[0_8px_30px_rgb(126,34,206,0.3)] flex items-center justify-center active:scale-90 transition-all group relative overflow-hidden ring-1 ring-white/20"
                             >
-                                <Sparkles size={20} className="group-hover:rotate-12 transition-transform" />
+                                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] duration-700 transition-transform" />
+                                <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+                                <Zap size={22} className="group-hover:rotate-12 transition-transform fill-white/20" />
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[var(--bg-main)] animate-pulse" />
                             </button>
 
                             <button
                                 onClick={() => setShowSectionTypeModal(true)}
-                                className="w-12 h-12 bg-[var(--accent)] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-all"
+                                className="w-14 h-14 bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-[20px] shadow-2xl flex items-center justify-center active:scale-95 transition-all relative"
                             >
-                                <div className="absolute inset-0 rounded-full animate-ping bg-[var(--accent)] opacity-20"></div>
-                                <span className="text-2xl font-light mb-1">+</span>
+                                <div className="absolute inset-0 rounded-[20px] animate-ping bg-[var(--accent)] opacity-5 pointer-events-none"></div>
+                                <span className="text-3xl font-light mb-1 opacity-60">+</span>
                             </button>
                         </div>
                     )}
@@ -728,24 +764,13 @@ function ResumeBuilderContent() {
                             onClick={() => setShowRecruiterAI(false)}
                         />
                         {/* Drawer Panel */}
-                        <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-[var(--bg-card)] shadow-2xl animate-in slide-in-from-right duration-300 border-l border-[var(--border-color)]">
+                        <div className="absolute right-0 top-0 bottom-0 w-[90%] max-w-sm bg-[var(--bg-card)] shadow-2xl animate-in slide-in-from-right duration-300 border-l border-[var(--border-color)]">
                             <div className="h-full flex flex-col">
-                                <div className="p-4 border-b border-[var(--border-color)] flex justify-between items-center">
-                                    <div className="flex items-center gap-2">
-                                        <Sparkles size={16} className="text-purple-500" />
-                                        <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)]">ATS Expert</h3>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowRecruiterAI(false)}
-                                        className="p-2 hover:bg-[var(--bg-input)] rounded-full transition-colors"
-                                    >
-                                        <X size={20} className="text-[var(--text-muted)]" />
-                                    </button>
-                                </div>
                                 <div className="flex-1 overflow-hidden relative">
                                     <RecruiterPanel
                                         data={data}
                                         onUpdateJD={(jd) => updateResume({ ...data, targetJD: jd })}
+                                        onClose={() => setShowRecruiterAI(false)}
                                         onOpenGuidance={(insights, auditResult) => {
                                             setGuidanceInsights(insights);
                                             setGuidanceAuditResult(auditResult);

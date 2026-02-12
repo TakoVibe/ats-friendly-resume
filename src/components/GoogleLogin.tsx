@@ -51,8 +51,6 @@ export function GoogleLogin() {
                                 toast.error("Google login failed. Please try again.");
                                 return;
                             }
-                            console.log(response.credential)
-
                             const res = await api.post("/api/users/google/", {
                                 code: response.credential
                             });
