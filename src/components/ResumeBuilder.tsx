@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useResume } from '../hooks/useResume';
 import { ResumePreview } from './ResumePreview';
-import { Download, RotateCcw, FileText, Eye, Edit, Loader2, Sparkles, UserCheck, Zap } from 'lucide-react';
+import { Download, RotateCcw, FileText, Eye, Edit, Loader2, Sparkles, UserCheck, Zap, LogIn, Save, Lock, Globe, X } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '../context/ThemeContext';
 import { TextPreview } from './parser/TextPreview';
 import { EditorToolbar } from './ui/EditorToolbar';
@@ -18,9 +19,13 @@ import { SectionTypeDialog } from './ui/SectionTypeDialog';
 import { RecruiterPanel } from './RecruiterPanel';
 import { ShareModal } from './ShareModal';
 import { CareerGuidanceModal } from './editor/CareerGuidanceModal';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import { GoogleLogin } from './GoogleLogin';
+import { api } from '../lib/api';
 
 function ResumeBuilderContent() {
     const { data, updateResume, resetToDefault, isLoaded, undo, redo } = useResume();
+    const { user, isAuthenticated, logout } = useAuth();
     const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'parser'>('editor');
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -34,10 +39,20 @@ function ResumeBuilderContent() {
     const [guidanceInsights, setGuidanceInsights] = useState<Array<{ type: 'good' | 'warning' | 'info'; text: string }>>([]);
     const [guidanceAuditResult, setGuidanceAuditResult] = useState<any>(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
     const [lastDownloadedFile, setLastDownloadedFile] = useState('');
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [resumeMetadata, setResumeMetadata] = useState<{ id?: string, name: string, isPublic: boolean } | null>(null);
 
     const [isPublicView, setIsPublicView] = useState(false);
+
+    // Close login modal when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            setShowLoginModal(false);
+        }
+    }, [isAuthenticated]);
 
     // Check for public view mode
     useEffect(() => {
@@ -159,6 +174,50 @@ function ResumeBuilderContent() {
         }
     };
 
+    const handleSave = async () => {
+        if (!isAuthenticated) {
+            setShowLoginModal(true);
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            // Use existing name if available, otherwise prompt
+            const defaultName = resumeMetadata?.name || data.personalInfo.fullName || "My Resume";
+            const resumeName = prompt("Enter a name for your resume:", defaultName);
+
+            if (!resumeName) {
+                setIsSaving(false);
+                return;
+            }
+
+            const response = await api.post('/api/resumes/', {
+                resume_name: resumeName,
+                resume_data: data,
+                is_public: resumeMetadata?.isPublic || false
+            });
+
+            if (response.ok) {
+                const responseData = await response.json();
+                setResumeMetadata({
+                    id: responseData.id,
+                    name: responseData.resume_name,
+                    isPublic: responseData.is_public
+                });
+                alert("Resume saved successfully!");
+            } else {
+                const err = await response.json();
+                console.error("Save failed:", err);
+                alert("Failed to save resume. " + (err.detail || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error saving resume:", error);
+            alert("An error occurred while saving.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const generatePdfPreview = async () => {
         try {
             // Small delay to allow render
@@ -251,6 +310,43 @@ function ResumeBuilderContent() {
                 <ResumePreview data={data} id="resume-preview-for-generation" />
             </div>
 
+            {/* Login Modal */}
+            {showLoginModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-in fade-in duration-300">
+                    <div className="relative bg-[var(--bg-card)] p-[1px] rounded-[24px] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 group">
+                        {/* Gradient Border */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 opacity-100"></div>
+
+                        <div className="relative bg-[var(--bg-card)] p-8 rounded-[23px] h-full flex flex-col items-center text-center overflow-hidden">
+                            {/* Subtle Inner Glow */}
+                            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
+
+                            <div className="relative mb-6">
+                                <div className="w-16 h-16 rounded-2xl bg-[var(--bg-input)] flex items-center justify-center shadow-inner border border-[var(--border-color)]">
+                                    <Lock className="w-7 h-7 text-[var(--text-main)] opacity-70" strokeWidth={1.5} />
+                                </div>
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-[var(--text-main)] mb-3 tracking-tight">Unlock Full Access</h2>
+                            <p className="mb-8 text-[var(--text-muted)] text-sm leading-relaxed px-2 font-medium">
+                                Sign in to save your progress, create multiple versions, and share your resume with the world.
+                            </p>
+
+                            <div className="w-full flex justify-center mb-6 transform transition-transform hover:scale-[1.02]">
+                                <GoogleLogin />
+                            </div>
+
+                            <button
+                                onClick={() => setShowLoginModal(false)}
+                                className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors py-2 px-6 rounded-full hover:bg-[var(--bg-input)]"
+                            >
+                                Continue as Guest
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Top Bar - Desktop */}
             <nav className="hidden md:flex sticky top-0 z-[60] justify-between items-center px-8 py-4 bg-[var(--glass-bg)] backdrop-blur-2xl border-b border-[var(--border-color)] text-[var(--text-main)] shadow-2xl">
                 <div className="flex items-center gap-3 md:gap-6">
@@ -322,6 +418,19 @@ function ResumeBuilderContent() {
                         <span className="hidden lg:inline">Import</span>
                     </button>
 
+                    {/* Save Button - Temporarily Disabled */}
+                    <div className="relative group/tooltip">
+                        <button
+                            disabled
+                            className="flex items-center gap-2 px-3 md:px-4 py-2 text-xs bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest opacity-50 cursor-not-allowed grayscale"
+                        >
+                            <Save size={16} />
+                            <span className="hidden lg:inline">Save</span>
+                        </button>
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                            Coming Soon
+                        </div>
+                    </div>
 
                     <button
                         onClick={resetToDefault}
@@ -331,13 +440,37 @@ function ResumeBuilderContent() {
                         <RotateCcw size={18} />
                     </button>
 
-                    <button
-                        className="hidden md:hidden lg:hidden xl:hidden flex items-center gap-2 px-3 md:px-6 py-2 text-xs bg-[var(--bg-input)] text-[var(--text-muted)] rounded-xl font-bold uppercase tracking-[0.1em] border border-[var(--border-color)] opacity-60 cursor-not-allowed"
-                        disabled
-                    >
-                        <Sparkles size={14} />
-                        Upcoming
-                    </button>
+                    {isAuthenticated ? (
+                        <div className="flex items-center gap-2 ml-2">
+                            {user?.profile_image && (
+                                <img src={user.profile_image} alt="Profile" className="w-8 h-8 rounded-full border border-[var(--border-color)]" />
+                            )}
+                            <button onClick={logout} className="text-xs text-[var(--text-muted)] hover:text-red-500 font-bold uppercase tracking-wide">
+                                Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setShowLoginModal(true)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)] hover:bg-[var(--accent)]/10 rounded-xl transition-colors"
+                        >
+                            <LogIn size={16} /> Login
+                        </button>
+                    )}
+
+                    {/* Share Button - Temporarily Disabled */}
+                    <div className="relative group/tooltip">
+                        <button
+                            disabled
+                            className="hidden md:flex items-center gap-2 px-3 md:px-4 py-2 text-xs bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest opacity-50 cursor-not-allowed grayscale"
+                        >
+                            <Globe size={16} />
+                            <span className="hidden lg:inline">Share</span>
+                        </button>
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                            Coming Soon
+                        </div>
+                    </div>
 
                     <button
                         onClick={handleDownload}
@@ -396,15 +529,24 @@ function ResumeBuilderContent() {
                     {activeTab === 'editor' && <div className="hidden md:block"><EditorToolbar onAddSection={() => setShowSectionTypeModal(true)} /></div>}
 
                     {/* Mobile Bottom Toolbar Spacer to prevent content overlapping */}
-                    {activeTab === 'editor' && <div className="block md:hidden fixed bottom-4 right-4 z-50">
-                        <button
-                            onClick={() => setShowSectionTypeModal(true)}
-                            className="w-12 h-12 bg-[var(--accent)] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-all mb-14"
-                        >
-                            <div className="absolute inset-0 rounded-full animate-ping bg-[var(--accent)] opacity-20"></div>
-                            <span className="text-2xl font-light mb-1">+</span>
-                        </button>
-                    </div>}
+                    {activeTab === 'editor' && (
+                        <div className="block xl:hidden fixed bottom-28 right-4 z-50 flex flex-col gap-3">
+                            <button
+                                onClick={() => setShowRecruiterAI(true)}
+                                className="w-12 h-12 bg-white text-purple-600 border border-purple-200 rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-all group"
+                            >
+                                <Sparkles size={20} className="group-hover:rotate-12 transition-transform" />
+                            </button>
+
+                            <button
+                                onClick={() => setShowSectionTypeModal(true)}
+                                className="w-12 h-12 bg-[var(--accent)] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-all"
+                            >
+                                <div className="absolute inset-0 rounded-full animate-ping bg-[var(--accent)] opacity-20"></div>
+                                <span className="text-2xl font-light mb-1">+</span>
+                            </button>
+                        </div>
+                    )}
 
                     {/* Mobile Bottom Toolbar (Using EditorToolbar but styled to dock bottom) */}
                     {activeTab === 'editor' && (
@@ -495,8 +637,17 @@ function ResumeBuilderContent() {
                     <ShareModal
                         isOpen={showShareModal}
                         onClose={() => setShowShareModal(false)}
-                        resumeId={data.personalInfo.fullName.toLowerCase().replace(/\s+/g, '-')}
+                        resumeId={resumeMetadata?.name || data.personalInfo.fullName.toLowerCase().replace(/\s+/g, '-')}
                         fullName={data.personalInfo.fullName}
+                        username={user?.email?.split('@')[0] || 'user'}
+                        isPublic={resumeMetadata?.isPublic || false}
+                        onVisibilityChange={(isPublic) => {
+                            if (resumeMetadata) {
+                                setResumeMetadata({ ...resumeMetadata, isPublic });
+                            }
+                        }}
+                        isAuthenticated={isAuthenticated}
+                        onRequireAuth={() => setShowLoginModal(true)}
                     />
 
                     {showGuidanceModal && (
@@ -545,9 +696,10 @@ function ResumeBuilderContent() {
                     )}
                 </div>
 
-                {/* Right Sidebar - ATS Expert */}
+                {/* Right Sidebar - ATS Expert (Responsive) */}
+                {/* On XL screens: Always visible as sidebar */}
                 {activeTab === 'editor' && showRecruiterAI && (
-                    <div className="hidden xl:block">
+                    <div className="hidden xl:block h-full border-l border-[var(--border-color)]">
                         <RecruiterPanel
                             data={data}
                             onUpdateJD={(jd) => updateResume({ ...data, targetJD: jd })}
@@ -561,7 +713,58 @@ function ResumeBuilderContent() {
                                 setShowOptimizeModal(true);
                             }}
                             onAuditResult={(result) => setGuidanceAuditResult(result)}
+                            isAuthenticated={isAuthenticated}
+                            onRequireAuth={() => setShowLoginModal(true)}
                         />
+                    </div>
+                )}
+
+                {/* On Mobile/Tablet: Slide-over Drawer */}
+                {activeTab === 'editor' && showRecruiterAI && (
+                    <div className="fixed inset-0 z-[70] xl:hidden">
+                        {/* Backdrop */}
+                        <div
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300"
+                            onClick={() => setShowRecruiterAI(false)}
+                        />
+                        {/* Drawer Panel */}
+                        <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-[var(--bg-card)] shadow-2xl animate-in slide-in-from-right duration-300 border-l border-[var(--border-color)]">
+                            <div className="h-full flex flex-col">
+                                <div className="p-4 border-b border-[var(--border-color)] flex justify-between items-center">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles size={16} className="text-purple-500" />
+                                        <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)]">ATS Expert</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowRecruiterAI(false)}
+                                        className="p-2 hover:bg-[var(--bg-input)] rounded-full transition-colors"
+                                    >
+                                        <X size={20} className="text-[var(--text-muted)]" />
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-hidden relative">
+                                    <RecruiterPanel
+                                        data={data}
+                                        onUpdateJD={(jd) => updateResume({ ...data, targetJD: jd })}
+                                        onOpenGuidance={(insights, auditResult) => {
+                                            setGuidanceInsights(insights);
+                                            setGuidanceAuditResult(auditResult);
+                                            setShowGuidanceModal(true);
+                                            // Optional: Close drawer on mobile when guidance opens? 
+                                            // setShowRecruiterAI(false);
+                                        }}
+                                        onOpenOptimizer={() => {
+                                            setShowAutoOptimize(true);
+                                            setShowOptimizeModal(true);
+                                            setShowRecruiterAI(false); // Close drawer to show modal
+                                        }}
+                                        onAuditResult={(result) => setGuidanceAuditResult(result)}
+                                        isAuthenticated={isAuthenticated}
+                                        onRequireAuth={() => setShowLoginModal(true)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </main >
@@ -572,9 +775,18 @@ function ResumeBuilderContent() {
 export function ResumeBuilder() {
     return (
         <ThemeProvider>
-            <ResumeProvider>
-                <ResumeBuilderContent />
-            </ResumeProvider>
+            <AuthProvider>
+                <ResumeProvider>
+                    <ResumeBuilderContent />
+                    <Toaster position="bottom-center" toastOptions={{
+                        style: {
+                            background: 'var(--bg-card)',
+                            color: 'var(--text-main)',
+                            border: '1px solid var(--border-color)',
+                        },
+                    }} />
+                </ResumeProvider>
+            </AuthProvider>
         </ThemeProvider>
     );
 }

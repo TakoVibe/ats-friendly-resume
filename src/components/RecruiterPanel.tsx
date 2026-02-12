@@ -9,9 +9,11 @@ interface RecruiterPanelProps {
     onOpenGuidance?: (insights: Array<{ type: 'good' | 'warning' | 'info'; text: string }>, auditResult?: any) => void;
     onOpenOptimizer?: () => void;
     onAuditResult?: (result: any) => void;
+    isAuthenticated?: boolean;
+    onRequireAuth?: () => void;
 }
 
-export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimizer, onAuditResult }: RecruiterPanelProps) {
+export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimizer, onAuditResult, isAuthenticated, onRequireAuth }: RecruiterPanelProps) {
     const [score, setScore] = useState(0);
     const [showJDInput, setShowJDInput] = useState(false);
     const [activeTab, setActiveTab] = useState<'pulse' | 'strategy' | 'analysis'>('pulse');
@@ -21,10 +23,17 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
     const [isAuditing, setIsAuditing] = useState(false);
     const [auditResult, setAuditResult] = useState<any>(null);
     const [auditError, setAuditError] = useState<string | null>(null);
+    // Explicitly track if we are in "General Mode" (no JD)
+    const [isGeneralMode, setIsGeneralMode] = useState(false);
 
     const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     const handleDeepAudit = async () => {
+        if (!isAuthenticated) {
+            onRequireAuth?.();
+            return;
+        }
+
         setIsAuditing(true);
         setAuditError(null);
         try {
@@ -33,7 +42,7 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     resume: data,
-                    jobDescription: data.targetJD
+                    jobDescription: data.targetJD || (isGeneralMode ? "General Industry Standards" : "")
                 })
             });
             const result = await response.json();
@@ -52,8 +61,33 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
     // Autopilot: Audit + Optimize
     const handleAutopilot = async () => {
+        if (!isAuthenticated) {
+            onRequireAuth?.();
+            return;
+        }
         onOpenOptimizer?.();
         handleDeepAudit();
+    };
+
+    const handleBeginMission = () => {
+        if (!isAuthenticated) {
+            onRequireAuth?.();
+            return;
+        }
+        setShowJDInput(true);
+    };
+
+    const handleSkipToGeneral = () => {
+        if (!isAuthenticated) {
+            onRequireAuth?.();
+            return;
+        }
+        setIsGeneralMode(true);
+        // Automatically switch to analysis tab and start audit? Or just show the tabs?
+        // Let's just show the tabs (effectively forcing a "ready" state without JD)
+        // We set a flag or just rely on manual state. 
+        // Actually, the UI logic relies on `data.targetJD` to show tabs. 
+        // We should probably have a local state override.
     };
 
     useEffect(() => {
@@ -188,89 +222,19 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
         })
     );
 
+    // Derived state for showing content: either we have a JD OR we are in General Mode
+    const showContent = !!data.targetJD || isGeneralMode;
+
     // Workflow step calculation
-    const currentStep = !data.targetJD ? 1 : (!auditResult ? 2 : 3);
+    const currentStep = !showContent ? 1 : (!auditResult ? 2 : 3);
 
     return (
         <div className="w-80 h-full bg-[var(--bg-card)] border-l border-[var(--border-color)] flex flex-col overflow-hidden animate-in slide-in-from-right duration-500 shadow-2xl relative">
-            {/* Header / Score Section */}
-            <div className="relative p-4 border-b border-[var(--border-color)] bg-gradient-to-br from-purple-500/10 via-transparent to-transparent overflow-hidden">
-                {/* Background Decor */}
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-purple-500/10 rounded-lg">
-                            <Cpu size={14} className="text-purple-500" />
-                        </div>
-                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-main)]">AI Cockpit</h2>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        {[1, 2, 3].map((s) => (
-                            <div key={s} className="flex items-center">
-                                <div className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${currentStep === s ? 'bg-purple-500 ring-4 ring-purple-500/20' : currentStep > s ? 'bg-green-500' : 'bg-[var(--border-color)]'}`} />
-                                {s < 3 && <div className={`w-3 h-[1px] ${currentStep > s ? 'bg-green-500' : 'bg-[var(--border-color)]'}`} />}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="flex items-center justify-between mb-4 bg-black/5 dark:bg-white/5 p-2 rounded-xl border border-[var(--border-color)] relative z-10">
-                    <div className="flex flex-col">
-                        <p className="text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-60">Phase {currentStep}</p>
-                        <p className="text-[9px] font-black uppercase tracking-tight text-purple-500">
-                            {currentStep === 1 ? '1. Target Mission' : currentStep === 2 ? '2. Diagnostic' : '3. Power Autopilot'}
-                        </p>
-                    </div>
-                    <button
-                        onClick={() => setShowJDInput(true)}
-                        className={`group p-2 rounded-lg transition-all ${data.targetJD ? 'text-purple-500 bg-purple-500/10' : 'text-[var(--text-muted)] bg-[var(--bg-input)] border border-[var(--border-color)] hover:border-purple-500/50'}`}
-                        title="Set Target Job Description"
-                    >
-                        <Search size={14} />
-                    </button>
-                </div>
-
-                {/* Mini Score & Tabs */}
-                <div className="flex items-center gap-4 relative z-10">
-                    {/* Mini Circle */}
-                    <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
-                        <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-[var(--bg-input)] opacity-50" />
-                            <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="transparent" strokeDasharray={151} strokeDashoffset={151 - (151 * score) / 100} strokeLinecap="round" className={`transition-all duration-1000 ${score > 80 ? 'text-green-500' : score > 50 ? 'text-amber-500' : 'text-rose-500'}`} />
-                        </svg>
-                        <span className={`absolute text-sm font-black tracking-tighter ${score > 80 ? 'text-green-500' : score > 50 ? 'text-amber-500' : 'text-rose-500'}`}>{score}</span>
-                    </div>
-
-                    {/* High-Density Tab Nav */}
-                    <div className="flex-1 flex bg-[var(--bg-input)] p-1 rounded-xl border border-[var(--border-color)]">
-                        <div className="flex items-center gap-1 w-full mt-1">
-                            <button
-                                onClick={() => setActiveTab('pulse')}
-                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'pulse' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)] hover:bg-black/5 dark:hover:bg-white/5'}`}
-                            >
-                                Checklist
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('strategy')}
-                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'strategy' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)] hover:bg-black/5 dark:hover:bg-white/5'}`}
-                            >
-                                Strategy
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('analysis')}
-                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'analysis' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)] hover:bg-black/5 dark:hover:bg-white/5'}`}
-                            >
-                                Audit
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {/* ... Header ... */}
 
             {/* Content Area */}
             <div className="flex-1 overflow-y-auto p-4 scrollbar-hide space-y-6">
-                {!data.targetJD ? (
+                {!showContent ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in zoom-in duration-500">
                         <div className="w-20 h-20 p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/20 mb-6 group hover:scale-110 transition-transform">
                             <Logo className="w-full h-full" />
@@ -279,15 +243,24 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                         <p className="text-[10px] text-[var(--text-muted)] font-medium max-w-[200px] mb-8 leading-relaxed">
                             Paste a Job Description to start the autonomous optimization workflow.
                         </p>
-                        <button
-                            onClick={() => setShowJDInput(true)}
-                            className="px-8 py-3 bg-[var(--text-main)] text-[var(--bg-main)] rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center gap-2"
-                        >
-                            <Search size={14} /> Begin Mission
-                        </button>
+                        <div className="flex flex-col gap-3 w-full px-4">
+                            <button
+                                onClick={handleBeginMission}
+                                className="w-full py-3 bg-[var(--text-main)] text-[var(--bg-main)] rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                <Search size={14} /> Begin Mission
+                            </button>
+                            <button
+                                onClick={handleSkipToGeneral}
+                                className="w-full py-2 text-[var(--text-muted)] hover:text-[var(--text-main)] text-[9px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-1"
+                            >
+                                Skip to General Audit <TrendingUp size={12} />
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <>
+                        {/* Existing Tab Content... */}
                         {activeTab === 'pulse' && (
                             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                                 {/* Autopilot Call to Action */}

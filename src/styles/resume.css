@@ -1,5 +1,5 @@
 /* Resume CSS - Simple styles for PDF export */
-@import "/print.css";
+@import "./print.css";
 
 /* Variables */
 :root {

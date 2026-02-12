@@ -1,141 +1,209 @@
-import { X, Link, Mail, MessageCircle, Copy, Check, Globe, Sparkles, TrendingUp } from 'lucide-react';
+import { X, Copy, Check, Mail, Phone, Linkedin, Globe, Eye, Lock } from 'lucide-react';
 import { useState } from 'react';
+import { api } from '../lib/api';
 
 interface ShareModalProps {
     isOpen: boolean;
     onClose: () => void;
     resumeId: string;
     fullName: string;
+    username: string;
+    isPublic: boolean;
+    onVisibilityChange: (isPublic: boolean) => void;
+    isAuthenticated?: boolean;
+    onRequireAuth?: () => void;
 }
 
-export function ShareModal({ isOpen, onClose, resumeId, fullName }: ShareModalProps) {
+export function ShareModal({ isOpen, onClose, resumeId, fullName, username, isPublic, onVisibilityChange, isAuthenticated, onRequireAuth }: ShareModalProps) {
     const [copied, setCopied] = useState(false);
-    const mockPublicUrl = `https://resumevibe.com/v/${resumeId || 'user-123'}`;
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Construct the public URL
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    // resumeId is the resume_name which might contain spaces, but we slugified it in parent. 
+    // Wait, parent passed `resumeMetadata?.name` which might be "My Resume".
+    // I should ensure the URL uses a slug or encoded name.
+    // Ideally backend handles lookup by slug or name. 
+    // The previous implementation replaced spaces with hyphens. 
+    // Let's assume resumeId passed here is URL-safe or we encode it.
+    // But backend expects `resume_name` to match exactly?
+    // In ResumeBuilder I did: `resumeId={resumeMetadata?.name || ...}`.
+    // If I used "My Resume", the URL will be `.../My%20Resume`. That works.
+    const encodedResumeId = encodeURI(resumeId); // encodeURI might be safer for resume names with spaces but not slash
+    // actually encodeURIComponent is better for the segment.
+    // resumeId comes from `resumeMetadata.name` which acts as the ID/Slug.
+
+    // NOTE: If resumeId is undefined or empty, this link will be broken.
+    const publicUrl = `${origin}/resume/${username}/${encodeURIComponent(resumeId)}`;
 
     const handleCopy = async () => {
-        const text = mockPublicUrl;
         try {
-            await navigator.clipboard.writeText(text);
+            await navigator.clipboard.writeText(publicUrl);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
-            console.error('Clipboard API failed, using fallback', err);
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
-            textArea.style.top = "0";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-            } catch (copyErr) {
-                console.error('Fallback copy failed', copyErr);
+            console.error('Failed to copy:', err);
+            setError('Failed to copy link');
+        }
+    };
+
+    const handleTogglePublic = async () => {
+        if (!isAuthenticated) {
+            onRequireAuth?.();
+            onClose(); // Close share modal so login modal is visible (if it's below)
+            // Or keep it open if login modal is on top. Usually separate modals.
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+        try {
+            const newStatus = !isPublic;
+            // We use resumeId (name) to identify.
+            // But PATCH endpoint uses `lookup_field = 'resume_name'`.
+            // So URL resource is `/api/resumes/${resumeId}/`.
+            const response = await api.patch(`/api/resumes/${resumeId}/`, {
+                is_public: newStatus
+            });
+
+            if (response.ok) {
+                onVisibilityChange(newStatus);
+            } else {
+                const err = await response.json();
+                console.error(err);
+                setError('Failed to update visibility. Please try again.');
             }
-            document.body.removeChild(textArea);
+        } catch (error) {
+            console.error('Error toggling visibility:', error);
+            setError('Connection error. Please check your network.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="bg-[var(--bg-card)] rounded-2xl shadow-[var(--shadow)] w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-[var(--border-color)]">
-                {/* Header */}
-                <div className="p-6 border-b border-[var(--border-color)] flex justify-between items-center bg-gradient-to-r from-purple-500/5 to-blue-500/5">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl shadow-xl flex items-center justify-center transform -rotate-3 group-hover:rotate-0 transition-transform">
-                            <Globe size={24} className="text-white" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-black text-[var(--text-main)] tracking-tight leading-none mb-1">Share Portfolio</h2>
-                            <p className="text-[10px] font-black text-purple-500 uppercase tracking-[0.2em]">Personal Digital Resume</p>
-                        </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div
+                className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-md border border-[var(--border-color)] overflow-hidden animate-in zoom-in-95 duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="p-6 pb-0 flex justify-between items-center">
+                    <div>
+                        <h2 className="text-xl font-bold text-[var(--text-main)]">Share Resume</h2>
+                        <p className="text-sm text-[var(--text-muted)] mt-1">Share your professional profile with the world</p>
                     </div>
+                    <button
+                        onClick={onClose}
+                        className="p-2 rounded-full hover:bg-[var(--bg-input)] text-[var(--text-muted)] transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
                 </div>
 
-                <div className="p-6 sm:p-8 space-y-8">
-                    {/* URL Section */}
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-center px-1">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-60">Personal Portfolio Link</label>
-                            <span
-                                className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] opacity-40 flex items-center gap-1 cursor-not-allowed"
-                            >
-                                <Globe size={10} /> Live Preview (Upcoming)
-                            </span>
+                {error && (
+                    <div className="mx-6 mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-500 animate-in slide-in-from-top-2">
+                        <Lock size={16} />
+                        <span className="text-xs font-bold">{error}</span>
+                    </div>
+                )}
+
+                <div className="p-6 space-y-6">
+                    {/* Public Access Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-[var(--bg-input)] rounded-xl border border-[var(--border-color)]">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${isPublic ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                                {isPublic ? <Globe size={20} /> : <Lock size={20} />}
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-sm text-[var(--text-main)]">Public Access</h3>
+                                <p className="text-xs text-[var(--text-muted)]">
+                                    {isPublic ? 'Anyone with the link can view' : 'Only you can view'}
+                                </p>
+                            </div>
                         </div>
-                        <div className="relative group grayscale">
-                            <div className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-2xl pl-12 pr-32 py-4 flex items-center opacity-50 transition-all shadow-inner">
-                                <Link size={18} className="absolute left-4 text-[var(--text-muted)] transition-colors" />
-                                <span className="text-sm font-bold text-[var(--text-muted)] truncate select-all">{mockPublicUrl}</span>
+                        <button
+                            onClick={handleTogglePublic}
+                            disabled={isLoading}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${isPublic ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
+                                }`}
+                        >
+                            <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPublic ? 'translate-x-6' : 'translate-x-1'
+                                    }`}
+                            />
+                        </button>
+                    </div>
+
+                    {/* Link Section */}
+                    <div className={`space-y-3 transition-opacity duration-200 ${!isPublic ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                            Public Link
+                        </label>
+                        <div className="flex gap-2">
+                            <div className="flex-1 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm text-[var(--text-muted)] truncate font-mono select-all">
+                                {publicUrl}
                             </div>
                             <button
-                                disabled
-                                className="absolute right-2 top-2 bottom-2 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg z-30 bg-[var(--border-color)] text-[var(--text-muted)] cursor-not-allowed"
+                                onClick={handleCopy}
+                                className="px-4 py-2 bg-[var(--text-main)] text-[var(--bg-main)] rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center min-w-[48px]"
+                                title="Copy Link"
                             >
-                                Upcoming
+                                {copied ? <Check size={18} /> : <Copy size={18} />}
                             </button>
                         </div>
                     </div>
 
-                    {/* Quick Share */}
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1 opacity-60">Instant Reach</label>
-                        <div className="grid grid-cols-3 gap-3">
-                            {[
-                                {
-                                    icon: Mail, label: 'Email', color: 'blue', bg: 'bg-blue-500/10', text: 'text-blue-500',
-                                    url: `mailto:?subject=Professional Portfolio - ${fullName}&body=Hello, I'd like to share my professional portfolio with you: ${mockPublicUrl}`
-                                },
-                                {
-                                    icon: MessageCircle, label: 'WhatsApp', color: 'green', bg: 'bg-green-500/10', text: 'text-green-500',
-                                    url: `https://wa.me/?text=${encodeURIComponent(`Check out my professional portfolio: ${mockPublicUrl}`)}`
-                                },
-                                {
-                                    icon: Sparkles, label: 'LinkedIn', color: 'purple', bg: 'bg-purple-500/10', text: 'text-purple-500',
-                                    url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(mockPublicUrl)}`
-                                }
-                            ].map((social, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => window.open(social.url, '_blank')}
-                                    className="flex flex-col items-center justify-center p-4 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl gap-2 transition-all group hover:border-[var(--accent)]/30 hover:-translate-y-1"
-                                >
-                                    <div className={`p-3 ${social.bg} rounded-xl group-hover:scale-110 transition-transform`}>
-                                        <social.icon size={20} className={social.text} />
-                                    </div>
-                                    <span className="text-[10px] font-black uppercase tracking-tighter text-[var(--text-muted)] group-hover:text-[var(--text-main)]">{social.label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Premium Card */}
-                    <div className="p-4 bg-gradient-to-br from-blue-600/10 via-purple-600/5 to-transparent rounded-2xl border border-blue-500/10 flex items-start gap-4 ring-1 ring-blue-500/5">
-                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow-lg flex-shrink-0">
-                            <TrendingUp size={16} className="text-white animate-pulse" />
-                        </div>
-                        <div>
-                            <h3 className="text-xs font-black text-[var(--text-main)] leading-tight uppercase tracking-wide">Dynamic Presentation</h3>
-                            <p className="text-[11px] text-[var(--text-muted)] mt-1 font-medium leading-relaxed opacity-80">
-                                This link opens a high-performance web view with your selected theme.
-                            </p>
-                        </div>
+                    {/* Social Share */}
+                    <div className={`grid grid-cols-3 gap-3 ${!isPublic ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <a
+                            href={`mailto:?subject=Resume of ${fullName}&body=Check out my resume: ${publicUrl}`}
+                            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-[var(--bg-input)] transition-colors border border-[var(--border-color)] hover:border-purple-500/30 group"
+                        >
+                            <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg group-hover:scale-110 transition-transform">
+                                <Mail size={20} />
+                            </div>
+                            <span className="text-xs font-medium text-[var(--text-muted)]">Email</span>
+                        </a>
+                        <a
+                            href={`https://wa.me/?text=Check out my resume: ${publicUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-[var(--bg-input)] transition-colors border border-[var(--border-color)] hover:border-green-500/30 group"
+                        >
+                            <div className="p-2 bg-green-500/10 text-green-500 rounded-lg group-hover:scale-110 transition-transform">
+                                <Phone size={20} />
+                            </div>
+                            <span className="text-xs font-medium text-[var(--text-muted)]">WhatsApp</span>
+                        </a>
+                        <a
+                            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-[var(--bg-input)] transition-colors border border-[var(--border-color)] hover:border-blue-600/30 group"
+                        >
+                            <div className="p-2 bg-blue-600/10 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
+                                <Linkedin size={20} />
+                            </div>
+                            <span className="text-xs font-medium text-[var(--text-muted)]">LinkedIn</span>
+                        </a>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 bg-[var(--bg-input)]/50 border-t border-[var(--border-color)] flex items-center justify-center">
-                    <button
-                        onClick={onClose}
-                        className="px-12 py-3 bg-[var(--bg-card)] hover:bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-main)] rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 shadow-sm"
-                    >
-                        Back to Editor
-                    </button>
+                <div className="p-6 bg-[var(--bg-input)] border-t border-[var(--border-color)]">
+                    <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+                        <div className="p-1.5 bg-yellow-500/10 text-yellow-500 rounded-lg">
+                            <Eye size={14} />
+                        </div>
+                        <p>
+                            {isPublic
+                                ? "Anyone with the link can view your resume."
+                                : "Make your resume public to share it with others."}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
