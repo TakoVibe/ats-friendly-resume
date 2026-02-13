@@ -92,6 +92,7 @@ Important Rules:
 - Extract ALL information available. Do not skip any details.
 - DO NOT MERGE separate work experience entries or projects even if they have the same job title or similar dates. Each distinct heading must be a separate entry.
 - Ensure chronological order matches the source.
+- DATE FORMATTING: Normalize all dates to 'MMM YYYY' (e.g., 'Aug 2018') or 'Aug 2018 - Present' or 'Aug 2018 - Aug 2022'. Never use numeric months or full month names.
 - PROJECTS: Look for sections titled "Projects", "Relevant Projects", "Personal Projects", "Academic Projects".
 - ANY project description or paragraph following the title should be added as the FIRST bullet point in the 'metrics' array. DO NOT use a separate 'description' field.
 - Extract technology names, tools, version control (e.g., Git, Bitbucket), and infrastructure (e.g., AWS, Docker) into techStack arrays.
@@ -109,7 +110,6 @@ ${text}`;
         { role: 'user', content: prompt }
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.1,
     });
 
     const generatedText = completion.choices[0]?.message?.content;

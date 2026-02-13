@@ -93,7 +93,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
             id: Math.random().toString(36).substr(2, 9),
             institution: 'Institution Name',
             degree: 'Degree',
-            duration: 'Year - Year',
+            duration: 'Aug 2018 - Aug 2022',
             location: 'Location',
             details: []
         };

@@ -62,6 +62,7 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
         const newItem = {
             id: Math.random().toString(36).substr(2, 9),
             name: 'Project Name',
+            date: 'Aug 2018 - Aug 2022',
             techStack: ['Tech 1', 'Tech 2'],
             metrics: ['Project summary or key feature...']
         };

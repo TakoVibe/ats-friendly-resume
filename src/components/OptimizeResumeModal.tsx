@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Sparkles, Loader2, X, AlertCircle, History, Target } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Sparkles, Loader2, X, AlertCircle, History, Target, Timer } from 'lucide-react';
 import { useResume } from '../hooks/useResume';
 import ResumeDiffViewer from './ResumeDiffViewer';
 import VersionHistory, { type ResumeVersion } from './VersionHistory';
@@ -28,6 +28,29 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
         }
     }, [resume.targetJD]);
     const [isOptimizing, setIsOptimizing] = useState(false);
+    const [elapsedTime, setElapsedTime] = useState(0);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (isOptimizing) {
+            setElapsedTime(0);
+            timerRef.current = setInterval(() => {
+                setElapsedTime(prev => prev + 1);
+            }, 1000);
+        } else {
+            if (timerRef.current) clearInterval(timerRef.current);
+        }
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, [isOptimizing]);
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
     const [error, setError] = useState<string | null>(null);
     const [optimizedResume, setOptimizedResume] = useState<ResumeSchema | null>(null);
     const [originalResume, setOriginalResume] = useState<ResumeSchema | null>(null);
@@ -251,7 +274,7 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
                                 {auditResult.insights?.filter((i: any) => i.type === 'gap').map((gap: any, idx: number) => (
                                     <li key={idx} className="text-[11px] text-[var(--text-muted)] font-medium flex items-start gap-2">
                                         <AlertCircle size={12} className="text-indigo-500 mt-0.5 flex-shrink-0" />
-                                        <span className="leading-tight opacity-90">{gap.text}</span>
+                                        <span className="leading-tight opacity-90" dangerouslySetInnerHTML={{ __html: gap.text }} />
                                     </li>
                                 ))}
                             </ul>
@@ -306,6 +329,10 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
                             {isOptimizing ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin" />
+                                    <span className="font-mono tabular-nums bg-white/10 px-1.5 py-0.5 rounded text-[10px] border border-white/20 mr-1 animate-pulse flex items-center gap-1">
+                                        <Timer size={10} />
+                                        {formatTime(elapsedTime)}
+                                    </span>
                                     Analysing...
                                 </>
                             ) : (

@@ -39,7 +39,9 @@ Unlike a simple keyword matcher, you look for:
     - \`insights\`: (array of objects with {type: 'strength'|'gap'|'recommendation', category: string, text: string, impact: 'high'|'medium'|'low'})
     - \`jdAlignment\`: (object with {score: number, missingCriticalSkills: string[], strengths: string[]})
 - Be brutally honest but constructive.
-- 'insights' should contain at least 4-6 high-quality observations.`;
+- 'insights' should contain at least 4-6 high-quality observations.
+- **Formatting**: Use <strong> tags within the 'text' field to highlight "weighty" words (revenue, specific tech, major gaps). Be strategic—only bold 1-2 most impactful terms per insight to maintain professional clarity.
+- **Date Standardization**: When recommending date-related changes, always use the 'MMM YYYY - MMM YYYY' format (e.g., 'Aug 2018 - Aug 2022').`;
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -72,15 +74,14 @@ ${JSON.stringify(resume, null, 2)}
 
 Perform a Deep Audit. Return the results in the specified JSON format.`;
 
-        console.log('Calling OpenAI gpt-4o-mini...');
+        console.log('Calling OpenAI gpt-5-mini...');
         const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: 'gpt-5-mini',
             messages: [
                 { role: 'system', content: SYSTEM_PROMPT },
                 { role: 'user', content: userPrompt }
             ],
             response_format: { type: 'json_object' },
-            temperature: 0.4,
         });
 
         const responseText = completion.choices[0].message.content;

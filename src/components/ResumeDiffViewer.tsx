@@ -91,7 +91,7 @@ export default function ResumeDiffViewer({
                 </div>
                 <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
                     <p className="text-xs font-semibold text-green-500 mb-1">OPTIMIZED</p>
-                    <p className="text-sm text-[var(--text-main)] font-medium">{optimized.summary}</p>
+                    <p className="text-sm text-[var(--text-main)] font-medium" dangerouslySetInnerHTML={{ __html: optimized.summary }} />
                 </div>
             </div>
         );
@@ -170,7 +170,10 @@ export default function ResumeDiffViewer({
                                         <p className="text-[10px] font-black uppercase text-green-500 mb-1.5">OPTIMIZED</p>
                                         <ul className="text-xs text-[var(--text-main)] font-medium space-y-1">
                                             {optExp.metrics.map((metric: BulletItem, i: number) => (
-                                                <li key={i}>• {typeof metric === 'string' ? metric : metric.text}</li>
+                                                <li key={i} className="flex items-start gap-1">
+                                                    <span>•</span>
+                                                    <span dangerouslySetInnerHTML={{ __html: typeof metric === 'string' ? metric : metric.text }} />
+                                                </li>
                                             ))}
                                         </ul>
                                     </div>
@@ -211,7 +214,7 @@ export default function ResumeDiffViewer({
                                     </div>
                                     <div className="bg-green-500/10 rounded p-2 border border-green-500/10">
                                         <p className="text-[10px] font-black uppercase text-green-500 mb-1">OPTIMIZED</p>
-                                        <p className="text-xs text-[var(--text-main)] font-medium">{optProj.description}</p>
+                                        <p className="text-xs text-[var(--text-main)] font-medium" dangerouslySetInnerHTML={{ __html: optProj.description || '' }} />
                                     </div>
                                 </div>
                             )}
@@ -230,7 +233,10 @@ export default function ResumeDiffViewer({
                                         <p className="text-[10px] font-black uppercase text-green-500 mb-1.5">OPTIMIZED</p>
                                         <ul className="text-xs text-[var(--text-main)] font-medium space-y-1">
                                             {optProj.metrics.map((metric: BulletItem, i: number) => (
-                                                <li key={i}>• {typeof metric === 'string' ? metric : metric.text}</li>
+                                                <li key={i} className="flex items-start gap-1">
+                                                    <span>•</span>
+                                                    <span dangerouslySetInnerHTML={{ __html: typeof metric === 'string' ? metric : metric.text }} />
+                                                </li>
                                             ))}
                                         </ul>
                                     </div>
@@ -277,7 +283,10 @@ export default function ResumeDiffViewer({
                                         <p className="text-[10px] font-black uppercase text-green-500 mb-1.5">OPTIMIZED</p>
                                         <ul className="text-xs text-[var(--text-main)] font-medium space-y-1">
                                             {optEdu.details.map((detail: BulletItem, i: number) => (
-                                                <li key={i}>• {typeof detail === 'string' ? detail : detail.text}</li>
+                                                <li key={i} className="flex items-start gap-1">
+                                                    <span>•</span>
+                                                    <span dangerouslySetInnerHTML={{ __html: typeof detail === 'string' ? detail : detail.text }} />
+                                                </li>
                                             ))}
                                         </ul>
                                     </div>
@@ -309,7 +318,10 @@ export default function ResumeDiffViewer({
                     <p className="text-xs font-semibold text-green-500 mb-2">OPTIMIZED</p>
                     <ul className="text-xs text-[var(--text-main)] font-medium space-y-1">
                         {optimized.achievements.map((achievement: BulletItem, i: number) => (
-                            <li key={i}>• {typeof achievement === 'string' ? achievement : achievement.text}</li>
+                            <li key={i} className="flex items-start gap-1">
+                                <span>•</span>
+                                <span dangerouslySetInnerHTML={{ __html: typeof achievement === 'string' ? achievement : achievement.text }} />
+                            </li>
                         ))}
                     </ul>
                 </div>

@@ -104,7 +104,7 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
             id: Math.random().toString(36).substr(2, 9),
             company: 'Company Name',
             role: 'Job Title',
-            duration: 'Month Year - Present',
+            duration: 'Aug 2018 - Present',
             // Default to string for new items (bullet)
             metrics: ['Key achievement or responsibility...'],
             techStack: ['Skill 1', 'Skill 2']

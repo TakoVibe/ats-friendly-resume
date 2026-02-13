@@ -63,7 +63,7 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
             id: Math.random().toString(36).substr(2, 9),
             name: 'Certification Name',
             issuer: 'Issuer',
-            date: 'Year'
+            date: 'Aug 2022'
         };
         onUpdate([...certifications, newItem]);
     };

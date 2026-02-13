@@ -109,11 +109,19 @@ Your task is to rewrite the user's resume to align perfectly with the target job
 8. **Skill Re-categorization**: Group skills into relevant categories matching JD requirements
 9. **Tech Stack Alignment**: Highlight technologies mentioned in the JD
 10. **Professional Summary**: Rewrite to mirror the JD's key requirements and desired qualifications
-11. **Custom Sections**: Maintain the structure of custom sections. The 'items' array content varies by section type (e.g., 'summary' expects an array of one string, 'experience' expects an array of objects).
+11. **Date Formatting**: Use a strict 'MMM YYYY - MMM YYYY' format for all dates (e.g., 'Aug 2018 - Aug 2022' or 'Dec 2020 - Present'). Never use numeric months or full month names.
+12. **Custom Sections**: Maintain the structure of custom sections. The 'items' array content varies by section type (e.g., 'summary' expects an array of one string, 'experience' expects an array of objects).
+13. **Formatting (Strategic Bolding)**: Use <strong> tags to emphasize high-impact, "weighty" terms that prove your value. This includes:
+    - Major quantifiable results (e.g., <strong>99.9% uptime</strong>, <strong>$2M savings</strong>, <strong>10x scale</strong>).
+    - High-impact technologies or niche skills (e.g., <strong>Kubernetes</strong>, <strong>Rust</strong>, <strong>Distributed Systems</strong>).
+    - Leadership or strategic actions (e.g., <strong>Architected</strong>, <strong>Spearheaded</strong>).
+    - **Balance**: Limit bolding to 2-3 truly important instances per section or bullet point. Do not bold entire sentences.
+    - Ensure tags are properly closed.
 
 **OUTPUT REQUIREMENTS:**
 - You MUST respond with ONLY a valid JSON object, no additional text or explanation
-- Return a complete, valid ResumeSchema JSON object
+- Return a COMPLETE ResumeSchema JSON object.
+- **NEVER OMIT SECTIONS**: Even if you don't change a section (like 'education' or 'certifications'), you MUST include it in the response exactly as it was provided.
 - Ensure all required fields are present (never omit fields like 'company', 'role', 'metrics', or 'description' - use empty strings or arrays if needed)
 - Maintain all existing IDs
 - Keep the same sectionOrder and visibleSections unless optimization requires changes`;
@@ -153,24 +161,23 @@ export const POST: APIRoute = async ({ request }) => {
         }
 
         // Create the user prompt
-        const userPrompt = `**Job Description:**
-${jobDescription}
+        const userPrompt = `** Job Description:**
+    ${jobDescription}
 
-**Current Resume (JSON):**
-${JSON.stringify(resumeToOptimize, null, 2)}${auditContext}
+** Current Resume(JSON):**
+    ${JSON.stringify(resumeToOptimize, null, 2)}${auditContext}
 
-Please optimize this resume for the job description above. Return a complete, optimized resume in the exact same JSON structure.
+Please optimize this resume for the job description above.Return a complete, optimized resume in the exact same JSON structure.
 If critical gaps are listed above, prioritize fixing them by adding relevant skills, rewriting bullets to demonstrate those competencies, or adjusting the summary.`;
 
         // Call OpenAI with structured output
         const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: 'gpt-5-mini',
             messages: [
                 { role: 'system', content: SYSTEM_PROMPT },
                 { role: 'user', content: userPrompt }
             ],
             response_format: { type: 'json_object' },
-            temperature: 0.7,
         });
 
         const responseText = completion.choices[0].message.content;
@@ -190,6 +197,17 @@ If critical gaps are listed above, prioritize fixing them by adding relevant ski
             if (Array.isArray(parsed.summary)) {
                 parsed.summary = parsed.summary.join('\n\n');
             }
+
+            // Ensure all required sections exist as arrays if missing (AI fallibility)
+            const requiredArrays = ['skills', 'experience', 'education', 'achievements', 'certifications'];
+            requiredArrays.forEach(key => {
+                if (!parsed[key]) {
+                    parsed[key] = [];
+                } else if (!Array.isArray(parsed[key])) {
+                    // If it returned an object instead of array (rare AI quirk)
+                    parsed[key] = [parsed[key]];
+                }
+            });
 
             // Re-attach the original projects
             const fullResume = { ...parsed, projects: originalProjects };
