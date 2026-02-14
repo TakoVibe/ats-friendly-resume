@@ -9,7 +9,7 @@ async function request(endpoint: string, options: RequestInit = {}) {
     } as HeadersInit;
 
     if (token) {
-        (headers as any)["Authorization"] = `Bearer ${token}`;
+        (headers as any)["Authorization"] = `Token ${token}`;
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -20,7 +20,6 @@ async function request(endpoint: string, options: RequestInit = {}) {
     if (response.status === 401) {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("user");
-        window.location.reload();
     }
 
     return response;

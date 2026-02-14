@@ -1,6 +1,9 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import type { ResumeSchema } from '../types/resume';
 import { initialResume } from '../data/sample-resume';
+import { api } from '../lib/api';
+import { useAuth } from './AuthContext';
+import { toast } from 'react-hot-toast';
 
 const STORAGE_KEY = 'resume-data-v3';
 
@@ -12,8 +15,14 @@ interface ResumeContextType {
     isLoaded: boolean;
     undo: () => void;
     redo: () => void;
+    saveToBackend: () => Promise<void>;
+    saveVersionToBackend: () => Promise<void>;
     canUndo: boolean;
     canRedo: boolean;
+    isSaving: boolean;
+    lastSaved: Date | null;
+    resumeMetadata: { id?: string, slug: string, name: string, isPublic: boolean } | null;
+    setResumeMetadata: (meta: { id?: string, slug: string, name: string, isPublic: boolean } | null) => void;
 }
 
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
@@ -29,7 +38,12 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         future: []
     });
 
+    const { isAuthenticated } = useAuth();
     const [isLoaded, setIsLoaded] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [lastSaved, setLastSaved] = useState<Date | null>(null);
+    const [resumeMetadata, setResumeMetadata] = useState<{ id?: string, slug: string, name: string, isPublic: boolean } | null>(null);
+    const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -95,6 +109,89 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
+    const lastSavedDataRef = useRef<string | null>(null);
+
+
+    const saveToBackend = useCallback(async () => {
+        if (!isAuthenticated || !history.present || isSaving) return;
+
+        const currentDataString = JSON.stringify(history.present);
+        if (currentDataString === lastSavedDataRef.current) {
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+
+            const method = resumeMetadata?.id ? 'put' : 'post';
+            // Use the slug for the endpoint in PUT requests to find the record
+            const endpoint = resumeMetadata?.id ? `/api/resumes/${resumeMetadata.slug}/` : '/api/resumes/';
+
+            const response = await api[method](endpoint, {
+                resume_data: history.present,
+                is_public: resumeMetadata?.isPublic || false
+            });
+
+            if (response.ok) {
+                const responseData = await response.json();
+                lastSavedDataRef.current = currentDataString;
+                setResumeMetadata({
+                    id: responseData.id,
+                    slug: responseData.slug,
+                    name: responseData.resume_name,
+                    isPublic: responseData.is_public
+                });
+                setLastSaved(new Date());
+            }
+        } catch (error) {
+            console.error("Auto-save failed:", error);
+        } finally {
+            setIsSaving(false);
+        }
+    }, [isAuthenticated, history.present, resumeMetadata]);
+
+    const saveVersionToBackend = useCallback(async () => {
+        if (!isAuthenticated || !resumeMetadata?.slug) {
+            toast.error("Please save the resume first before creating a version.");
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const response = await api.post(`/api/resumes/${resumeMetadata.slug}/create_version/`, {});
+            if (response.ok) {
+                toast.success("Version saved successfully!");
+            } else {
+                toast.error("Failed to save version.");
+            }
+        } catch (error) {
+            console.error("Error creating version:", error);
+            toast.error("Error creating version.");
+        } finally {
+            setIsSaving(false);
+        }
+    }, [isAuthenticated, resumeMetadata]);
+
+    // Auto-save effect with dirty check
+    useEffect(() => {
+        if (isAuthenticated && isLoaded) {
+            // Compare current with last saved
+            const currentDataString = JSON.stringify(history.present);
+            if (currentDataString === lastSavedDataRef.current) {
+                return;
+            }
+
+            if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+
+            autoSaveTimerRef.current = setTimeout(() => {
+                saveToBackend();
+            }, 5000);
+        }
+        return () => {
+            if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        };
+    }, [history.present, isAuthenticated, isLoaded, saveToBackend]);
+
     const updateSection = <K extends keyof ResumeSchema>(section: K, value: ResumeSchema[K]) => {
         const newData = { ...history.present, [section]: value };
         updateResume(newData);
@@ -113,8 +210,14 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
             isLoaded,
             undo,
             redo,
+            saveToBackend,
+            saveVersionToBackend,
             canUndo: history.past.length > 0,
-            canRedo: history.future.length > 0
+            canRedo: history.future.length > 0,
+            isSaving,
+            lastSaved,
+            resumeMetadata,
+            setResumeMetadata
         }}>
             {children}
         </ResumeContext.Provider>

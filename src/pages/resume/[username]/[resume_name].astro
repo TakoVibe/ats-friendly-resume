@@ -1,58 +1,61 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import { ResumePreview } from '../../../components/ResumePreview';
+import Layout from "../../../layouts/Layout.astro";
+import { PublicResumeContent } from "../../../components/profile/PublicResumeContent";
 
-const { username, resume_name } = Astro.params;
+const { username, resume_name: slug } = Astro.params;
 
 let resumeData = null;
 let error = null;
 
 try {
-  const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
-  const response = await fetch(`${apiUrl}/api/resumes/public/${username}/${resume_name}/`);
-  
+  const apiUrl = import.meta.env.PUBLIC_API_URL || "http://localhost:8000";
+  const response = await fetch(
+    `${apiUrl}/api/resumes/public/${username}/${slug}/`,
+  );
+
   if (response.ok) {
     const data = await response.json();
     resumeData = data.resume_data;
   } else {
-    error = response.status === 404 ? 'Resume not found' : 'Error loading resume';
+    error =
+      response.status === 404 ? "Resume not found" : "Error loading resume";
   }
 } catch (e) {
   console.error(e);
-  error = 'Failed to load resume';
+  error = "Failed to load resume";
 }
 ---
 
-<Layout title={resumeData?.personalInfo?.fullName ? `${resumeData.personalInfo.fullName} - Resume` : 'Resume Not Found'}>
-  <div class="min-h-screen bg-[var(--bg-main)] py-8 px-4 flex flex-col items-center">
-    {resumeData ? (
-      <div class="w-full max-w-4xl animate-in fade-in duration-500">
-        <ResumePreview
-          data={resumeData}
-          id="public-resume-view"
-          isEditable={false}
-          client:load
-        />
-        
-        <div class="mt-8 text-center">
-          <a href="/" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] rounded-xl font-bold hover:opacity-90 transition-opacity">
-            Create Your Own Resume
+<Layout
+  title={resumeData?.personalInfo?.fullName
+    ? `${resumeData.personalInfo.fullName} - Resume`
+    : "Resume Not Found"}
+>
+  <div
+    class="min-h-screen bg-[var(--bg-main)] py-8 px-4 flex flex-col items-center"
+  >
+    {
+      resumeData ? (
+        <PublicResumeContent resumeData={resumeData} client:only="react" />
+      ) : (
+        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center">
+          <h1 class="text-4xl font-bold text-[var(--text-main)] mb-4">404</h1>
+          <p class="text-[var(--text-muted)] text-xl mb-8">
+            {error || "Resume not found or is private"}
+          </p>
+          <a
+            href="/"
+            class="px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] rounded-xl font-bold hover:opacity-90 transition-opacity"
+          >
+            Go Home
           </a>
         </div>
-      </div>
-    ) : (
-      <div class="flex flex-col items-center justify-center min-h-[50vh] text-center">
-        <h1 class="text-4xl font-bold text-[var(--text-main)] mb-4">404</h1>
-        <p class="text-[var(--text-muted)] text-xl mb-8">{error || 'Resume not found or is private'}</p>
-        <a href="/" class="px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] rounded-xl font-bold hover:opacity-90 transition-opacity">
-          Go Home
-        </a>
-      </div>
-    )}
+      )
+    }
   </div>
 </Layout>
 
 <script>
   // Import resume.css to ensure styles are applied
-  import '../../../styles/resume.css';
+  import "../../../styles/resume.css";
 </script>

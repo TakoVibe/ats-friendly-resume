@@ -69,93 +69,93 @@ export function EditorToolbar({ onAddSection, isMobile = false }: { onAddSection
 
 
     const containerClasses = isMobile
-        ? "w-full flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1"
+        ? "w-full grid grid-cols-2 gap-3 p-1 bg-[var(--bg-main)] overflow-visible"
         : "absolute top-6 left-1/2 -translate-x-1/2 z-[55] w-fit max-w-[95%] sm:max-w-screen-md bg-[var(--glass-bg)] backdrop-blur-2xl border border-[var(--glass-border)] shadow-[var(--shadow)] rounded-2xl p-1.5 sm:px-4 sm:py-2 flex items-center justify-center gap-2 sm:gap-4 select-none animate-in fade-in slide-in-from-top-4 duration-500 sm:overflow-visible";
 
     return (
         <div className={containerClasses}>
 
             {/* Formatting Group */}
-            <div className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 bg-[var(--bg-input)] rounded-xl border border-[var(--border-color)] shrink-0">
+            <div className={`flex items-center gap-0.5 sm:gap-1.5 px-1 sm:px-2 py-1.5 sm:py-1 bg-[var(--bg-input)] rounded-xl border border-[var(--border-color)] ${isMobile ? 'justify-around' : 'shrink-0'}`}>
                 <button
                     onMouseDown={(e) => { e.preventDefault(); exec('bold'); }}
-                    className="p-1.5 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg "
+                    className={`p-2 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg flex justify-center ${isMobile ? 'flex-1' : ''}`}
                     title="Bold"
                 >
-                    <Bold size={14} className="sm:w-4 sm:h-4" />
+                    <Bold size={16} className="sm:w-4 sm:h-4" />
                 </button>
                 <button
                     onMouseDown={(e) => { e.preventDefault(); exec('italic'); }}
-                    className="p-1.5 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg "
+                    className={`p-2 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg flex justify-center ${isMobile ? 'flex-1' : ''}`}
                     title="Italic"
                 >
-                    <Italic size={14} className="sm:w-4 sm:h-4" />
+                    <Italic size={16} className="sm:w-4 sm:h-4" />
                 </button>
-                <div className="w-[1px] h-3 sm:h-4 bg-[var(--border-color)] mx-1"></div>
+                <div className="w-[1px] h-4 bg-[var(--border-color)] mx-0.5"></div>
                 <button
                     onMouseDown={(e) => { e.preventDefault(); handleLink(); }}
-                    className="p-1.5 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg "
+                    className={`p-2 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg flex justify-center ${isMobile ? 'flex-1' : ''}`}
                     title="Insert Link"
                 >
-                    <Link size={14} className="sm:w-4 sm:h-4" />
+                    <Link size={16} className="sm:w-4 sm:h-4" />
                 </button>
                 <button
                     onMouseDown={(e) => { e.preventDefault(); exec('insertUnorderedList'); }}
-                    className="p-1.5 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg "
+                    className={`p-2 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg flex justify-center ${isMobile ? 'flex-1' : ''}`}
                     title="Bullet List"
                 >
-                    <List size={14} className="sm:w-4 sm:h-4" />
+                    <List size={16} className="sm:w-4 sm:h-4" />
+                </button>
+            </div>
+
+            {/* Actions Group */}
+            <div className={`flex items-center gap-1.5 sm:gap-2 ${isMobile ? 'w-full' : 'shrink-0 pr-2 sm:pr-0'}`}>
+                <button
+                    onClick={toggleDarkMode}
+                    className={`${isMobile ? 'flex-1' : 'p-2 sm:px-3'} h-9 sm:h-10 flex items-center justify-center bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-color)] rounded-xl transition-colors shadow-sm`}
+                    title={isDarkMode ? "Light mode" : "Dark mode"}
+                >
+                    {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                </button>
+
+                <button
+                    className={`${isMobile ? 'flex-[2]' : 'px-4'} h-9 sm:h-10 flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-[12px] font-black uppercase tracking-widest shadow-lg shadow-purple-500/20`}
+                    onClick={onAddSection}
+                >
+                    <MessageSquarePlus size={16} />
+                    <span>Add</span>
                 </button>
             </div>
 
             {/* Typography Group */}
-            <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 bg-[var(--bg-input)] rounded-xl border border-[var(--border-color)] shrink-0">
+            <div className={`flex items-center gap-1 px-1.5 sm:px-2 py-1.5 sm:py-1 bg-[var(--bg-input)] rounded-xl border border-[var(--border-color)] ${isMobile ? 'w-full justify-between' : 'shrink-0'}`}>
                 <CustomSelect
                     value={config.fontFamily || 'Inter'}
                     options={fontOptions}
                     onChange={(val) => updateConfig('fontFamily', val)}
                     icon={<Type size={14} />}
-                    className="min-w-fit sm:min-w-[120px]"
+                    className={isMobile ? "flex-1 min-w-0" : "min-w-[120px]"}
                 />
 
-                <div className="w-[1px] h-3 sm:h-4 bg-[var(--border-color)]"></div>
+                <div className="w-[1px] h-4 bg-[var(--border-color)]"></div>
 
                 <CustomSelect
                     value={config.baseFontSize || 10}
                     options={fontSizeOptions}
                     onChange={(val) => updateConfig('baseFontSize', val)}
-                    className="min-w-fit"
+                    className={isMobile ? "w-14" : "min-w-[60px]"}
                 />
             </div>
 
             {/* Layout Group */}
-            <div className="flex items-center gap-1 px-1.5 sm:px-2 py-1 bg-[var(--bg-input)] rounded-xl border border-[var(--border-color)] shrink-0">
+            <div className={`flex items-center gap-1 px-1.5 sm:px-2 py-1.5 sm:py-1 bg-[var(--bg-input)] rounded-xl border border-[var(--border-color)] ${isMobile ? 'w-full' : 'shrink-0'}`}>
                 <CustomSelect
                     value={config.margins || 'standard'}
                     options={marginOptions}
                     onChange={(val) => updateConfig('margins', val)}
                     icon={<LayoutTemplate size={14} />}
-                    className="min-w-fit sm:min-w-[110px]"
+                    className={isMobile ? "flex-1" : "min-w-[110px]"}
                 />
-            </div>
-
-            {/* Actions Group */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pr-2 sm:pr-0">
-                <button
-                    onClick={toggleDarkMode}
-                    className="p-2 sm:p-2.5 bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-color)] rounded-xl transition-colors shadow-sm"
-                    title={isDarkMode ? "Light mode" : "Dark mode"}
-                >
-                    {isDarkMode ? <Sun size={16} className="sm:w-4.5 sm:h-4.5" /> : <Moon size={16} className="sm:w-4.5 sm:h-4.5" />}
-                </button>
-
-                <button
-                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-[11px] sm:text-sm font-bold shadow-lg shadow-purple-500/20"
-                    onClick={onAddSection}
-                >
-                    <MessageSquarePlus size={14} className="sm:w-4 sm:h-4" />
-                    <span className="hidden xs:inline sm:inline">Add</span>
-                </button>
             </div>
 
             <PromptDialog

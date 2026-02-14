@@ -57,7 +57,7 @@ export function GoogleLogin() {
 
                             if (res.ok) {
                                 const data = await res.json();
-                                login(data.data.access, data.data.user);
+                                login(data.data.auth_token, data.data.user);
                                 toast.success("Successfully logged in!");
                             } else {
                                 console.error("Authentication failed");

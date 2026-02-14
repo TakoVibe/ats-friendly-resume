@@ -124,7 +124,7 @@ Rewrite this project description. Return only the improved text.`;
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: userPrompt }
             ],
-            max_tokens: 1000,
+            // max_tokens: 1000,
         });
 
         const optimizedText = completion.choices[0]?.message?.content?.trim();

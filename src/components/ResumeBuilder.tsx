@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useResume } from '../hooks/useResume';
 import { ResumePreview } from './ResumePreview';
-import { Download, RotateCcw, FileText, Eye, Edit, Loader2, Sparkles, UserCheck, Zap, LogIn, Save, Lock, Globe, X } from 'lucide-react';
+import { Save, Download, FileText, Globe, History, Loader2, Edit, Check, Eye, Trash2, Zap, LogIn, RotateCcw, ChevronDown, User, LogOut, Settings, Sparkles, UserCheck, Lock, X, Moon, Sun } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { LoginModal } from './ui/LoginModal';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '../context/ThemeContext';
 import { TextPreview } from './parser/TextPreview';
 import { EditorToolbar } from './ui/EditorToolbar';
 import { Logo } from './ui/Logo';
+import { Navbar } from './ui/Navbar';
 
 import { PersonalInfoModal } from './editor/PersonalInfoModal';
 import { ResumeProvider } from '../context/ResumeContext';
@@ -24,8 +27,11 @@ import { GoogleLogin } from './GoogleLogin';
 import { api } from '../lib/api';
 
 function ResumeBuilderContent() {
-    const { data, updateResume, resetToDefault, isLoaded, undo, redo } = useResume();
+    const { data, updateResume, resetToDefault, isLoaded, undo, redo, saveToBackend, saveVersionToBackend, isSaving, lastSaved, resumeMetadata, setResumeMetadata } = useResume();
     const { user, isAuthenticated, logout } = useAuth();
+    const { isDarkMode, toggleDarkMode } = useTheme();
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showMoreActions, setShowMoreActions] = useState(false);
     const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'parser'>('editor');
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -39,11 +45,9 @@ function ResumeBuilderContent() {
     const [guidanceInsights, setGuidanceInsights] = useState<Array<{ type: 'good' | 'warning' | 'info'; text: string }>>([]);
     const [guidanceAuditResult, setGuidanceAuditResult] = useState<any>(null);
     const [isGenerating, setIsGenerating] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
     const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
     const [lastDownloadedFile, setLastDownloadedFile] = useState('');
     const [showLoginModal, setShowLoginModal] = useState(false);
-    const [resumeMetadata, setResumeMetadata] = useState<{ id?: string, name: string, isPublic: boolean } | null>(null);
 
     const [isPublicView, setIsPublicView] = useState(false);
 
@@ -54,13 +58,36 @@ function ResumeBuilderContent() {
         }
     }, [isAuthenticated]);
 
-    // Check for public view mode
+    // Check for public view or edit mode
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         if (params.get('view') === 'public') {
             setIsPublicView(true);
         }
-    }, []);
+
+        const editResumeName = params.get('edit');
+        if (editResumeName && isAuthenticated) {
+            loadResume(editResumeName);
+        }
+    }, [isAuthenticated]);
+
+    const loadResume = async (slug: string) => {
+        try {
+            const response = await api.get(`/api/resumes/${slug}/`);
+            if (response.ok) {
+                const resume = await response.json();
+                updateResume(resume.resume_data);
+                setResumeMetadata({
+                    id: resume.id,
+                    slug: resume.slug,
+                    name: resume.resume_name,
+                    isPublic: resume.is_public
+                });
+            }
+        } catch (error) {
+            console.error("Failed to load resume:", error);
+        }
+    };
 
     // Auto-generate PDF preview when switching to 'preview' tab
     useEffect(() => {
@@ -179,43 +206,15 @@ function ResumeBuilderContent() {
             setShowLoginModal(true);
             return;
         }
+        await saveToBackend();
+    };
 
-        setIsSaving(true);
-        try {
-            // Use existing name if available, otherwise prompt
-            const defaultName = resumeMetadata?.name || data.personalInfo.fullName || "My Resume";
-            const resumeName = prompt("Enter a name for your resume:", defaultName);
-
-            if (!resumeName) {
-                setIsSaving(false);
-                return;
-            }
-
-            const response = await api.post('/api/resumes/', {
-                resume_name: resumeName,
-                resume_data: data,
-                is_public: resumeMetadata?.isPublic || false
-            });
-
-            if (response.ok) {
-                const responseData = await response.json();
-                setResumeMetadata({
-                    id: responseData.id,
-                    name: responseData.resume_name,
-                    isPublic: responseData.is_public
-                });
-                alert("Resume saved successfully!");
-            } else {
-                const err = await response.json();
-                console.error("Save failed:", err);
-                alert("Failed to save resume. " + (err.detail || "Unknown error"));
-            }
-        } catch (error) {
-            console.error("Error saving resume:", error);
-            alert("An error occurred while saving.");
-        } finally {
-            setIsSaving(false);
+    const handleSaveVersion = async () => {
+        if (!isAuthenticated) {
+            setShowLoginModal(true);
+            return;
         }
+        await saveVersionToBackend();
     };
 
     const generatePdfPreview = async () => {
@@ -304,245 +303,175 @@ function ResumeBuilderContent() {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[var(--bg-main)]">
+        <div className="flex flex-col h-screen bg-[var(--bg-main)] selection:bg-purple-500/30">
             {/* Hidden instance for PDF generation scraping */}
             <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
                 <ResumePreview data={data} id="resume-preview-for-generation" />
             </div>
 
-            {/* Login Modal */}
-            {showLoginModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-in fade-in duration-300">
-                    <div className="relative bg-[var(--bg-card)] p-[1px] rounded-[24px] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 group">
-                        {/* Gradient Border */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 opacity-100"></div>
-
-                        <div className="relative bg-[var(--bg-card)] p-8 rounded-[23px] h-full flex flex-col items-center text-center overflow-hidden">
-                            {/* Subtle Inner Glow */}
-                            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
-
-                            <div className="relative mb-6">
-                                <div className="w-16 h-16 rounded-2xl bg-[var(--bg-input)] flex items-center justify-center shadow-inner border border-[var(--border-color)]">
-                                    <Lock className="w-7 h-7 text-[var(--text-main)] opacity-70" strokeWidth={1.5} />
-                                </div>
-                            </div>
-
-                            <h2 className="text-2xl font-bold text-[var(--text-main)] mb-3 tracking-tight">Unlock Full Access</h2>
-                            <p className="mb-8 text-[var(--text-muted)] text-sm leading-relaxed px-2 font-medium">
-                                Sign in to save your progress, create multiple versions, and share your resume with the world.
-                            </p>
-
-                            <div className="w-full flex justify-center mb-6 transform transition-transform hover:scale-[1.02]">
-                                <GoogleLogin />
-                            </div>
-
-                            <button
-                                onClick={() => setShowLoginModal(false)}
-                                className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors py-2 px-6 rounded-full hover:bg-[var(--bg-input)]"
-                            >
-                                Continue as Guest
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Top Bar - Desktop */}
-            <nav className="hidden md:flex sticky top-0 z-[60] justify-between items-center px-8 py-4 bg-[var(--glass-bg)] backdrop-blur-2xl border-b border-[var(--border-color)] text-[var(--text-main)] shadow-2xl">
-                <div className="flex items-center gap-3 md:gap-6">
-                    <BrandSwitcher />
-                    <a
-                        href="/why-resumevibe"
-                        className="hidden lg:flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-purple-500 transition-colors"
-                    >
-                        <Zap size={14} className="text-purple-500" />
-                        Why ResumeVibe?
-                    </a>
-                </div>
-
-                {/* Mobile Tab Switcher Centered on Mobile */}
-                <div className="flex xl:hidden bg-[var(--bg-input)] rounded-lg p-1 border border-[var(--border-color)] shrink-0" role="tablist" aria-label="Editor Views">
+            {/* Premium Unified Navbar - Responsive */}
+            <Navbar>
+                {/* Editor specific actions */}
+                <div className="flex bg-[var(--bg-input)] rounded-lg p-1 border border-[var(--border-color)] shrink-0 h-10" role="tablist" aria-label="Editor Views">
                     <button
                         onClick={() => setActiveTab('editor')}
-                        className={`p-1.5 sm:p-2 rounded-md transition-all ${activeTab === 'editor' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)]'}`}
-                        title="Switch to Editor"
-                        aria-label="Editor View"
-                        aria-selected={activeTab === 'editor'}
-                        role="tab"
+                        className={`px-1.5 sm:px-4 flex items-center gap-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'editor' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
                     >
-                        <Edit size={14} className="sm:w-4 sm:h-4" />
+                        <Edit size={14} /> <span className="hidden md:inline">Editor</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('preview')}
-                        className={`p-1.5 sm:p-2 rounded-md transition-all ${activeTab === 'preview' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-sm' : 'text-[var(--text-muted)]'}`}
-                        title="Switch to PDF Preview"
-                        aria-label="PDF Preview View"
-                        aria-selected={activeTab === 'preview'}
-                        role="tab"
+                        className={`px-1.5 sm:px-4 flex items-center gap-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'preview' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
                     >
-                        <FileText size={14} className="sm:w-4 sm:h-4" />
+                        <FileText size={14} /> <span className="hidden md:inline">Preview</span>
                     </button>
                 </div>
 
-                <div className="flex gap-1.5 md:gap-3 items-center">
-                    {/* Desktop Tabs (XL only now) */}
-                    <div className="hidden xl:flex bg-[var(--bg-input)] rounded-xl p-1 border border-[var(--border-color)]" role="tablist" aria-label="Editor Views">
+                <div className="w-px h-6 bg-[var(--border-color)] hidden lg:block mx-1 shrink-0"></div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Secondary Actions - Responsive Grouping */}
+                    <div className="hidden lg:flex items-center gap-1.5">
                         <button
-                            onClick={() => setActiveTab('editor')}
-                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all ${activeTab === 'editor' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
-                            role="tab"
-                            aria-selected={activeTab === 'editor'}
-                            aria-label="Switch to Editor"
+                            onClick={() => setShowImportModal(true)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest shadow-sm transition-all"
+                            title="Import Resume"
                         >
-                            <Edit size={14} /> Editor
+                            <FileText size={16} />
+                            <span className="text-[10px]">Import</span>
                         </button>
+
                         <button
-                            onClick={() => setActiveTab('preview')}
-                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all ${activeTab === 'preview' ? 'bg-[var(--bg-card)] text-[var(--text-main)] shadow-lg' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}
-                            role="tab"
-                            aria-selected={activeTab === 'preview'}
-                            aria-label="Switch to PDF Preview"
+                            onClick={handleSaveVersion}
+                            disabled={isSaving}
+                            className="flex items-center gap-2 px-3 py-2 text-xs bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest shadow-sm disabled:opacity-50 transition-all"
+                            title="Save as New Version"
                         >
-                            <FileText size={14} /> Preview
+                            <History size={16} />
+                            <span className="text-[10px]">Version</span>
                         </button>
-                    </div>
 
-                    <div className="w-px h-6 bg-[var(--border-color)] hidden xl:block mx-1"></div>
-
-                    <button
-                        onClick={() => setShowImportModal(true)}
-                        className="flex items-center gap-2 px-3 md:px-4 py-2 text-xs bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest shadow-sm"
-                        title="Import Resume"
-                    >
-                        <FileText size={16} />
-                        <span className="hidden lg:inline">Import</span>
-                    </button>
-
-                    {/* Save Button - Temporarily Disabled */}
-                    <div className="relative group/tooltip">
                         <button
-                            disabled
-                            className="flex items-center gap-2 px-3 md:px-4 py-2 text-xs bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest opacity-50 cursor-not-allowed grayscale"
-                        >
-                            <Save size={16} />
-                            <span className="hidden lg:inline">Save</span>
-                        </button>
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                            Coming Soon
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={resetToDefault}
-                        className="p-2 text-[var(--text-muted)] hover:text-red-500 transition-colors hidden sm:block"
-                        title="Reset to Default"
-                    >
-                        <RotateCcw size={18} />
-                    </button>
-
-                    {isAuthenticated ? (
-                        <div className="flex items-center gap-2 ml-2">
-                            {user?.profile_image && (
-                                <img src={user.profile_image} alt="Profile" className="w-8 h-8 rounded-full border border-[var(--border-color)]" />
-                            )}
-                            <button onClick={logout} className="text-xs text-[var(--text-muted)] hover:text-red-500 font-bold uppercase tracking-wide">
-                                Logout
-                            </button>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={() => setShowLoginModal(true)}
-                            className="flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)] hover:bg-[var(--accent)]/10 rounded-xl transition-colors"
-                        >
-                            <LogIn size={16} /> Login
-                        </button>
-                    )}
-
-                    {/* Share Button - Temporarily Disabled */}
-                    <div className="relative group/tooltip">
-                        <button
-                            disabled
-                            className="hidden md:flex items-center gap-2 px-3 md:px-4 py-2 text-xs bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest opacity-50 cursor-not-allowed grayscale"
+                            onClick={() => setShowShareModal(true)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest shadow-sm transition-all"
                         >
                             <Globe size={16} />
-                            <span className="hidden lg:inline">Share</span>
+                            <span className="text-[10px]">Share</span>
                         </button>
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                            Coming Soon
-                        </div>
                     </div>
 
-                    <button
-                        onClick={handleDownload}
-                        disabled={isGenerating}
-                        className="flex items-center gap-3 px-3 md:px-6 py-2 text-xs bg-[var(--text-main)] hover:opacity-90 text-[var(--bg-main)] rounded-xl font-bold uppercase tracking-[0.1em] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
-                    >
-                        {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                        <span className="hidden md:inline">{isGenerating ? 'Generating...' : 'Download'}</span>
-                    </button>
-                </div>
-            </nav>
-
-            {/* Top Bar - Mobile - Simplified */}
-            <nav className="flex md:hidden sticky top-0 z-[60] justify-between items-center px-3 py-3 bg-[var(--glass-bg)] backdrop-blur-2xl border-b border-[var(--border-color)] text-[var(--text-main)] shadow-sm">
-                <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 p-1 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-                        <Logo className="w-full h-full" />
-                    </div>
-                </div>
-
-                <div className="flex-1 text-center font-bold text-sm truncate px-2">
-                    {data.personalInfo.fullName || 'Untitled Resume'}
-                </div>
-
-                <div className="flex items-center gap-1">
-                    <button
-                        onClick={() => setShowRecruiterAI(!showRecruiterAI)}
-                        className={`p-2 rounded-lg transition-all relative group ${showRecruiterAI ? 'text-purple-500 bg-purple-500/10' : 'text-[var(--text-muted)]'}`}
-                    >
-                        {showRecruiterAI && <div className="absolute inset-0 rounded-lg animate-ping bg-purple-500 opacity-20 pointer-events-none"></div>}
-                        <Zap size={18} className={showRecruiterAI ? 'fill-purple-500/20' : ''} />
-                    </button>
-                    <button
-                        onClick={() => setActiveTab(activeTab === 'editor' ? 'preview' : 'editor')}
-                        className={`p-2 rounded-lg transition-all ${activeTab === 'preview' ? 'text-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text-muted)]'}`}
-                    >
-                        {activeTab === 'editor' ? <Eye size={18} /> : <Edit size={18} />}
-                    </button>
-
-                    {isAuthenticated ? (
-                        <div className="flex items-center gap-2 ml-1">
-                            {user?.profile_image ? (
-                                <img
-                                    src={user.profile_image}
-                                    alt="Profile"
-                                    className="w-7 h-7 rounded-full border border-[var(--border-color)]"
-                                    onClick={logout}
-                                />
-                            ) : (
-                                <button onClick={logout} className="p-2 text-red-500">
-                                    <LogIn size={18} className="rotate-180" />
-                                </button>
-                            )}
-                        </div>
-                    ) : (
+                    {/* Mobile "More" Menu for secondary actions */}
+                    <div className="lg:hidden relative">
                         <button
-                            onClick={() => setShowLoginModal(true)}
-                            className="p-2 text-[var(--accent)] transition-colors"
+                            onClick={() => setShowMoreActions(!showMoreActions)}
+                            className="w-10 h-10 flex items-center justify-center bg-[var(--bg-input)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl hover:bg-[var(--bg-card)] transition-all shadow-sm active:scale-95"
+                            title="More Actions"
                         >
-                            <LogIn size={18} />
+                            <ChevronDown size={18} className={`transition-transform duration-300 ${showMoreActions ? 'rotate-180 text-purple-500' : ''}`} />
                         </button>
-                    )}
+
+                        {showMoreActions && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setShowMoreActions(false)} />
+                                <div className="absolute right-0 mt-2 w-48 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="p-2 flex flex-col gap-1">
+                                        <a
+                                            href="/why-resumevibe"
+                                            className="flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-xl transition-colors w-full text-left uppercase tracking-widest"
+                                        >
+                                            <Zap size={16} className="text-purple-500" />
+                                            Why ResumeVibe?
+                                        </a>
+                                        <button
+                                            onClick={() => {
+                                                setShowMoreActions(false);
+                                                setShowImportModal(true);
+                                            }}
+                                            className="flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-xl transition-colors w-full text-left uppercase tracking-widest"
+                                        >
+                                            <FileText size={16} className="text-blue-500" />
+                                            Import
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowMoreActions(false);
+                                                handleSaveVersion();
+                                            }}
+                                            className="flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-xl transition-colors w-full text-left uppercase tracking-widest"
+                                        >
+                                            <History size={16} className="text-orange-500" />
+                                            Version
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowMoreActions(false);
+                                                setShowShareModal(true);
+                                            }}
+                                            className="flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-xl transition-colors w-full text-left uppercase tracking-widest"
+                                        >
+                                            <Globe size={16} className="text-emerald-500" />
+                                            Share
+                                        </button>
+                                        <div className="h-px bg-[var(--border-color)] my-1" />
+                                        <button
+                                            onClick={() => {
+                                                toggleDarkMode();
+                                                setShowMoreActions(false);
+                                            }}
+                                            className="flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-xl transition-colors w-full text-left uppercase tracking-widest"
+                                        >
+                                            {isDarkMode ? (
+                                                <>
+                                                    <Sun size={16} className="text-yellow-500" />
+                                                    Light Mode
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Moon size={16} className="text-blue-400" />
+                                                    Dark Mode
+                                                </>
+                                            )}
+                                        </button>
+                                        <div className="h-px bg-[var(--border-color)] my-1" />
+                                        <button
+                                            onClick={() => {
+                                                setShowMoreActions(false);
+                                                resetToDefault();
+                                            }}
+                                            className="flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-red-500 hover:bg-red-500/10 rounded-xl transition-colors w-full text-left uppercase tracking-widest"
+                                        >
+                                            <RotateCcw size={16} />
+                                            Reset All
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="w-px h-6 bg-[var(--border-color)] hidden md:block mx-1 shrink-0"></div>
+
+                    {/* Primary Actions - Always Visible */}
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="w-10 h-10 md:w-auto md:px-3 md:py-2 flex items-center justify-center gap-2 text-xs bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 border border-purple-500/20 rounded-xl font-bold uppercase tracking-widest shadow-sm disabled:opacity-50 transition-all active:scale-95"
+                        title="Save Changes"
+                    >
+                        {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                        <span className="hidden md:inline text-[10px]">{isSaving ? 'Saving...' : 'Save'}</span>
+                    </button>
 
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
-                        className="p-2 text-[var(--accent)] font-bold disabled:opacity-50"
+                        className="w-10 h-10 sm:w-auto sm:px-4 md:px-6 flex items-center justify-center gap-2 md:gap-3 text-[10px] md:text-xs bg-[var(--text-main)] hover:opacity-90 text-[var(--bg-main)] rounded-xl font-bold uppercase tracking-[0.1em] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-95 transition-all"
                     >
-                        {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                        {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        <span className="hidden sm:inline">{isGenerating ? 'Generating...' : 'Download'}</span>
                     </button>
                 </div>
-            </nav >
+            </Navbar>
 
             {/* Hidden resume for generation */}
             < div className="absolute top-0 left-0 -z-50 invisible h-0 w-0 overflow-hidden" >
@@ -584,19 +513,14 @@ function ResumeBuilderContent() {
                         </div>
                     )}
 
-                    {/* Mobile Bottom Toolbar (Using EditorToolbar but styled to dock bottom) */}
+                    {/* Mobile Top Toolbar (Unified for editing context) */}
                     {activeTab === 'editor' && (
-                        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60] pb-safe-area">
-                            <div className="bg-[var(--glass-bg)] backdrop-blur-xl border-t border-[var(--border-color)] p-2 flex justify-around">
-                                {/* We reuse EditorToolbar but it needs some CSS tweaks to look native bottom bar - for now just wrapping it might be clunky. 
-                                     Let's render a custom simplified bottom bar here instead for speed and "Mobile tuning". 
-                                 */}
-                                <EditorToolbar onAddSection={() => setShowSectionTypeModal(true)} isMobile={true} />
-                            </div>
+                        <div className="md:hidden sticky top-0 left-0 right-0 z-[55] bg-[var(--bg-main)] border-b border-[var(--border-color)] px-3 py-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)]">
+                            <EditorToolbar onAddSection={() => setShowSectionTypeModal(true)} isMobile={true} />
                         </div>
                     )}
                     {activeTab === 'editor' && (
-                        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col items-center bg-[var(--bg-main)] scroll-smooth pt-24 pb-32">
+                        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col items-center bg-[var(--bg-main)] scroll-smooth pt-4 md:pt-24 pb-32">
                             {/* Mobile-optimized Container - Fits Width Automatically */}
                             <div className="w-full md:w-auto relative mt-4 md:mt-8 px-2 md:px-0 flex justify-center">
                                 {/* Only apply transform scale on non-mobile, on mobile we use CSS Zoom or Width constraints */}
@@ -673,7 +597,7 @@ function ResumeBuilderContent() {
                     <ShareModal
                         isOpen={showShareModal}
                         onClose={() => setShowShareModal(false)}
-                        resumeId={resumeMetadata?.name || data.personalInfo.fullName.toLowerCase().replace(/\s+/g, '-')}
+                        resumeId={resumeMetadata?.slug || data.personalInfo.fullName.toLowerCase().replace(/\s+/g, '-')}
                         fullName={data.personalInfo.fullName}
                         username={user?.email?.split('@')[0] || 'user'}
                         isPublic={resumeMetadata?.isPublic || false}
@@ -775,17 +699,15 @@ function ResumeBuilderContent() {
                                             setGuidanceInsights(insights);
                                             setGuidanceAuditResult(auditResult);
                                             setShowGuidanceModal(true);
-                                            // Optional: Close drawer on mobile when guidance opens? 
-                                            // setShowRecruiterAI(false);
                                         }}
                                         onOpenOptimizer={() => {
                                             setShowAutoOptimize(true);
                                             setShowOptimizeModal(true);
-                                            setShowRecruiterAI(false); // Close drawer to show modal
+                                            setShowRecruiterAI(false);
                                         }}
                                         onAuditResult={(result) => setGuidanceAuditResult(result)}
                                         isAuthenticated={isAuthenticated}
-                                        onRequireAuth={() => setShowLoginModal(true)}
+                                        onRequireAuth={() => window.dispatchEvent(new CustomEvent('show-login-modal'))}
                                     />
                                 </div>
                             </div>
@@ -793,6 +715,8 @@ function ResumeBuilderContent() {
                     </div>
                 )}
             </main >
+
+            <LoginModal />
         </div >
     );
 }
