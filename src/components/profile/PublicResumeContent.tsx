@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ResumePreview } from '../../components/ResumePreview';
 import { Providers } from '../../components/Providers';
-import { PublicFooter } from '../ui/PublicFooter';
-import { Download, Loader2 } from 'lucide-react';
+import { Logo } from '../ui/Logo';
+import { Download, Loader2, ArrowRight } from 'lucide-react';
 
 interface PublicResumeContentProps {
     resumeData: any;
@@ -64,11 +64,6 @@ export function PublicResumeContent({ resumeData }: PublicResumeContentProps) {
         }
     };
 
-    // Browser-native print approach as a secondary option or primary if requested
-    const handleBrowserPrint = () => {
-        window.print();
-    };
-
     return (
         <Providers>
             {/* Hidden instance for PDF generation scraping */}
@@ -76,43 +71,76 @@ export function PublicResumeContent({ resumeData }: PublicResumeContentProps) {
                 <ResumePreview data={resumeData} id="resume-preview-for-generation" />
             </div>
 
-            <div className="w-full max-w-4xl animate-in fade-in duration-500">
-                <div className="flex justify-end mb-6 gap-3 no-print">
+            <div className="w-full max-w-4xl mx-auto py-8 px-4 md:px-0 animate-in fade-in duration-700">
+                {/* Minimal Floating Download Button */}
+                <div className="fixed top-6 right-6 z-50 no-print">
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
-                        className="flex items-center gap-2 px-6 py-3 bg-[var(--text-main)] text-[var(--bg-main)] rounded-xl font-bold uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg disabled:opacity-50"
+                        className="group flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md border border-[var(--border-color)] text-[var(--text-main)] rounded-full font-bold text-[10px] uppercase tracking-widest hover:bg-[var(--text-main)] hover:text-white transition-all shadow-[0_4px_12px_rgba(0,0,0,0.1)] active:scale-95 disabled:opacity-50"
+                        title="Download PDF"
                     >
-                        {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                        <span>{isGenerating ? 'Generating...' : 'Download PDF'}</span>
-                    </button>
-                    <button
-                        onClick={handleBrowserPrint}
-                        className="flex items-center gap-2 px-4 py-3 bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest hover:bg-[var(--bg-input)] active:scale-95 transition-all shadow-md"
-                        title="Print with browser"
-                    >
-                        <span>Print</span>
+                        {isGenerating ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                        <span className="hidden sm:inline">{isGenerating ? 'Generating...' : 'Download'}</span>
                     </button>
                 </div>
 
-                <ResumePreview
-                    data={resumeData}
-                    id="public-resume-view"
-                    isEditable={false}
-                />
-
-                <div className="mt-12 text-center no-print bg-[var(--bg-card)] p-8 rounded-3xl border border-[var(--border-color)] shadow-xl">
-                    <h3 className="text-xl font-black text-[var(--text-main)] mb-2 uppercase tracking-tight">Impressed by this resume?</h3>
-                    <p className="text-[var(--text-muted)] mb-6">Create your own professional resume with AI-powered insights in minutes.</p>
-                    <a
-                        href="/"
-                        className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-2xl font-black uppercase tracking-widest hover:shadow-[0_0_40px_rgba(126,34,206,0.3)] active:scale-95 transition-all"
-                    >
-                        Create Your Own Now
-                    </a>
+                {/* Professional Resume Paper Presentation */}
+                <div className="bg-white shadow-[0_10px_60px_rgba(0,0,0,0.08)] rounded-sm overflow-hidden border border-[var(--border-color)]/20 transition-all duration-700">
+                    <ResumePreview
+                        data={resumeData}
+                        id="public-resume-view"
+                        isEditable={false}
+                    />
                 </div>
 
-                <PublicFooter />
+                {/* Subtle Divider - Tightened Spacing */}
+                <div className="mt-12 mb-8 border-t border-[var(--border-color)]/20 no-print mx-auto w-48" />
+
+                {/* Natural Next Step CTA */}
+                <div className="text-center no-print pb-24 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                    <div className="flex flex-col items-center">
+                        <h3 className="text-lg md:text-xl font-bold text-[var(--text-main)] mb-1 tracking-tight">
+                            Want a resume like this?
+                        </h3>
+                        <p className="text-[var(--text-muted)] text-[13px] mb-8 font-medium opacity-70">
+                            Build yours with ResumeVibe
+                        </p>
+
+                        <div className="flex flex-col items-center gap-5 mb-10">
+                            <a
+                                href="/"
+                                className="group relative inline-flex items-center gap-3 px-8 py-3.5 bg-[var(--text-main)] text-[var(--bg-main)] rounded-lg font-bold uppercase tracking-[0.2em] text-[10px] hover:opacity-90 active:scale-[0.98] transition-all shadow-sm border border-[var(--border-color)]"
+                            >
+                                <span>Create My Resume</span>
+                                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                            </a>
+
+                            <div className="flex flex-col gap-2 italic">
+                                <a href="/why-resumevibe" className="text-[10px] font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] underline underline-offset-4 decoration-[var(--border-color)] transition-colors">
+                                    See how it works
+                                </a>
+                                <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] opacity-30 not-italic">
+                                    No credit card required
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Intentional "Powered By" Badge */}
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="w-1 h-1 rounded-full bg-[var(--border-color)] opacity-40" />
+                            <div className="flex items-center gap-2.5 opacity-40 hover:opacity-100 transition-all duration-500 cursor-default group/powered">
+                                <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)]">Powered by</span>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.05em] text-[var(--text-main)]">TakoVibe</span>
+                                    <div className="p-0.5 rounded-full border border-[var(--border-color)] group-hover/powered:border-purple-500/30 transition-colors bg-[var(--bg-input)]">
+                                        <img src="https://takovibe.com/images/logo.svg" className="w-3 h-3 rounded-full" alt="TakoVibe" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </Providers>
     );
