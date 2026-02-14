@@ -113,7 +113,8 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
 
 
     const saveToBackend = useCallback(async () => {
-        if (!isAuthenticated || !history.present || isSaving) return;
+        const isTestingResume = history.present.personalInfo?.email === 'johnathan.doe@example.com';
+        if (!isAuthenticated || !history.present || isSaving || isTestingResume) return;
 
         const currentDataString = JSON.stringify(history.present);
         if (currentDataString === lastSavedDataRef.current) {
@@ -174,7 +175,9 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
 
     // Auto-save effect with dirty check
     useEffect(() => {
-        if (isAuthenticated && isLoaded) {
+        const isTestingResume = history.present.personalInfo?.email === 'johnathan.doe@example.com';
+
+        if (isAuthenticated && isLoaded && !isTestingResume) {
             // Compare current with last saved
             const currentDataString = JSON.stringify(history.present);
             if (currentDataString === lastSavedDataRef.current) {
