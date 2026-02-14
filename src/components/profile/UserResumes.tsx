@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { Edit, Trash2, Globe, Lock, Clock, ExternalLink, Loader2, FileText, Plus, LogIn, History, RotateCcw, X, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { LoadingScreen } from '../ui/LoadingScreen';
 
 interface Version {
     id: string;
@@ -121,12 +122,7 @@ export function UserResumes() {
     }
 
     if (isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 grayscale opacity-50">
-                <Loader2 className="w-12 h-12 animate-spin mb-4" />
-                <p className="font-bold uppercase tracking-widest text-xs">Loading Resumes...</p>
-            </div>
-        );
+        return <LoadingScreen message="Retrieving your professional portfolio..." />;
     }
 
     if (resumes.length === 0) {

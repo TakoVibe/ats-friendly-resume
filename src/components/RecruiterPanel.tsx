@@ -338,7 +338,7 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                             strokeDashoffset={263.9 - (263.9 * score) / 100}
                             strokeLinecap="round"
                             fill="transparent"
-                            className="text-orange-500 transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(249,115,22,0.4)]"
+                            className="text-orange-500 transition-[stroke-dashoffset] duration-1000 ease-out shadow-[0_0_15px_rgba(249,115,22,0.4)]"
                         />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center z-10">

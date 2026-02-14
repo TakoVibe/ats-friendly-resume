@@ -6,7 +6,7 @@ export function Logo({ className = "w-8 h-8" }: { className?: string }) {
             <img
                 src="/logo.png"
                 alt="ResumeVibe Logo"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
             />
         </div>
     );

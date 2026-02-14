@@ -170,7 +170,7 @@ export function WhyResumeVibeContent() {
                             </div>
                             <div className="bg-[var(--bg-input)]/50 rounded-[3rem] p-8 border border-[var(--border-color)] flex flex-col justify-center items-center text-center shadow-inner">
                                 <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center mb-6 animate-bounce overflow-hidden border-2 border-blue-500/20 shadow-lg">
-                                    <img src="/logo.png" className="w-full h-full object-cover" alt="Logo" />
+                                    <img src="/logo.png" className="w-full h-full object-contain" alt="Logo" />
                                 </div>
                                 <h3 className="text-2xl font-black mb-4 px-4 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                                     We're just getting started.

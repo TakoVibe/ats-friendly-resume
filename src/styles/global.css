@@ -1,22 +1,7 @@
 @import "tailwindcss";
 
 :root {
-    /* Dark Theme (Default) - Premium Midnight */
-    --bg-main: #09090b;
-    --bg-card: #111114;
-    --bg-input: rgba(255, 255, 255, 0.04);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --text-main: #fafafa;
-    --text-muted: #a1a1aa;
-    --accent: #8b5cf6;
-    --accent-hover: #7c3aed;
-    --shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
-    --glass-bg: rgba(17, 17, 20, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.1);
-}
-
-:root.light {
-    /* Light Theme Overlay - Soft Slate & Pearl */
+    /* Light Theme (Default) - Soft Slate & Pearl */
     --bg-main: #f4f7fa;
     --bg-card: #ffffff;
     --bg-input: #f1f3f6;
@@ -28,6 +13,21 @@
     --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: rgba(0, 0, 0, 0.05);
+}
+
+:root.dark {
+    /* Dark Theme Overlay - Premium Midnight */
+    --bg-main: #09090b;
+    --bg-card: #111114;
+    --bg-input: rgba(255, 255, 255, 0.04);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-main: #fafafa;
+    --text-muted: #a1a1aa;
+    --accent: #8b5cf6;
+    --accent-hover: #7c3aed;
+    --shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+    --glass-bg: rgba(17, 17, 20, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 body {
@@ -90,9 +90,11 @@ nav,
 }
 
 /* For Firefox */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(128, 128, 128, 0.2) transparent;
+@supports (scrollbar-width: thin) {
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(128, 128, 128, 0.2) transparent;
+    }
 }
 
 @media print {

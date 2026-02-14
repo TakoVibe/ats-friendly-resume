@@ -49,7 +49,7 @@ export function EditableField({
 
     const containerClasses = [
         className,
-        isEditable ? 'rounded-sm transition-all duration-200 cursor-text' : '',
+        isEditable ? 'rounded-sm transition-[opacity,outline,background-color] duration-200 cursor-text' : '',
         isFocused ? 'outline outline-2 outline-blue-500/30 z-10 relative' : '',
         !value && isEditable ? 'empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400' : ''
     ].join(' ');

@@ -7,7 +7,7 @@ import { CustomSelect } from './CustomSelect';
 
 export function EditorToolbar({ onAddSection, isMobile = false }: { onAddSection: () => void; isMobile?: boolean }) {
     const { data, updateResume } = useResume();
-    const { isDarkMode, toggleDarkMode } = useTheme();
+    const { isDarkMode } = useTheme();
     const config = data.config || {};
     const [showLinkPrompt, setShowLinkPrompt] = useState(false);
     const [savedRange, setSavedRange] = useState<Range | null>(null);
@@ -111,15 +111,7 @@ export function EditorToolbar({ onAddSection, isMobile = false }: { onAddSection
             {/* Actions Group */}
             <div className={`flex items-center gap-1.5 sm:gap-2 ${isMobile ? 'w-full' : 'shrink-0 pr-2 sm:pr-0'}`}>
                 <button
-                    onClick={toggleDarkMode}
-                    className={`${isMobile ? 'flex-1' : 'p-2 sm:px-3'} h-9 sm:h-10 flex items-center justify-center bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-color)] rounded-xl transition-colors shadow-sm`}
-                    title={isDarkMode ? "Light mode" : "Dark mode"}
-                >
-                    {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-                </button>
-
-                <button
-                    className={`${isMobile ? 'flex-[2]' : 'px-4'} h-9 sm:h-10 flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-[12px] font-black uppercase tracking-widest shadow-lg shadow-purple-500/20`}
+                    className={`${isMobile ? 'flex-[3]' : 'px-4'} h-9 sm:h-10 flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-xl text-[12px] font-black uppercase tracking-widest shadow-lg shadow-purple-500/20`}
                     onClick={onAddSection}
                 >
                     <MessageSquarePlus size={16} />

@@ -14,7 +14,7 @@ import { WhyMenu } from './WhyMenu';
 
 export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
     const { user, isAuthenticated, logout } = useAuth();
-    const { isDarkMode, toggleDarkMode } = useTheme();
+    const { isDarkMode } = useTheme();
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     return (

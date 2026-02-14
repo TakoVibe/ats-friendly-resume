@@ -25,11 +25,12 @@ import { CareerGuidanceModal } from './editor/CareerGuidanceModal';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { GoogleLogin } from './GoogleLogin';
 import { api } from '../lib/api';
+import { LoadingScreen } from './ui/LoadingScreen';
 
 function ResumeBuilderContent() {
     const { data, updateResume, resetToDefault, isLoaded, undo, redo, saveToBackend, saveVersionToBackend, isSaving, lastSaved, resumeMetadata, setResumeMetadata } = useResume();
     const { user, isAuthenticated, logout } = useAuth();
-    const { isDarkMode, toggleDarkMode } = useTheme();
+    const { isDarkMode } = useTheme();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showMoreActions, setShowMoreActions] = useState(false);
     const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'parser'>('editor');
@@ -117,7 +118,7 @@ function ResumeBuilderContent() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [undo, redo]);
 
-    if (!isLoaded) return <div className="p-10 text-center">Loading...</div>;
+    if (!isLoaded) return <LoadingScreen message="Unlocking your professional potential..." />;
 
     if (isPublicView) {
         return (
@@ -412,27 +413,6 @@ function ResumeBuilderContent() {
                                             <Globe size={16} className="text-emerald-500" />
                                             Share
                                         </button>
-                                        <div className="h-px bg-[var(--border-color)] my-1" />
-                                        <button
-                                            onClick={() => {
-                                                toggleDarkMode();
-                                                setShowMoreActions(false);
-                                            }}
-                                            className="flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-xl transition-colors w-full text-left uppercase tracking-widest"
-                                        >
-                                            {isDarkMode ? (
-                                                <>
-                                                    <Sun size={16} className="text-yellow-500" />
-                                                    Light Mode
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Moon size={16} className="text-blue-400" />
-                                                    Dark Mode
-                                                </>
-                                            )}
-                                        </button>
-                                        <div className="h-px bg-[var(--border-color)] my-1" />
                                         <button
                                             onClick={() => {
                                                 setShowMoreActions(false);
