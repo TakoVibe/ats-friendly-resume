@@ -5,9 +5,11 @@ import "../styles/global.css";
 interface Props {
     title?: string;
     description?: string;
+    image?: string;
+    keywords?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, image, keywords } = Astro.props;
 ---
 
 <html lang="en">
@@ -17,7 +19,12 @@ const { title, description } = Astro.props;
         <link rel="icon" type="image/svg+xml" href="/logo.png" />
         <meta name="generator" content={Astro.generator} />
 
-        <SEO title={title} description={description} />
+        <SEO
+            title={title}
+            description={description}
+            image={image}
+            keywords={keywords}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -54,10 +61,10 @@ const { title, description } = Astro.props;
                 return "dark"; // Default to dark as requested
             })();
 
-            if (theme === "light") {
-                document.documentElement.classList.add("light");
+            if (theme === "dark") {
+                document.documentElement.classList.add("dark");
             } else {
-                document.documentElement.classList.remove("light");
+                document.documentElement.classList.remove("dark");
             }
         </script>
     </head>

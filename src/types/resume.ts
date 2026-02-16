@@ -46,6 +46,8 @@ export interface ResumeSchema {
         name: string;
         description?: string;
         link?: string;
+        linkText?: string;
+        date?: string;
         metrics?: BulletItem[];
     }>;
     education: Array<{

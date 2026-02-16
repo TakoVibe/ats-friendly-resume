@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Target, CheckCircle2, AlertCircle, MessageSquare, Info, Sparkles, UserCheck, Lock, LogIn, TrendingUp, Cpu, BarChart, Bug, Zap, BarChart3, Settings2, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Target, CheckCircle2, AlertCircle, MessageSquare, Info, Sparkles, UserCheck, Lock, LogIn, TrendingUp, Cpu, BarChart, Bug, Zap, BarChart3, Settings2, X, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import { Logo } from './ui/Logo';
+import { ATSWarning } from './ui/ATSWarning';
 import type { ResumeSchema } from '../types/resume';
 
 interface RecruiterPanelProps {
@@ -170,7 +171,8 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                 ...data.experience.map((e: any) => `${e.company} ${e.role} ${(e.metrics || []).map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
                 ...data.skills.map((s: any) => `${s.name} ${s.items.join(' ')}`),
                 ...(data.projects || []).map((p: any) => `${p.name} ${p.description || ''} ${(p.metrics || []).map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
-                ...(data.customSections || []).map((os: any) => `${os.title} ${os.items.map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
+                ...(data.openSource || []).map((os: any) => `${os.name} ${os.description || ''}`),
+                ...(data.customSections || []).map((cs: any) => `${cs.title} ${cs.items.map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
             ].join(' ').toLowerCase();
 
             const foundKeywords = uniqueKeywords.filter(k => {
@@ -214,7 +216,8 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
             ...data.experience.map((e: any) => `${e.company} ${e.role} ${(e.metrics || []).map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
             ...data.skills.map((s: any) => `${s.name} ${s.items.join(' ')}`),
             ...(data.projects || []).map((p: any) => `${p.name} ${p.description || ''} ${(p.metrics || []).map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
-            ...(data.customSections || []).map((os: any) => `${os.title} ${os.items.map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
+            ...(data.openSource || []).map((os: any) => `${os.name} ${os.description || ''}`),
+            ...(data.customSections || []).map((cs: any) => `${cs.title} ${cs.items.map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
         ].join(' ').toLowerCase();
 
         return unique.map(word => ({
@@ -583,6 +586,9 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                                 </div>
 
                                                 <div className="space-y-3">
+                                                    {auditResult.aiScore < 76 && (
+                                                        <ATSWarning type="score" className="mb-4" />
+                                                    )}
                                                     {auditResult.insights.map((insight: any, i: number) => (
                                                         <div key={i} className={`group flex gap-4 p-4 rounded-2xl border transition-all hover:scale-[1.01] relative overflow-hidden ${insight.type === 'strength' ? 'bg-green-500/5 border-green-500/10' :
                                                             insight.type === 'gap' ? 'bg-rose-500/5 border-rose-500/10' :

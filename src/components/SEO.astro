@@ -5,14 +5,16 @@ interface Props {
     image?: string;
     canonicalURL?: URL | string;
     type?: string;
+    keywords?: string;
 }
 
 const {
     title = "ResumeVibe - Free Professional ATS Resume Builder",
     description = "Build a professional, ATS-friendly resume for free. No login required. AI-powered optimization, modern templates, and instant PDF export. Perfect for software engineers and professionals.",
-    image = "/og-image.png", // We should create this later
+    image = "/og-image.png",
     canonicalURL = new URL(Astro.url.pathname, Astro.site),
     type = "website",
+    keywords = "resume builder, ats-friendly resume, free resume maker, ai resume optimization, professional resume templates, software engineer resume, cv maker, online resume builder",
 } = Astro.props;
 ---
 
@@ -30,6 +32,7 @@ const {
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
+<meta name="keywords" content={keywords} />
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content={type} />
@@ -52,22 +55,70 @@ const {
 <script
     type="application/ld+json"
     is:inline
-    set:html={JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        name: "ResumeVibe",
-        operatingSystem: "Web",
-        applicationCategory: "BusinessApplication",
-        offers: {
-            "@type": "Offer",
-            price: "0",
-            priceCurrency: "USD",
+    set:html={JSON.stringify([
+        {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "ResumeVibe",
+            operatingSystem: "Web",
+            applicationCategory: "BusinessApplication",
+            offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD",
+            },
+            description: description,
+            aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.9",
+                reviewCount: "1200",
+            },
         },
-        description: description,
-        aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: "4.9",
-            reviewCount: "1200",
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "ResumeVibe Builder",
+            url: "https://resumevibe.takovibe.com",
+            description:
+                "High-performance, AI-powered ATS resume builder for tech professionals.",
         },
-    })}
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+                {
+                    "@type": "Question",
+                    name: "Is ResumeVibe really free?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Yes. Core features like building, saving, and exporting unlimited resumes will always be free. In the future, we plan to introduce premium AI-powered features and advanced analytics to give you an even greater competitive edge.",
+                    },
+                },
+                {
+                    "@type": "Question",
+                    name: "What is an ATS-friendly resume?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "An ATS-friendly resume is designed to be easily read by Applicant Tracking Systems. ResumeVibe uses a specialized single-column architecture to ensure 100% readability by these systems.",
+                    },
+                },
+                {
+                    "@type": "Question",
+                    name: "Do I need to login to build a resume?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "No, you can start building your resume immediately without creating an account. Your data is saved locally in your browser for convenience.",
+                    },
+                },
+                {
+                    "@type": "Question",
+                    name: "How does AI resume optimization work?",
+                    acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Our AI analyzes your resume against industry standards and specific job descriptions (if provided) to suggest improvements in phrasing, keywords, and impact metrics.",
+                    },
+                },
+            ],
+        },
+    ])}
 />

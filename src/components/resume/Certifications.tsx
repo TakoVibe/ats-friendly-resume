@@ -4,6 +4,7 @@ import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
 import { Plus } from 'lucide-react';
 import { InlineAIButton } from '../ui/InlineAIButton';
+import { DatePicker } from '../ui/DatePicker';
 
 type CertificationItem = ResumeSchema['certifications'][0];
 
@@ -115,12 +116,12 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
                                             className="resume-font-normal resume-text-gray"
                                         />
                                     </div>
-                                    <EditableField
+                                    <DatePicker
                                         value={cert.date || ''}
                                         onSave={(val) => updateCert(cert.id, 'date', val)}
                                         isEditable={isEditable}
                                         className="resume-duration-gray"
-                                        placeholder="Date"
+                                        mode="single"
                                     />
                                 </div>
                             </div>

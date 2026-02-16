@@ -1,0 +1,13 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ATSResumeGuideContent } from "../components/pages/ATSResumeGuideContent";
+
+export const prerender = true;
+---
+
+<Layout
+    title="ATS Resume Guide 2026: How to Pass Applicant Tracking Systems"
+    description="Learn how to build a 100% ATS-friendly resume. Discover the secrets to passing Applicant Tracking Systems (ATS) and getting more interviews in 2026."
+>
+    <ATSResumeGuideContent client:load />
+</Layout>

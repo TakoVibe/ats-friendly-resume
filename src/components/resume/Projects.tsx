@@ -3,6 +3,8 @@ import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
 import { Plus, List, ListMinus } from 'lucide-react';
+import { DatePicker } from '../ui/DatePicker';
+import { ATSWarning } from '../ui/ATSWarning';
 
 type ProjectItem = ResumeSchema['projects'][0];
 // ... rest of file until the error spot
@@ -171,12 +173,11 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                             );
                                         })()}
                                     </div>
-                                    <EditableField
+                                    <DatePicker
                                         value={project.date || ''}
                                         onSave={(val) => updateProject(project.id, 'date', val)}
                                         isEditable={isEditable}
                                         className="resume-duration-gray resume-text-right"
-                                        placeholder="Date / Duration"
                                     />
                                 </div>
                             </div>
@@ -307,6 +308,9 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                                                 </>
                                                             }
                                                         />
+                                                        {isEditable && metricText.includes('<') && (
+                                                            <ATSWarning type="formatting" className="mt-2" />
+                                                        )}
                                                     </div>
                                                 </li>
                                             );

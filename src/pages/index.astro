@@ -2,6 +2,7 @@
 export const prerender = true;
 import { ResumeBuilder } from "../components/ResumeBuilder";
 import Layout from "../layouts/Layout.astro";
+import { Footer } from "../components/ui/Footer";
 
 // Optional: Pass specific title/description if needed, or let Layout handle defaults via SEO component
 ---
@@ -11,5 +12,227 @@ import Layout from "../layouts/Layout.astro";
 		ResumeVibe - Professional ATS-Friendly Resume Builder & AI Optimization
 		Tool
 	</h1>
-	<ResumeBuilder client:load />
+
+	<main>
+		<section class="h-screen overflow-hidden">
+			<ResumeBuilder client:load />
+		</section>
+
+		<!-- SEO Content Section -->
+		<section
+			class="bg-[var(--bg-main)] border-t border-[var(--border-color)] relative z-10 px-6 py-24"
+		>
+			<div class="max-w-7xl mx-auto">
+				<div class="flex flex-col md:flex-row gap-16 items-start">
+					<div class="flex-1 space-y-12">
+						<header>
+							<h2
+								class="text-3xl lg:text-5xl font-black tracking-tighter mb-6 text-[var(--text-main)]"
+							>
+								Build a resume that skips the <span
+									class="text-purple-500">Waitlist</span
+								>.
+							</h2>
+							<p
+								class="text-lg text-[var(--text-muted)] font-medium leading-relaxed"
+							>
+								ResumeVibe is the first autonomous career
+								presentation engine. We don't just give you a
+								template; we give you a competitive advantage
+								with AI-powered diagnostics and ATS-optimized
+								architecture.
+							</p>
+						</header>
+
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+							<div class="space-y-4">
+								<div
+									class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="20"
+										height="20"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="3"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										><path
+											d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+										></path></svg
+									>
+								</div>
+								<h3
+									class="text-xl font-bold text-[var(--text-main)]"
+								>
+									100% ATS Friendly
+								</h3>
+								<p
+									class="text-sm text-[var(--text-muted)] leading-relaxed"
+								>
+									Tested against Greenhouse, Workday, and
+									Lever. Our single-column layouts guarantee a
+									perfect read every single time.
+								</p>
+							</div>
+							<div class="space-y-4">
+								<div
+									class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="20"
+										height="20"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="3"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										><path
+											d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"
+										></path></svg
+									>
+								</div>
+								<h3
+									class="text-xl font-bold text-[var(--text-main)]"
+								>
+									AI-Powered Fixing
+								</h3>
+								<p
+									class="text-sm text-[var(--text-muted)] leading-relaxed"
+								>
+									One-click "Power Autopilot" to rewrite your
+									experience bullets for maximum recruiter
+									impact and keyword density.
+								</p>
+							</div>
+						</div>
+
+						<div class="pt-8 border-t border-[var(--border-color)]">
+							<h3
+								class="text-xs font-black uppercase tracking-[0.2em] text-purple-500 mb-8"
+							>
+								Frequently Asked Questions
+							</h3>
+							<div class="grid grid-cols-1 gap-8">
+								<details
+									class="group border-b border-[var(--border-color)] pb-4"
+								>
+									<summary
+										class="list-none cursor-pointer flex justify-between items-center text-sm font-bold text-[var(--text-main)]"
+									>
+										Is ResumeVibe really free?
+										<span
+											class="group-open:rotate-180 transition-transform"
+											>↓</span
+										>
+									</summary>
+									<p
+										class="mt-4 text-xs text-[var(--text-muted)] leading-relaxed"
+									>
+										Yes. We believe essential career tools
+										should be accessible. Core features like
+										building, saving, and exporting
+										unlimited resumes will always be free.
+										In the future, we may introduce premium
+										AI-powered enhancements and advanced
+										analytics for users who want an extra
+										edge.
+									</p>
+								</details>
+								<details
+									class="group border-b border-[var(--border-color)] pb-4"
+								>
+									<summary
+										class="list-none cursor-pointer flex justify-between items-center text-sm font-bold text-[var(--text-main)]"
+									>
+										Will my resume look good for humans too?
+										<span
+											class="group-open:rotate-180 transition-transform"
+											>↓</span
+										>
+									</summary>
+									<p
+										class="mt-4 text-xs text-[var(--text-muted)] leading-relaxed"
+									>
+										Absolutely. While we prioritize ATS
+										readability, our design system is built
+										to look premium and professional to
+										recruiters and hiring managers.
+									</p>
+								</details>
+							</div>
+						</div>
+					</div>
+
+					<aside class="w-full md:w-80 space-y-8">
+						<div
+							class="p-8 rounded-[2rem] bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-input)] border border-[var(--border-color)] shadow-xl"
+						>
+							<h4
+								class="text-sm font-black uppercase tracking-widest text-blue-500 mb-4"
+							>
+								Quick Links
+							</h4>
+							<ul class="space-y-4">
+								<li>
+									<a
+										href="/why-resumevibe"
+										class="text-sm font-bold text-[var(--text-main)] hover:text-purple-500 transition-colors flex items-center justify-between"
+									>
+										Why ResumeVibe?
+										<span>→</span>
+									</a>
+								</li>
+								<li>
+									<a
+										href="/ats-resume-guide"
+										class="text-sm font-bold text-[var(--text-main)] hover:text-purple-500 transition-colors flex items-center justify-between"
+									>
+										ATS Resume Guide
+										<span>→</span>
+									</a>
+								</li>
+								<li>
+									<a
+										href="/profile"
+										class="text-sm font-bold text-[var(--text-main)] hover:text-purple-500 transition-colors flex items-center justify-between"
+									>
+										My Dashboard
+										<span>→</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+
+						<div
+							class="p-8 rounded-[2rem] bg-purple-600 text-white shadow-2xl"
+						>
+							<p
+								class="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2"
+							>
+								Pro Tip
+							</p>
+							<p class="text-sm font-bold leading-relaxed mb-6">
+								Using a single-column layout increases your
+								interview chances by 40% compared to two-column
+								designs.
+							</p>
+							<a
+								href="/ats-resume-guide"
+								class="text-xs font-black uppercase tracking-widest px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all inline-block"
+							>
+								Learn Why
+							</a>
+						</div>
+					</aside>
+				</div>
+			</div>
+		</section>
+
+		<Footer client:load />
+	</main>
 </Layout>

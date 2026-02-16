@@ -2,6 +2,7 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { InlineAIButton } from '../ui/InlineAIButton';
+import { ATSWarning } from '../ui/ATSWarning';
 
 interface Props {
     summary: string;
@@ -41,6 +42,9 @@ export function Summary({ summary, isEditable = false, onUpdate, title = "Summar
                     type: 'summary'
                 }}
             />
+            {isEditable && summary.includes('<') && (
+                <ATSWarning type="formatting" className="mt-2" />
+            )}
         </section>
     );
 }

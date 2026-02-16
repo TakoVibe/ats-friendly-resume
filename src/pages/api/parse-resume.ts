@@ -84,6 +84,15 @@ Return a JSON object with this exact structure:
       "issuer": "string",
       "date": "string (optional)"
     }
+  ],
+  "openSource": [
+    {
+      "id": "string (generate unique id: os-1, os-2...)",
+      "name": "string (Project/Contribution Name)",
+      "description": "string (Brief description of contribution)",
+      "link": "string (URL to repo/PR)",
+      "date": "string (optional)"
+    }
   ]
 }
 
@@ -97,6 +106,7 @@ Important Rules:
 - ANY project description or paragraph following the title should be added as the FIRST bullet point in the 'metrics' array. DO NOT use a separate 'description' field.
 - Extract technology names, tools, version control (e.g., Git, Bitbucket), and infrastructure (e.g., AWS, Docker) into techStack arrays.
 - Preserve the exact achievements, descriptions, and bullet points. Do not rewrite them into a summary unless they are very messy; keep the original tone and details.
+- OPEN SOURCE: Look for sections titled "Open Source", "Contributions", "Community Work". Extract repo links and specific PRs/contributions.
 - If a section is missing, return an empty array [].
 - Return ONLY the JSON object, do not include markdown blocks or any other text.
 
@@ -136,6 +146,7 @@ ${text}`;
         'summary',
         'experience',
         'projects',
+        'openSource',
         'skills',
         'education',
         'certifications'
@@ -146,6 +157,7 @@ ${text}`;
         education: (parsedResume.education?.length || 0) > 0,
         skills: (parsedResume.skills?.length || 0) > 0,
         projects: (parsedResume.projects?.length || 0) > 0,
+        openSource: (parsedResume.openSource?.length || 0) > 0,
         certifications: (parsedResume.certifications?.length || 0) > 0
       }
     };

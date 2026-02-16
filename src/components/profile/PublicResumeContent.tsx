@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ResumePreview } from '../../components/ResumePreview';
 import { Providers } from '../../components/Providers';
+import { Footer } from '../ui/Footer';
 import { Logo } from '../ui/Logo';
 import { Download, Loader2, ArrowRight } from 'lucide-react';
 
@@ -124,21 +125,10 @@ export function PublicResumeContent({ resumeData }: PublicResumeContentProps) {
                             </div>
                         </div>
 
-                        {/* Intentional "Powered By" Badge */}
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="w-1 h-1 rounded-full bg-[var(--border-color)] opacity-40" />
-                            <div className="flex items-center gap-2.5 opacity-40 hover:opacity-100 transition-all duration-500 cursor-default group/powered">
-                                <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)]">Powered by</span>
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.05em] text-[var(--text-main)]">TakoVibe</span>
-                                    <div className="p-0.5 rounded-full border border-[var(--border-color)] group-hover/powered:border-purple-500/30 transition-colors bg-[var(--bg-input)]">
-                                        <img src="https://takovibe.com/images/logo.svg" className="w-3 h-3 rounded-full" alt="TakoVibe" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        {/* Intentional "Powered By" Badge - Replaced by Footer */}
                     </div>
                 </div>
+                <Footer />
             </div>
         </Providers>
     );

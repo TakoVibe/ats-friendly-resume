@@ -244,7 +244,7 @@ function ResumeBuilderContent() {
 
     const handleAddSectionType = (type: string, label?: string) => {
         // Standard sections map to keys in visibleSections
-        const standardSections = ['summary', 'experience', 'education', 'skills', 'projects', 'certifications'];
+        const standardSections = ['summary', 'experience', 'education', 'skills', 'projects', 'certifications', 'openSource', 'achievements'];
 
         let shouldCreateCustom = false;
         let sectionTitle = label || "New Section";
@@ -256,9 +256,16 @@ function ResumeBuilderContent() {
                 shouldCreateCustom = true;
             } else {
                 // Enable the standard section
+                const newVisible = { ...data.visibleSections, [type]: true };
+                let newOrder = [...data.sectionOrder];
+                if (!newOrder.includes(type)) {
+                    newOrder.push(type);
+                }
+
                 updateResume({
                     ...data,
-                    visibleSections: { ...data.visibleSections, [type]: true }
+                    visibleSections: newVisible,
+                    sectionOrder: newOrder
                 });
 
                 // Wait for render then scroll

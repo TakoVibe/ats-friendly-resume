@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://resume.takovibe.com/sitemap-index.xml
+Sitemap: https://resumevibe.takovibe.com/sitemap-index.xml

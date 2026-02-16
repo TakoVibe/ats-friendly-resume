@@ -41,7 +41,7 @@ Unlike a simple keyword matcher, you look for:
 - Be brutally honest but constructive.
 - 'insights' should contain at least 4-6 high-quality observations.
 - **Formatting**: Use <strong> tags within the 'text' field to highlight "weighty" words (revenue, specific tech, major gaps). Be strategic—only bold 1-2 most impactful terms per insight to maintain professional clarity.
-- **Date Standardization**: When recommending date-related changes, always use the 'MMM YYYY - MMM YYYY' format (e.g., 'Aug 2018 - Aug 2022').`;
+- **Date Standardization**: When recommending date-related changes, always use the 'MM/YYYY - MM/YYYY' format (e.g., '08/2018 - 08/2022'). Ensure 'Present' is used for current roles.`;
 
 export const POST: APIRoute = async ({ request }) => {
     try {

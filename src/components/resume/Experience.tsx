@@ -2,8 +2,10 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
-import { Plus, List, ListMinus, Sparkles, X } from 'lucide-react';
+import { Plus, List, ListMinus, Sparkles, X, AlertTriangle } from 'lucide-react';
 import { InlineAIButton } from '../ui/InlineAIButton';
+import { DatePicker } from '../ui/DatePicker';
+import { ATSWarning } from '../ui/ATSWarning';
 
 type ExperienceItem = ResumeSchema['experience'][0];
 
@@ -164,7 +166,7 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                     isEditable={isEditable}
                                     className="resume-role"
                                 />
-                                <EditableField
+                                <DatePicker
                                     value={job.duration}
                                     onSave={(val) => updateJob(job.id, 'duration', val)}
                                     isEditable={isEditable}
@@ -304,6 +306,9 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                                             </>
                                                         }
                                                     />
+                                                    {isEditable && metricText.includes('<') && (
+                                                        <ATSWarning type="formatting" className="mt-2" />
+                                                    )}
                                                 </div>
                                             </li>
                                         );

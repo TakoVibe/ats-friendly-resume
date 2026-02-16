@@ -22,6 +22,8 @@ export function SectionTypeDialog({
         { id: 'skills', icon: Code, label: 'Key Skills', description: 'Technical and soft skills relevant to the job' },
         { id: 'projects', icon: Folder, label: 'Projects', description: 'Key projects you have worked on' },
         { id: 'certifications', icon: Award, label: 'Certifications', description: 'Professional certifications and awards' },
+        // { id: 'openSource', icon: Code, label: 'Open Source', description: 'Your contributions to open source projects' },
+        { id: 'achievements', icon: Award, label: 'Achievements', description: 'Highlight your notable career achievements' },
         { id: 'custom', icon: FileText, label: 'Custom Section', description: 'Create a section with your own title and content' },
     ];
 

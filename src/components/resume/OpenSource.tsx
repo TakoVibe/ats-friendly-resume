@@ -2,7 +2,9 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
-import { Plus } from 'lucide-react';
+import { Plus, Github } from 'lucide-react';
+import { DatePicker } from '../ui/DatePicker';
+import { ATSWarning } from '../ui/ATSWarning';
 
 type OpenSourceItem = NonNullable<ResumeSchema['openSource']>[0];
 
@@ -50,7 +52,8 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
             id: Math.random().toString(36).substr(2, 9),
             name: 'Project/Contribution Name',
             description: 'Description of your contribution...',
-            link: 'Link'
+            link: 'Link',
+            date: ''
         };
         onUpdate([...safeOpenSource, newItem]);
     };
@@ -66,11 +69,10 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
             />
             <ul className="resume-details-list">
                 {safeOpenSource.map((item, index) => (
-                    <li key={item.id} className="resume-list-item resume-text-justify group/item-content resume-relative pr-8">
-                        {/* hasBullet logic not present here, keeping simple dot for now or adding condition if needed */}
+                    <li key={item.id} className="resume-list-item resume-text-justify group/item-content resume-relative pr-8 leading-tight py-0.5">
                         <span className="resume-bullet">•</span>
-                        <div className="resume-flex-1">
-                            <span className="resume-font-bold resume-text-dark">
+                        <div className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5">
+                            <span className="resume-font-bold resume-text-dark whitespace-nowrap">
                                 <EditableField
                                     tagName="span"
                                     value={item.name}
@@ -78,37 +80,57 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                                     isEditable={isEditable}
                                 />
                             </span>
-                            <span>: </span>
-                            <EditableField
-                                tagName="span"
-                                value={item.description}
-                                onSave={(val) => updateItem(item.id, 'description', val)}
-                                isEditable={isEditable}
-                                controlsLayout="parent"
-                                aiProps={{
-                                    type: 'bullet',
-                                    context: { jobDescription: title }
-                                }}
-                                actions={
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); deleteItem(index); }}
-                                        className="p-1 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                        title="Delete item"
-                                    >
-                                        <span className="text-lg leading-none">×</span>
-                                    </button>
-                                }
-                            />
-                            {item.link && (
-                                <span> (<EditableField
+                            <span className="opacity-70">: </span>
+                            <span className="resume-text-dark">
+                                <EditableField
                                     tagName="span"
-                                    value={item.link.replace(/^https?:\/\//, '')}
-                                    onSave={(val) => updateItem(item.id, 'link', val)}
+                                    value={item.description || ''}
+                                    onSave={(val) => updateItem(item.id, 'description', val)}
                                     isEditable={isEditable}
-                                    className="resume-link-text"
-                                />)</span>
+                                    controlsLayout="parent"
+                                    aiProps={{
+                                        type: 'bullet',
+                                        context: { jobDescription: title }
+                                    }}
+                                />
+                            </span>
+                            {item.link && (
+                                <span className="inline-flex items-baseline text-[var(--resume-gray)] ml-1">
+                                    <span className="opacity-60">(</span>
+                                    {isEditable ? (
+                                        <EditableField
+                                            tagName="span"
+                                            value={item.linkText || (item.link.match(/(?:pull|issues)\/(\d+)$/)?.[1] ? `#${item.link.match(/(?:pull|issues)\/(\d+)$/)?.[1]}` : item.link.replace(/^https?:\/\/(www\.)?github\.com\//, '').replace(/\/$/, '') || 'view')}
+                                            onSave={(val) => updateItem(item.id, 'linkText', val)}
+                                            isEditable={isEditable}
+                                            className="text-[var(--resume-accent)] hover:underline cursor-alias"
+                                        />
+                                    ) : (
+                                        <a
+                                            href={item.link.startsWith('http') ? item.link : `https://${item.link}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-[var(--resume-accent)] hover:underline"
+                                        >
+                                            {item.linkText || (item.link.match(/(?:pull|issues)\/(\d+)$/)?.[1] ? `#${item.link.match(/(?:pull|issues)\/(\d+)$/)?.[1]}` : item.link.replace(/^https?:\/\/(www\.)?github\.com\//, '').replace(/\/$/, '') || 'view')}
+                                        </a>
+                                    )}
+                                    <span className="opacity-60">)</span>
+                                </span>
+                            )}
+                            {isEditable && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); deleteItem(index); }}
+                                    className="ml-2 opacity-0 group-hover/item-content:opacity-100 p-0.5 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                                    title="Delete item"
+                                >
+                                    <span className="text-sm font-bold leading-none">×</span>
+                                </button>
                             )}
                         </div>
+                        {isEditable && (item.description || '').includes('<') && (
+                            <ATSWarning type="formatting" className="mt-1" />
+                        )}
                     </li>
                 ))}
             </ul>

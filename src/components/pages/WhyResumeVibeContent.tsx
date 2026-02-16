@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthOnlyProviders } from '../Providers';
 import { Navbar } from '../ui/Navbar';
+import { Footer } from '../ui/Footer';
 import { LoginModal } from '../ui/LoginModal';
 import {
     Sparkles,
@@ -252,8 +253,31 @@ export function WhyResumeVibeContent() {
                     </div>
                 </section>
 
+                {/* Pricing Philosophy / FAQ */}
+                <section className="mb-32">
+                    <div className="flex items-center gap-4 mb-16">
+                        <h2 className="text-xs font-black uppercase tracking-widest text-purple-500">Pricing Philosophy</h2>
+                        <div className="h-[1px] flex-1 bg-gradient-to-r from-purple-500/50 to-transparent"></div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--border-color)]">
+                            <h3 className="text-lg font-black mb-4 text-[var(--text-main)]">Is it actually free?</h3>
+                            <p className="text-[var(--text-muted)] font-medium leading-relaxed">
+                                <strong>Yes.</strong> Every essential tool required to build, format, and export a world-class resume is free and will stay free. We don't believe in holding your career data hostage.
+                            </p>
+                        </div>
+                        <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--border-color)]">
+                            <h3 className="text-lg font-black mb-4 text-[var(--text-main)]">What's the catch?</h3>
+                            <p className="text-[var(--text-muted)] font-medium leading-relaxed">
+                                No catch. We are building the future of career tech. While core features remain free, we plan to introduce <strong>Premium AI Features</strong> (like automated custom tailoring & deep market analytics) in the future to sustain the platform.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Call to Action Footer */}
-                <footer className="text-center pb-20">
+                <footer className="text-center pb-20 mb-20">
                     <a
                         href="/"
                         className="inline-flex items-center gap-4 px-12 py-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded-[2rem] text-white text-xl font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-purple-500/30"
@@ -263,12 +287,9 @@ export function WhyResumeVibeContent() {
                     <p className="mt-8 text-[var(--text-muted)] text-sm font-black uppercase tracking-widest opacity-40">
                         Propelled by TakoVibe Engineering Ecosystem
                     </p>
-                    <div className="mt-12 flex flex-col items-center gap-2 text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest opacity-30">
-                        <p>© 2026 TakoVibe</p>
-                        <p>made with love in india</p>
-                    </div>
                 </footer>
             </main>
+            <Footer />
         </AuthOnlyProviders>
     );
 }

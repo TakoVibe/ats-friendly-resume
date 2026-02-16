@@ -14,7 +14,8 @@ export function OpenSourceEditor({ items, onChange }: Props) {
                 id: crypto.randomUUID(),
                 name: 'Project Name',
                 description: 'Contribution description...',
-                link: ''
+                link: '',
+                date: ''
             },
             ...(items || [])
         ]);
@@ -44,7 +45,7 @@ export function OpenSourceEditor({ items, onChange }: Props) {
                     <div key={item.id} className="p-4 border rounded-lg bg-gray-50 space-y-3">
                         <div className="flex justify-between items-start gap-3">
                             <div className="flex-1 space-y-2">
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                     <input
                                         type="text"
                                         className="p-2 border rounded text-sm font-bold"
@@ -57,15 +58,22 @@ export function OpenSourceEditor({ items, onChange }: Props) {
                                         className="p-2 border rounded text-sm"
                                         value={item.link || ''}
                                         onChange={(e) => updateItem(item.id, 'link', e.target.value)}
-                                        placeholder="Link (Optional)"
+                                        placeholder="URL (e.g. github.com/...)"
+                                    />
+                                    <input
+                                        type="text"
+                                        className="p-2 border rounded text-sm"
+                                        value={item.linkText || ''}
+                                        onChange={(e) => updateItem(item.id, 'linkText', e.target.value)}
+                                        placeholder="Label (e.g. #101)"
                                     />
                                 </div>
                                 <div className="w-full">
                                     <InlineEditor
-                                        content={item.description}
+                                        content={item.description || ''}
                                         onChange={(val) => updateItem(item.id, 'description', val)}
                                         className="min-h-[40px] text-sm border border-gray-300 rounded px-2 py-1 bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent"
-                                        placeholder="Description of contribution"
+                                        placeholder="Contribution description (e.g. fixed memory leak in #123)"
                                     />
                                 </div>
                             </div>

@@ -3,6 +3,7 @@ import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
 import { Plus, List, ListMinus } from 'lucide-react';
+import { ATSWarning } from '../ui/ATSWarning';
 
 type BulletItem = ResumeSchema['achievements'][0];
 
@@ -140,6 +141,9 @@ export function Achievements({ achievements, isEditable = false, onUpdate, title
                                             </>
                                         }
                                     />
+                                    {isEditable && achievementText.includes('<') && (
+                                        <ATSWarning type="formatting" className="mt-2" />
+                                    )}
                                 </div>
                             </li>
                         </ItemControls>

@@ -3,6 +3,8 @@ import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
 import { Plus, List, ListMinus } from 'lucide-react';
+import { DatePicker } from '../ui/DatePicker';
+import { ATSWarning } from '../ui/ATSWarning';
 
 type EducationItem = ResumeSchema['education'][0];
 
@@ -140,50 +142,38 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                         forceMobileControls={viewMode === 'mobile'}
                     >
                         <div className="resume-relative group/item-content">
+                            {/* Degree & Duration */}
                             <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
                                 <EditableField
                                     tagName="h3"
-                                    value={edu.institution}
-                                    onSave={(val) => updateEdu(edu.id, 'institution', val)}
-                                    isEditable={isEditable}
-                                    className="resume-role"
-                                />
-                                <div className={`resume-flex resume-items-baseline ${isMobile ? 'resume-flex-col resume-items-start' : 'resume-text-right resume-gap-2'}`}>
-                                    {(edu.location?.trim() || isEditable) && (
-                                        <EditableField
-                                            value={edu.location || ''}
-                                            onSave={(val) => updateEdu(edu.id, 'location', val)}
-                                            isEditable={isEditable}
-                                            className="resume-location-text"
-                                        />
-                                    )}
-                                    {(edu.location?.trim() && edu.duration?.trim() && !isMobile) && <span className="resume-duration-gray mx-1 md:hidden xl:inline">•</span>}
-                                    {(edu.duration?.trim() || isEditable) && (
-                                        <EditableField
-                                            value={edu.duration}
-                                            onSave={(val) => updateEdu(edu.id, 'duration', val)}
-                                            isEditable={isEditable}
-                                            className="resume-duration-gray"
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                            <div className={`resume-flex resume-items-baseline ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
-                                <EditableField
                                     value={edu.degree}
                                     onSave={(val) => updateEdu(edu.id, 'degree', val)}
                                     isEditable={isEditable}
-                                    className="resume-degree"
+                                    className="resume-role"
                                 />
-                                {((edu.score) || isEditable) && (
-                                    <EditableField
-                                        value={edu.score || ''}
-                                        placeholder="Score/GPA"
-                                        onSave={(val) => updateEdu(edu.id, 'score', val)}
-                                        isEditable={isEditable}
-                                        className={`resume-score ${isMobile ? 'resume-mt-0.5' : ''}`}
-                                    />
-                                )}
+                                <DatePicker
+                                    value={edu.duration}
+                                    onSave={(val) => updateEdu(edu.id, 'duration', val)}
+                                    isEditable={isEditable}
+                                    className={`resume-duration-gray ${isMobile ? 'resume-mt-0.5' : ''}`}
+                                />
+                            </div>
+
+                            {/* Institution & Location */}
+                            <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
+                                <EditableField
+                                    tagName="h4"
+                                    value={edu.institution}
+                                    onSave={(val) => updateEdu(edu.id, 'institution', val)}
+                                    isEditable={isEditable}
+                                    className="resume-company"
+                                />
+                                <EditableField
+                                    value={edu.location || ''}
+                                    onSave={(val) => updateEdu(edu.id, 'location', val)}
+                                    isEditable={isEditable}
+                                    className={`resume-location-text ${isMobile ? 'resume-mt-0.5' : ''}`}
+                                />
                             </div>
 
                             {(edu.details || isEditable) && (
@@ -230,6 +220,9 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                                                 </>
                                                             }
                                                         />
+                                                        {isEditable && detailText.includes('<') && (
+                                                            <ATSWarning type="formatting" className="mt-2" />
+                                                        )}
                                                     </div>
                                                 </li>
                                             );
@@ -251,18 +244,20 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                 ))}
             </div>
 
-            {isEditable && (
-                <button
-                    onClick={addItem}
-                    aria-label="Add new education entry"
-                    className="mt-6 w-full py-3 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-[var(--accent)] border border-dashed border-[var(--border-color)] hover:border-[var(--accent)]/50 rounded-2xl flex items-center justify-center gap-2.5 font-bold uppercase tracking-widest text-[10px] group"
-                >
-                    <div className="p-1 bg-[var(--bg-card)] rounded-lg group-hover:bg-[var(--accent)] group-hover:text-white transition-colors">
-                        <Plus size={14} />
-                    </div>
-                    Add Education
-                </button>
-            )}
-        </section>
+            {
+                isEditable && (
+                    <button
+                        onClick={addItem}
+                        aria-label="Add new education entry"
+                        className="mt-6 w-full py-3 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-[var(--accent)] border border-dashed border-[var(--border-color)] hover:border-[var(--accent)]/50 rounded-2xl flex items-center justify-center gap-2.5 font-bold uppercase tracking-widest text-[10px] group"
+                    >
+                        <div className="p-1 bg-[var(--bg-card)] rounded-lg group-hover:bg-[var(--accent)] group-hover:text-white transition-colors">
+                            <Plus size={14} />
+                        </div>
+                        Add Education
+                    </button>
+                )
+            }
+        </section >
     );
 }

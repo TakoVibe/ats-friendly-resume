@@ -2,6 +2,7 @@ import { AuthOnlyProviders } from '../Providers';
 import { Navbar } from '../ui/Navbar';
 import { UserResumes } from './UserResumes';
 import { LoginModal } from '../ui/LoginModal';
+import { Footer } from '../ui/Footer';
 import { ChevronLeft, ArrowRight } from 'lucide-react';
 
 export function ProfileDashboard() {
@@ -73,6 +74,7 @@ export function ProfileDashboard() {
                     <UserResumes />
                 </div>
             </main>
+            <Footer />
         </AuthOnlyProviders>
     );
 }

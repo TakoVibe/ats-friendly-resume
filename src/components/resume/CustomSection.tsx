@@ -3,6 +3,8 @@ import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
 import { Plus } from 'lucide-react';
+import { ATSWarning } from '../ui/ATSWarning';
+import { DatePicker } from '../ui/DatePicker';
 
 type CustomSectionData = NonNullable<ResumeSchema['customSections']>[0];
 type CustomItem = CustomSectionData['items'][0];
@@ -37,7 +39,8 @@ export function CustomSection({ sectionData, isEditable = false, onUpdate, showS
         const newItem: CustomItem = {
             id: `item-${Date.now()}`,
             content: 'New item content...',
-            title: ''
+            title: '',
+            date: ''
         };
         onUpdate({
             ...sectionData,
@@ -110,13 +113,13 @@ export function CustomSection({ sectionData, isEditable = false, onUpdate, showS
                                         />
                                     </div>
                                 )}
-                                {item.date !== undefined && (
+                                {(item.date !== undefined || isEditable) && (
                                     <div className="resume-custom-date">
-                                        <EditableField
+                                        <DatePicker
                                             value={item.date}
                                             onSave={(val) => updateItem(idx, 'date', val)}
                                             isEditable={isEditable}
-                                            placeholder="Date"
+                                            className="resume-duration-gray"
                                         />
                                     </div>
                                 )}
@@ -148,6 +151,9 @@ export function CustomSection({ sectionData, isEditable = false, onUpdate, showS
                                         </div>
                                     }
                                 />
+                                {isEditable && item.content.includes('<') && (
+                                    <ATSWarning type="formatting" className="mt-2" />
+                                )}
                             </div>
                         </div>
                     </ItemControls>

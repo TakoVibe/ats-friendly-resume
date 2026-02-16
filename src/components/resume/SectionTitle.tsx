@@ -1,5 +1,6 @@
 import { EditableField } from '../ui/EditableField';
 import { Minus, Plus, AlertCircle } from 'lucide-react';
+import { ATSWarning } from '../ui/ATSWarning';
 
 interface Props {
     title: string;
@@ -15,13 +16,22 @@ export function SectionTitle({ title, isEditable, onChange, showSeparator = true
     return (
         <div className="resume-section-title-box group/title">
             <div className="resume-flex resume-items-center resume-justify-between">
-                <EditableField
-                    tagName="h2"
-                    value={title}
-                    onSave={(val) => onChange?.(val)}
-                    isEditable={isEditable}
-                    className="resume-section-title"
-                />
+                <div className="flex-1">
+                    <EditableField
+                        tagName="h2"
+                        value={title}
+                        onSave={(val) => onChange?.(val)}
+                        isEditable={isEditable}
+                        className="resume-section-title"
+                    />
+                    {isEditable && !(() => {
+                        const standardKeywords = ['experience', 'education', 'skills', 'projects', 'summary', 'certifications', 'achievements', 'open source', 'publications', 'languages', 'interests'];
+                        const lowerTitle = title.toLowerCase();
+                        return standardKeywords.some(keyword => lowerTitle.includes(keyword));
+                    })() && (
+                            <ATSWarning type="label" className="mt-2 w-fit" />
+                        )}
+                </div>
 
                 {gapText && (
                     <div className="flex items-center gap-2 px-2 py-1 bg-purple-500/10 border border-purple-500/30 rounded-full animate-pulse group/gap relative ml-3">
