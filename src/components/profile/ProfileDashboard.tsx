@@ -35,7 +35,7 @@ export function ProfileDashboard() {
                         <div
                             className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/10 text-purple-500 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4 border border-purple-500/20"
                         >
-                            User Dashboard
+                            Dashboard
                         </div>
                         <div
                             className="flex flex-col md:flex-row md:items-end justify-between gap-8"

@@ -161,7 +161,7 @@ export function ResumePreview({ data, id, isEditable = false, onUpdate, onEditHe
     const applyDarkMode = isEditable && isDarkMode;
 
     const resumeStyle = {
-        width: isMobile ? '100%' : '210mm',
+        width: isMobile ? '100%' : 'min(100%, 210mm)',
         minHeight: isMobile ? 'auto' : '297mm',
         padding: padding,
         fontFamily: fontFamily === 'Inter' ? '"Inter", sans-serif' :

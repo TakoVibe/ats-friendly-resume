@@ -2,7 +2,7 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 type SkillGroup = ResumeSchema['skills'][0];
 
@@ -93,28 +93,40 @@ export function Skills({ skills, isEditable = false, onUpdate, title = "Key Skil
                             </span>
 
                             {isMobile ? (
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-1.5">
                                     {skill.items.map((item, i) => (
-                                        <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-md bg-[var(--bg-input)] text-[var(--text-main)] text-sm border border-[var(--border-color)]">
+                                        <span key={i} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--bg-input,rgba(128,128,128,0.05))] text-[var(--text-main)] text-[11px] font-medium border border-[var(--border-color)] group/tag">
                                             {isEditable ? (
-                                                <input
-                                                    className="bg-transparent border-none outline-none w-full min-w-[20px]"
-                                                    value={item}
-                                                    onChange={(e) => {
-                                                        const newItems = [...skill.items];
-                                                        newItems[i] = e.target.value;
-                                                        updateSkillGroup(skill.id, 'items', newItems);
-                                                    }}
-                                                />
+                                                <div className="flex items-center gap-1.5">
+                                                    <input
+                                                        className="bg-transparent border-none outline-none w-full min-w-[20px]"
+                                                        value={item}
+                                                        onChange={(e) => {
+                                                            const newItems = [...skill.items];
+                                                            newItems[i] = e.target.value;
+                                                            updateSkillGroup(skill.id, 'items', newItems);
+                                                        }}
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const newItems = skill.items.filter((_, idx) => idx !== i);
+                                                            updateSkillGroup(skill.id, 'items', newItems);
+                                                        }}
+                                                        className="hover:text-red-500 transition-colors opacity-40 hover:opacity-100"
+                                                    >
+                                                        <X size={10} />
+                                                    </button>
+                                                </div>
                                             ) : item}
                                         </span>
                                     ))}
                                     {isEditable && (
                                         <button
                                             onClick={() => updateSkillGroup(skill.id, 'items', [...skill.items, 'New Skill'])}
-                                            className="inline-flex items-center px-2 py-1 rounded-md bg-[var(--accent)] text-white text-xs font-bold shadow-sm"
+                                            className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 hover:bg-[var(--accent)] hover:text-white transition-all active:scale-90"
+                                            title="Add skill"
                                         >
-                                            +
+                                            <Plus size={12} />
                                         </button>
                                     )}
                                 </div>

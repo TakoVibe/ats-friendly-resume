@@ -4,6 +4,8 @@ import { BrandSwitcher } from '../brand/BrandSwitcher';
 import { Logo } from './Logo';
 import { ChevronDown, LogIn, User, FileText, Settings, LogOut, Zap, Globe, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeToggle } from './ThemeToggle';
+export { ThemeToggle };
 
 interface NavbarProps {
     children?: React.ReactNode;
@@ -14,7 +16,6 @@ import { WhyMenu } from './WhyMenu';
 
 export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
     const { user, isAuthenticated, logout } = useAuth();
-    const { isDarkMode } = useTheme();
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     return (
@@ -30,7 +31,7 @@ export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
                 <WhyMenu />
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4 py-0.5">
+            <div className="flex items-center gap-1.5 md:gap-4 py-0.5 min-w-0">
                 {children}
 
                 {isAuthenticated && <div className="w-px h-6 bg-[var(--border-color)] hidden md:block mx-1 shrink-0"></div>}
@@ -39,7 +40,7 @@ export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
                     <div className="relative shrink-0 ml-1">
                         <button
                             onClick={() => setShowUserMenu(!showUserMenu)}
-                            className="flex items-center gap-2 p-1 md:p-1.5 md:pr-3 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl transition-all shadow-sm group"
+                            className="flex items-center gap-1 md:gap-2 p-1 md:p-1.5 md:pr-3 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl transition-all shadow-sm group"
                         >
                             <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl overflow-hidden border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center">
                                 {user?.profile_image ? (
@@ -49,8 +50,8 @@ export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
                                 )}
                             </div>
                             <div className="hidden sm:flex flex-col items-start leading-tight">
-                                <span className="text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] opacity-60">Account</span>
-                                <span className="text-xs font-bold text-[var(--text-main)] max-w-[80px] truncate">{user?.first_name || 'User'}</span>
+                                <span className="text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] opacity-60">Personal</span>
+                                <span className="text-xs font-bold text-[var(--text-main)] max-w-[80px] truncate">{user?.first_name || 'Me'}</span>
                             </div>
                             <ChevronDown size={14} className={`text-[var(--text-muted)] transition-transform duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
                         </button>
@@ -112,6 +113,8 @@ export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
                         <LogIn size={16} /> Login
                     </button>
                 )}
+
+                <ThemeToggle />
             </div>
         </nav>
     );

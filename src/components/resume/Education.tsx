@@ -18,6 +18,7 @@ interface Props {
 }
 
 export function Education({ education, isEditable = false, onUpdate, title = "Education", onTitleChange, showSeparator, onToggleSeparator, viewMode = 'desktop' }: Props) {
+    const isMobile = viewMode === 'mobile';
     const updateEdu = (id: string, field: keyof Props['education'][0], value: any) => {
         if (!onUpdate) return;
         const newEdu = education.map(e =>
@@ -139,7 +140,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                         forceMobileControls={viewMode === 'mobile'}
                     >
                         <div className="resume-relative group/item-content">
-                            <div className="resume-flex resume-justify-between resume-items-baseline resume-mb-1">
+                            <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
                                 <EditableField
                                     tagName="h3"
                                     value={edu.institution}
@@ -147,7 +148,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                     isEditable={isEditable}
                                     className="resume-role"
                                 />
-                                <div className="resume-text-right">
+                                <div className={`resume-flex resume-items-baseline ${isMobile ? 'resume-flex-col resume-items-start' : 'resume-text-right resume-gap-2'}`}>
                                     {(edu.location?.trim() || isEditable) && (
                                         <EditableField
                                             value={edu.location || ''}
@@ -156,6 +157,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                             className="resume-location-text"
                                         />
                                     )}
+                                    {(edu.location?.trim() && edu.duration?.trim() && !isMobile) && <span className="resume-duration-gray mx-1 md:hidden xl:inline">•</span>}
                                     {(edu.duration?.trim() || isEditable) && (
                                         <EditableField
                                             value={edu.duration}
@@ -166,7 +168,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                     )}
                                 </div>
                             </div>
-                            <div className="resume-flex resume-justify-between resume-items-baseline">
+                            <div className={`resume-flex resume-items-baseline ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
                                 <EditableField
                                     value={edu.degree}
                                     onSave={(val) => updateEdu(edu.id, 'degree', val)}
@@ -179,7 +181,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                         placeholder="Score/GPA"
                                         onSave={(val) => updateEdu(edu.id, 'score', val)}
                                         isEditable={isEditable}
-                                        className="resume-score"
+                                        className={`resume-score ${isMobile ? 'resume-mt-0.5' : ''}`}
                                     />
                                 )}
                             </div>

@@ -9,7 +9,7 @@ import { ThemeProvider } from '../context/ThemeContext';
 import { TextPreview } from './parser/TextPreview';
 import { EditorToolbar } from './ui/EditorToolbar';
 import { Logo } from './ui/Logo';
-import { Navbar } from './ui/Navbar';
+import { Navbar, ThemeToggle } from './ui/Navbar';
 
 import { PersonalInfoModal } from './editor/PersonalInfoModal';
 import { ResumeProvider } from '../context/ResumeContext';
@@ -423,6 +423,10 @@ function ResumeBuilderContent() {
                                             <RotateCcw size={16} />
                                             Reset All
                                         </button>
+                                        <div className="px-3 py-2.5 flex items-center justify-between border-t border-[var(--border-color)] mt-1">
+                                            <span className="text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)]">Theme</span>
+                                            <ThemeToggle compact />
+                                        </div>
                                     </div>
                                 </div>
                             </>

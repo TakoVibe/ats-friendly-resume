@@ -164,13 +164,13 @@ export function InlineAIButton({
         <button
             onClick={handleOptimize}
             disabled={isOptimizing || !text.trim()}
-            className={`flex items-center justify-center p-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg shadow-xl shadow-black/5 active:scale-95 transition-all border border-zinc-700/50 ${isOptimizing ? 'opacity-80' : ''} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+            className={`flex items-center justify-center p-2 bg-white hover:bg-purple-50 text-[var(--text-main)] rounded-lg shadow-lg shadow-purple-900/5 active:scale-95 transition-all border border-purple-100 ${isOptimizing ? 'opacity-80' : ''} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
             title="Enhance with AI"
         >
             {isOptimizing ? (
-                <Loader2 size={12} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin text-purple-600" />
             ) : (
-                <Sparkles size={12} className="text-purple-400" />
+                <Sparkles size={14} className="text-purple-600 fill-purple-600/10" />
             )}
         </button>
     );

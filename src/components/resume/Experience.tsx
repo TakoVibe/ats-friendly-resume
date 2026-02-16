@@ -2,7 +2,7 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
-import { Plus, List, ListMinus, Sparkles } from 'lucide-react';
+import { Plus, List, ListMinus, Sparkles, X } from 'lucide-react';
 import { InlineAIButton } from '../ui/InlineAIButton';
 
 type ExperienceItem = ResumeSchema['experience'][0];
@@ -156,7 +156,7 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                     >
                         <div className="resume-relative group/item-content">
                             {/* Role & Date */}
-                            <div className="resume-flex resume-justify-between resume-items-baseline resume-mb-1">
+                            <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
                                 <EditableField
                                     tagName="h3"
                                     value={job.role}
@@ -168,12 +168,12 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                     value={job.duration}
                                     onSave={(val) => updateJob(job.id, 'duration', val)}
                                     isEditable={isEditable}
-                                    className="resume-duration-gray"
+                                    className={`resume-duration-gray ${isMobile ? 'resume-mt-0.5' : ''}`}
                                 />
                             </div>
 
                             {/* Company & Location */}
-                            <div className="resume-flex resume-justify-between resume-items-baseline resume-mb-1">
+                            <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
                                 {job.company && (
                                     <EditableField
                                         tagName="h4"
@@ -189,7 +189,7 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                         value={job.location || ''}
                                         onSave={(val) => updateJob(job.id, 'location', val)}
                                         isEditable={isEditable}
-                                        className="resume-location-text"
+                                        className={`resume-location-text ${isMobile ? 'resume-mt-0.5' : ''}`}
                                         placeholder="Location"
                                     />
                                 )}
@@ -197,7 +197,7 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
 
                             {/* Tech Stack */}
                             {(job.techStack && job.techStack.length > 0) && (
-                                <div className={`resume-tech-stack ${isMobile ? 'flex flex-wrap gap-2 mt-2 mb-2' : ''}`}>
+                                <div className={`resume-tech-stack ${isMobile ? 'flex flex-wrap gap-1.5 mt-2 mb-2' : ''}`}>
                                     {!isMobile && (
                                         <span className="resume-font-bold resume-text-dark resume-mr-1">
                                             <EditableField
@@ -213,27 +213,40 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                     {isMobile ? (
                                         <>
                                             {(job.techStack || []).map((tech, i) => (
-                                                <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[var(--resume-bg-sub,rgba(128,128,128,0.1))] text-[var(--resume-gray)] border border-[var(--resume-border)]">
+                                                <span key={i} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--bg-input,rgba(128,128,128,0.05))] text-[var(--text-main)] text-[11px] font-medium border border-[var(--border-color)] group/tag">
                                                     {isEditable ? (
-                                                        <EditableField
-                                                            value={tech}
-                                                            onSave={(val) => {
-                                                                const newStack = [...(job.techStack || [])];
-                                                                newStack[i] = val;
-                                                                updateJob(job.id, 'techStack', newStack);
-                                                            }}
-                                                            isEditable={true}
-                                                            tagName="span"
-                                                        />
+                                                        <div className="flex items-center gap-1">
+                                                            <EditableField
+                                                                value={tech}
+                                                                onSave={(val) => {
+                                                                    const newStack = [...(job.techStack || [])];
+                                                                    newStack[i] = val;
+                                                                    updateJob(job.id, 'techStack', newStack);
+                                                                }}
+                                                                isEditable={true}
+                                                                tagName="span"
+                                                            />
+                                                            <button
+                                                                onClick={() => {
+                                                                    const techStack = job.techStack || [];
+                                                                    const newStack = techStack.filter((_, idx) => idx !== i);
+                                                                    updateJob(job.id, 'techStack', newStack);
+                                                                }}
+                                                                className="hover:text-red-500 transition-colors opacity-40 hover:opacity-100"
+                                                            >
+                                                                <X size={10} />
+                                                            </button>
+                                                        </div>
                                                     ) : tech}
                                                 </span>
                                             ))}
                                             {isEditable && (
                                                 <button
                                                     onClick={() => updateJob(job.id, 'techStack', [...(job.techStack || []), 'New'])}
-                                                    className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-blue-600 border border-blue-100"
+                                                    className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 hover:bg-[var(--accent)] hover:text-white transition-all active:scale-90"
+                                                    title="Add technology"
                                                 >
-                                                    +
+                                                    <Plus size={12} />
                                                 </button>
                                             )}
                                         </>

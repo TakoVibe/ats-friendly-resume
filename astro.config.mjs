@@ -9,7 +9,7 @@ import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://easyresume.takovibe.com',
+  site: 'https://resumevibe.takovibe.com',
   output: 'server',
   adapter: node({
     mode: 'standalone'

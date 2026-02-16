@@ -212,7 +212,7 @@ export function UserResumes() {
 
                         {resume.is_public && (
                             <a
-                                href={`/resume/public/${resume.slug}`}
+                                href={`/resume/${typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}').username || 'public' : 'public'}/${resume.slug}`}
                                 target="_blank"
                                 className="mt-3 flex items-center justify-center gap-2 py-3 bg-[var(--text-main)]/5 hover:bg-[var(--text-main)]/10 text-[var(--text-main)] rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all opacity-60 hover:opacity-100"
                             >

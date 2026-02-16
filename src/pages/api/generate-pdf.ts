@@ -17,7 +17,6 @@ export const POST: APIRoute = async ({ request }) => {
         });
         const page = await browser.newPage();
 
-        console.log(`Setting content... HTML length: ${html?.length || 0}, CSS length: ${css?.length || 0}`);
         const fullContent = `
             <!DOCTYPE html>
             <html>
@@ -46,7 +45,6 @@ export const POST: APIRoute = async ({ request }) => {
         // Small delay to ensure rendering settles
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        console.log('Generating PDF...');
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
@@ -59,7 +57,6 @@ export const POST: APIRoute = async ({ request }) => {
         });
 
         await browser.close();
-        console.log('PDF generated, now compressing...');
 
         // Aggressive compression with pdf-lib
         const pdfDoc = await PDFDocument.load(pdfBuffer);

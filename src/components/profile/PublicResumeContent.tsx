@@ -10,26 +10,23 @@ interface PublicResumeContentProps {
 
 export function PublicResumeContent({ resumeData }: PublicResumeContentProps) {
     const [isGenerating, setIsGenerating] = useState(false);
+    const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+
+    React.useEffect(() => {
+        const checkMobile = () => {
+            setViewMode(window.innerWidth < 1024 ? 'mobile' : 'desktop');
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const generatePdfPayload = async () => {
         const element = document.getElementById('resume-preview-for-generation');
         if (!element) return null;
 
-        // Explicitly fetch the clean resume.css
-        let resumeCss = '';
-        try {
-            const cssRes = await fetch('/resume.css');
-            if (cssRes.ok) {
-                resumeCss = await cssRes.text();
-            } else {
-                console.error('Failed to fetch resume.css');
-            }
-        } catch (e) {
-            console.error('Error fetching resume.css:', e);
-        }
-
         const html = element.outerHTML;
-        return { html, css: resumeCss };
+        return { html };
     };
 
     const handleDownload = async () => {
@@ -71,7 +68,7 @@ export function PublicResumeContent({ resumeData }: PublicResumeContentProps) {
                 <ResumePreview data={resumeData} id="resume-preview-for-generation" />
             </div>
 
-            <div className="w-full max-w-4xl mx-auto py-8 px-4 md:px-0 animate-in fade-in duration-700">
+            <div className="w-full max-w-5xl mx-auto py-4 md:py-8 px-0 md:px-4 animate-in fade-in duration-700">
                 {/* Minimal Floating Download Button */}
                 <div className="fixed top-6 right-6 z-50 no-print">
                     <button
@@ -91,6 +88,7 @@ export function PublicResumeContent({ resumeData }: PublicResumeContentProps) {
                         data={resumeData}
                         id="public-resume-view"
                         isEditable={false}
+                        viewMode={viewMode}
                     />
                 </div>
 

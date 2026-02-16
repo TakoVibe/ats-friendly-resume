@@ -46,7 +46,6 @@ Unlike a simple keyword matcher, you look for:
 export const POST: APIRoute = async ({ request }) => {
     try {
         const { resume, jobDescription } = await request.json();
-        console.log('Deep Audit Request received');
 
         if (!resume) {
             return new Response(
@@ -74,7 +73,6 @@ ${JSON.stringify(resume, null, 2)}
 
 Perform a Deep Audit. Return the results in the specified JSON format.`;
 
-        console.log('Calling OpenAI gpt-5-mini...');
         const completion = await openai.chat.completions.create({
             model: 'gpt-5-mini',
             messages: [
@@ -85,7 +83,6 @@ Perform a Deep Audit. Return the results in the specified JSON format.`;
         });
 
         const responseText = completion.choices[0].message.content;
-        console.log('AI Response received');
 
         if (!responseText) throw new Error('AI returned empty response');
 
