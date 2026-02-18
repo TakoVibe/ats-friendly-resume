@@ -46,20 +46,52 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
         onUpdate(newOS);
     };
 
+    const duplicateItem = (index: number) => {
+        if (!onUpdate || !openSource) return;
+        const itemToClone = openSource[index];
+        const newItem = {
+            ...itemToClone,
+            id: Math.random().toString(36).substr(2, 9),
+            name: `${itemToClone.name} (Copy)`
+        };
+        const newOS = [...openSource];
+        newOS.splice(index + 1, 0, newItem);
+        onUpdate(newOS);
+    };
+
     const addItem = () => {
         if (!onUpdate) return;
         const newItem = {
             id: Math.random().toString(36).substr(2, 9),
-            name: 'Project/Contribution Name',
-            description: 'Description of your contribution...',
-            link: 'Link',
-            date: ''
+            name: 'Project Name',
+            description: 'Core contribution description (#123)...',
+            link: '',
+            date: '2024',
+            metrics: []
         };
         onUpdate([...safeOpenSource, newItem]);
     };
 
+    const addMetric = (osId: string) => {
+        if (!onUpdate) return;
+        const newOS = safeOpenSource.map(item => {
+            if (item.id !== osId) return item;
+            return { ...item, metrics: [...(item.metrics || []), 'New contribution detail...'] };
+        });
+        onUpdate(newOS);
+    };
+
+    const deleteMetric = (osId: string, metricIndex: number) => {
+        if (!onUpdate) return;
+        const newOS = safeOpenSource.map(item => {
+            if (item.id !== osId) return item;
+            return { ...item, metrics: item.metrics?.filter((_, i) => i !== metricIndex) };
+        });
+        onUpdate(newOS);
+    };
+
     return (
-        <section className="resume-section-mb-12">
+        <section className="resume-section mb-12">
             <SectionTitle
                 title={title}
                 isEditable={isEditable}
@@ -67,73 +99,108 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                 showSeparator={showSeparator}
                 onToggleSeparator={onToggleSeparator}
             />
-            <ul className="resume-details-list">
+            <div className="resume-space-y-4">
                 {safeOpenSource.map((item, index) => (
-                    <li key={item.id} className="resume-list-item resume-text-justify group/item-content resume-relative pr-8 leading-tight py-0.5">
-                        <span className="resume-bullet">•</span>
-                        <div className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5">
-                            <span className="resume-font-bold resume-text-dark whitespace-nowrap">
-                                <EditableField
-                                    tagName="span"
-                                    value={item.name}
-                                    onSave={(val) => updateItem(item.id, 'name', val)}
-                                    isEditable={isEditable}
-                                />
-                            </span>
-                            <span className="opacity-70">: </span>
-                            <span className="resume-text-dark">
-                                <EditableField
-                                    tagName="span"
-                                    value={item.description || ''}
-                                    onSave={(val) => updateItem(item.id, 'description', val)}
-                                    isEditable={isEditable}
-                                    controlsLayout="parent"
-                                    aiProps={{
-                                        type: 'bullet',
-                                        context: { jobDescription: title }
-                                    }}
-                                />
-                            </span>
-                            {item.link && (
-                                <span className="inline-flex items-baseline text-[var(--resume-gray)] ml-1">
-                                    <span className="opacity-60">(</span>
-                                    {isEditable ? (
+                    <ItemControls
+                        key={item.id}
+                        isFirst={index === 0}
+                        isLast={index === safeOpenSource.length - 1}
+                        onMoveUp={() => moveItem(index, 'up')}
+                        onMoveDown={() => moveItem(index, 'down')}
+                        onDelete={() => deleteItem(index)}
+                        onDuplicate={() => duplicateItem(index)}
+                        isEditable={isEditable}
+                    >
+                        <div className="resume-relative group/item-content">
+                            <div className="flex justify-between items-baseline mb-1">
+                                <div className="flex flex-wrap items-baseline gap-x-1">
+                                    <span className="resume-font-bold resume-text-dark">
                                         <EditableField
                                             tagName="span"
-                                            value={item.linkText || (item.link.match(/(?:pull|issues)\/(\d+)$/)?.[1] ? `#${item.link.match(/(?:pull|issues)\/(\d+)$/)?.[1]}` : item.link.replace(/^https?:\/\/(www\.)?github\.com\//, '').replace(/\/$/, '') || 'view')}
-                                            onSave={(val) => updateItem(item.id, 'linkText', val)}
+                                            value={item.name}
+                                            onSave={(val) => updateItem(item.id, 'name', val)}
                                             isEditable={isEditable}
-                                            className="text-[var(--resume-accent)] hover:underline cursor-alias"
+                                            placeholder="Project Name"
                                         />
-                                    ) : (
-                                        <a
-                                            href={item.link.startsWith('http') ? item.link : `https://${item.link}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-[var(--resume-accent)] hover:underline"
-                                        >
-                                            {item.linkText || (item.link.match(/(?:pull|issues)\/(\d+)$/)?.[1] ? `#${item.link.match(/(?:pull|issues)\/(\d+)$/)?.[1]}` : item.link.replace(/^https?:\/\/(www\.)?github\.com\//, '').replace(/\/$/, '') || 'view')}
-                                        </a>
+                                    </span>
+                                    <span className="opacity-70 text-[var(--resume-gray)]">: </span>
+                                    <div className="inline-flex items-baseline">
+                                        <EditableField
+                                            tagName="span"
+                                            value={item.description || ''}
+                                            onSave={(val) => updateItem(item.id, 'description', val)}
+                                            isEditable={isEditable}
+                                            placeholder="Contribution description & references..."
+                                            aiProps={{
+                                                type: 'bullet',
+                                                context: { projectName: item.name }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <DatePicker
+                                    value={item.date || ''}
+                                    onSave={(val) => updateItem(item.id, 'date', val)}
+                                    isEditable={isEditable}
+                                    mode="single"
+                                    className="resume-duration-gray"
+                                />
+                            </div>
+
+                            {/* Secondary points/bullets */}
+                            {(item.metrics || isEditable) && (
+                                <ul className="resume-details-list pl-4">
+                                    {item.metrics?.map((metric, idx) => {
+                                        const metricText = typeof metric === 'string' ? metric : metric.text;
+                                        return (
+                                            <li key={idx} className="resume-list-item group/metric resume-relative py-0.5">
+                                                <span className="resume-bullet">•</span>
+                                                <div className="resume-flex-1">
+                                                    <EditableField
+                                                        tagName="span"
+                                                        value={metricText}
+                                                        onSave={(val) => {
+                                                            const nm = [...(item.metrics || [])];
+                                                            nm[idx] = typeof nm[idx] === 'object' ? { ...(nm[idx] as object), text: val } : val;
+                                                            updateItem(item.id, 'metrics', nm);
+                                                        }}
+                                                        isEditable={isEditable}
+                                                        placeholder="Contribution detail..."
+                                                        controlsLayout="parent"
+                                                        aiProps={{
+                                                            type: 'bullet',
+                                                            context: { projectName: item.name }
+                                                        }}
+                                                        actions={
+                                                            <button
+                                                                onClick={() => deleteMetric(item.id, idx)}
+                                                                className="p-1 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                                title="Delete point"
+                                                            >
+                                                                <span className="text-sm font-bold leading-none">×</span>
+                                                            </button>
+                                                        }
+                                                    />
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                    {isEditable && (
+                                        <li className="flex mt-0.5 opacity-0 group-hover/item-content:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => addMetric(item.id)}
+                                                className="text-[8pt] text-[var(--accent)] hover:underline flex items-center gap-1 font-bold uppercase tracking-wider"
+                                            >
+                                                <Plus size={10} /> Add Point
+                                            </button>
+                                        </li>
                                     )}
-                                    <span className="opacity-60">)</span>
-                                </span>
-                            )}
-                            {isEditable && (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); deleteItem(index); }}
-                                    className="ml-2 opacity-0 group-hover/item-content:opacity-100 p-0.5 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 rounded transition-all"
-                                    title="Delete item"
-                                >
-                                    <span className="text-sm font-bold leading-none">×</span>
-                                </button>
+                                </ul>
                             )}
                         </div>
-                        {isEditable && (item.description || '').includes('<') && (
-                            <ATSWarning type="formatting" className="mt-1" />
-                        )}
-                    </li>
+                    </ItemControls>
                 ))}
-            </ul>
+            </div>
 
             {isEditable && (
                 <button

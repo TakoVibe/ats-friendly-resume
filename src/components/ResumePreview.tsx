@@ -382,6 +382,18 @@ export function ResumePreview({ data, id, isEditable = false, onUpdate, onEditHe
                             viewMode={viewMode}
                         />;
                     }
+                    if (customSection.type === 'openSource') {
+                        return <OpenSource
+                            openSource={customSection.items}
+                            isEditable={isEditable}
+                            onUpdate={(newItems) => handleCustomSectionUpdate(key, { ...customSection, items: newItems })}
+                            title={customSection.title}
+                            onTitleChange={(newTitle) => handleCustomSectionUpdate(key, { ...customSection, title: newTitle })}
+                            showSeparator={getSeparator(key)}
+                            onToggleSeparator={(val) => handleSeparatorUpdate(key, val)}
+                            viewMode={viewMode}
+                        />;
+                    }
 
                     // Default generic custom section
                     return <CustomSection

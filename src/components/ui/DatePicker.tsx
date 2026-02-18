@@ -92,6 +92,7 @@ export function DatePicker({ value, onSave, className = '', isEditable = true, m
     };
 
     if (!isEditable) {
+        if (!value) return null;
         return <span className={`${className} whitespace-nowrap`}>{value}</span>;
     }
 
@@ -176,12 +177,23 @@ export function DatePicker({ value, onSave, className = '', isEditable = true, m
                             </div>
                         )}
 
-                        <button
-                            onClick={handleApply}
-                            className="w-full py-3 bg-[var(--accent)] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-purple-500/20"
-                        >
-                            Apply Filter
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => {
+                                    onSave('');
+                                    setIsOpen(false);
+                                }}
+                                className="px-4 py-3 bg-[var(--bg-input)] hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors"
+                            >
+                                Clear
+                            </button>
+                            <button
+                                onClick={handleApply}
+                                className="flex-1 py-3 bg-[var(--accent)] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-purple-500/20"
+                            >
+                                Apply Filter
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

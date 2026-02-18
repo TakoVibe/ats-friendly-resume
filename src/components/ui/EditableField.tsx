@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { InlineAIButton } from './InlineAIButton';
 import { PromptDialog } from './PromptDialog';
+import { Unlink, ExternalLink } from 'lucide-react';
 
 interface Props {
     value: string;
@@ -24,8 +26,6 @@ interface Props {
     controlsLayout?: 'local' | 'parent';
 }
 
-// ... (keep existing imports and interface)
-
 export function EditableField({
     value,
     onSave,
@@ -40,34 +40,45 @@ export function EditableField({
 }: Props) {
     const [isFocused, setIsFocused] = useState(false);
     const [showLinkPrompt, setShowLinkPrompt] = useState(false);
+    const [hoveredLink, setHoveredLink] = useState<HTMLAnchorElement | null>(null);
+    const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number } | null>(null);
+    const showLinkPromptRef = useRef(false);
     const contentRef = useRef<HTMLElement>(null);
     const selectionRef = useRef<Range | null>(null);
 
+    // Use a ref for onSave to keep handlers stable
+    const onSaveRef = useRef(onSave);
+    React.useEffect(() => {
+        onSaveRef.current = onSave;
+    }, [onSave]);
+
     const hasAI = isEditable && aiProps;
     const hasActions = isEditable && actions;
-    const showToolbar = hasAI || hasActions;
+    // Always show toolbar if editable to allow linking
+    const showToolbar = isEditable;
 
     const containerClasses = [
         className,
         isEditable ? 'rounded-sm transition-[opacity,outline,background-color] duration-200 cursor-text' : '',
         isFocused ? 'outline outline-2 outline-blue-500/30 z-10 relative' : '',
-        !value && isEditable ? 'empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400' : ''
+        !value && isEditable ? 'empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400' : '',
+        '[&_a]:!underline [&_a]:underline-offset-2 [&_a]:text-blue-600 [&_a]:cursor-pointer [&_a]:relative'
     ].join(' ');
 
-    const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
+    const handleBlur = React.useCallback((e: React.FocusEvent<HTMLElement>) => {
         // Did we blur because of the prompt?
-        if (showLinkPrompt) return;
+        if (showLinkPromptRef.current) return;
 
         setIsFocused(false);
         const hasTags = /<[a-z][\s\S]*>/i.test(e.currentTarget.innerHTML);
         const newValue = (mode === 'html' || hasTags) ? e.currentTarget.innerHTML : e.currentTarget.innerText;
 
         if (newValue !== value) {
-            onSave(newValue);
+            onSaveRef.current(newValue);
         }
-    };
+    }, [mode, value]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLElement>) => {
         if (e.key === 'Enter') {
             if (Tag === 'h1' || Tag === 'h2' || Tag === 'h3' || Tag === 'span') {
                 e.preventDefault();
@@ -82,12 +93,14 @@ export function EditableField({
             if (selection && selection.rangeCount > 0) {
                 selectionRef.current = selection.getRangeAt(0);
                 setShowLinkPrompt(true);
+                showLinkPromptRef.current = true;
             }
         }
-    };
+    }, [Tag]);
 
-    const handleLinkConfirm = (url: string) => {
+    const handleLinkConfirm = React.useCallback((url: string) => {
         setShowLinkPrompt(false);
+        showLinkPromptRef.current = false;
 
         // Restore selection
         const selection = window.getSelection();
@@ -95,15 +108,20 @@ export function EditableField({
             selection.removeAllRanges();
             selection.addRange(selectionRef.current);
 
+            // Ensure focus is back on the element
+            if (contentRef.current) {
+                contentRef.current.focus();
+            }
+
             if (url) {
                 document.execCommand('createLink', false, url);
                 if (contentRef.current) {
-                    onSave(contentRef.current.innerHTML);
+                    onSaveRef.current(contentRef.current.innerHTML);
                 }
             }
         }
         selectionRef.current = null;
-    };
+    }, []);
 
     const isEmpty = !value || value.trim().length === 0;
 
@@ -112,14 +130,46 @@ export function EditableField({
         return null;
     }
 
-    const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
+    const handleMouseOver = React.useCallback((e: React.MouseEvent<HTMLElement>) => {
+        if (!isEditable) return;
+        const target = e.target as HTMLElement;
+        const link = target.closest('a');
+
+        if (link) {
+            const rect = link.getBoundingClientRect();
+            setHoveredLink(link as HTMLAnchorElement);
+            setTooltipPosition({
+                top: rect.bottom + window.scrollY + 5,
+                left: rect.left + window.scrollX + (rect.width / 2)
+            });
+        }
+    }, [isEditable]);
+
+    const handleUnlink = React.useCallback(() => {
+        if (hoveredLink) {
+            const parent = hoveredLink.parentNode;
+            while (hoveredLink.firstChild) {
+                parent?.insertBefore(hoveredLink.firstChild, hoveredLink);
+            }
+            parent?.removeChild(hoveredLink);
+
+            // Trigger save
+            if (contentRef.current) {
+                onSaveRef.current(contentRef.current.innerHTML);
+            }
+            setHoveredLink(null);
+        }
+    }, [hoveredLink]);
+
+    const handleFocus = React.useCallback((e: React.FocusEvent<HTMLElement>) => {
         setIsFocused(true);
         if (isEmpty && isEditable && e.currentTarget.textContent === placeholder) {
             e.currentTarget.textContent = '';
         }
-    };
+    }, [isEmpty, isEditable, placeholder]);
 
-    const commonProps = {
+    // Memoize props to prevent unnecessary updates to element
+    const commonProps = React.useMemo(() => ({
         ref: contentRef,
         className: containerClasses,
         contentEditable: isEditable,
@@ -127,36 +177,76 @@ export function EditableField({
         onFocus: handleFocus,
         onBlur: handleBlur,
         onKeyDown: handleKeyDown,
+        onMouseOver: handleMouseOver,
         'data-placeholder': placeholder
-    };
+    }), [containerClasses, isEditable, placeholder, handleFocus, handleBlur, handleKeyDown, handleMouseOver]);
 
-    const element = (
-        <>
-            {isEmpty && isEditable ? (
-                React.createElement(Tag as string, {
-                    ...commonProps,
-                    className: `${commonProps.className} min-w-[1ch] inline-block align-bottom empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 empty:before:italic`
-                })
-            ) : isEmpty ? (
-                React.createElement(Tag as string, commonProps)
-            ) : (
-                React.createElement(Tag as string, {
-                    ...commonProps,
-                    dangerouslySetInnerHTML: { __html: value }
-                })
-            )}
+    // Memoize the element to prevent re-rendering when prompt opens (unless value changes)
+    const contentElement = React.useMemo(() => (
+        isEmpty && isEditable ? (
+            React.createElement(Tag as string, {
+                ...commonProps,
+                className: `${commonProps.className} min-w-[1ch] inline-block align-bottom empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 empty:before:italic`
+            })
+        ) : isEmpty ? (
+            React.createElement(Tag as string, commonProps)
+        ) : (
+            React.createElement(Tag as string, {
+                ...commonProps,
+                dangerouslySetInnerHTML: { __html: value }
+            })
+        )
+    ), [isEmpty, isEditable, Tag, commonProps, value]);
 
-            <PromptDialog
-                isOpen={showLinkPrompt}
-                title="Enter Link URL"
-                placeholder="https://example.com"
-                onConfirm={handleLinkConfirm}
-                onCancel={() => {
-                    setShowLinkPrompt(false);
-                    selectionRef.current = null;
-                }}
-            />
-        </>
+    const prompt = (
+        <PromptDialog
+            isOpen={showLinkPrompt}
+            title="Enter Link URL"
+            placeholder="https://example.com"
+            onConfirm={handleLinkConfirm}
+            onCancel={() => {
+                setShowLinkPrompt(false);
+                showLinkPromptRef.current = false;
+                selectionRef.current = null;
+            }}
+        />
+    );
+
+    // Tooltip Portal for managing links
+    const linkTooltip = hoveredLink && tooltipPosition && (
+        createPortal(
+            <div
+                className="fixed z-[9999] flex items-center gap-2 px-2 py-1.5 bg-gray-900/95 text-white text-xs rounded-lg shadow-xl animate-in fade-in zoom-in-95 duration-100 backdrop-blur-sm transform -translate-x-1/2"
+                style={{ top: tooltipPosition.top - window.scrollY, left: tooltipPosition.left - window.scrollX }}
+                onMouseEnter={() => { /* keep open */ }}
+                onMouseLeave={() => setHoveredLink(null)}
+            >
+                <div className="max-w-[200px] truncate opacity-80 border-r border-white/20 pr-2 mr-1">
+                    {hoveredLink.getAttribute('href')}
+                </div>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(hoveredLink.getAttribute('href') || '', '_blank');
+                    }}
+                    className="p-1 hover:bg-white/10 rounded transition-colors text-blue-300"
+                    title="Open Link"
+                >
+                    <ExternalLink size={12} />
+                </button>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleUnlink();
+                    }}
+                    className="p-1 hover:bg-red-500/20 hover:text-red-300 rounded transition-colors text-white/70"
+                    title="Remove Link"
+                >
+                    <Unlink size={12} />
+                </button>
+            </div>,
+            document.body
+        )
     );
 
     if (showToolbar) {
@@ -173,7 +263,9 @@ export function EditableField({
 
         return (
             <Wrapper className={wrapperClasses}>
-                {element}
+                {contentElement}
+                {prompt}
+                {linkTooltip}
                 <div className={`absolute ${positionClass} flex items-center z-[100] print:hidden`}>
                     <div className="flex items-center gap-1.5 opacity-0 group-hover/field:opacity-100 focus-within:opacity-100 transition-all duration-200">
                         {hasAI && (
@@ -196,5 +288,13 @@ export function EditableField({
         );
     }
 
-    return element;
+    return (
+        <>
+            {contentElement}
+            {prompt}
+            {linkTooltip}
+        </>
+    );
+
+
 }

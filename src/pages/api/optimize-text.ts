@@ -91,6 +91,23 @@ ${context?.company ? `Company: ${context.company}` : ''}
 Rewrite this role title. Return only the improved title.`;
                 break;
 
+            case 'linkedin-paragraph':
+                systemPrompt = `You are an expert LinkedIn profile optimizer. 
+Your task is to condense a user's professional experience into a SINGLE, high-impact paragraph (50-80 words).
+
+RULES:
+1. Write in the first person ("I am...", "I have...") or high-impact professional third person.
+2. Focus on the core value proposition and major achievements.
+3. No bullet points. Just one solid, compelling paragraph.
+4. Remove all HTML tags.
+5. Make it "social media" friendly yet professional.
+6. Return ONLY the paragraph, no preamble or quotes.`;
+
+                userPrompt = `Original data to condense: "${text}"
+
+Rewrite this into a single high-impact LinkedIn paragraph.`;
+                break;
+
             case 'description':
                 systemPrompt = `You are an expert resume writer specializing in project descriptions.
 Your task is to rewrite project descriptions to be clear, impactful, and highlight technical skills.

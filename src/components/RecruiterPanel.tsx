@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Target, CheckCircle2, AlertCircle, MessageSquare, Info, Sparkles, UserCheck, Lock, LogIn, TrendingUp, Cpu, BarChart, Bug, Zap, BarChart3, Settings2, X, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
+import { Search, Target, CheckCircle2, AlertCircle, MessageSquare, Info, Sparkles, UserCheck, Lock, LogIn, TrendingUp, Cpu, BarChart, Bug, Zap, BarChart3, Settings2, X, ChevronDown, ChevronUp, Calendar, Linkedin } from 'lucide-react';
 import { Logo } from './ui/Logo';
 import { ATSWarning } from './ui/ATSWarning';
 import type { ResumeSchema } from '../types/resume';
@@ -13,9 +13,10 @@ interface RecruiterPanelProps {
     isAuthenticated?: boolean;
     onRequireAuth?: () => void;
     onClose?: () => void;
+    onOpenLinkedIn?: () => void;
 }
 
-export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimizer, onAuditResult, isAuthenticated, onRequireAuth, onClose }: RecruiterPanelProps) {
+export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimizer, onAuditResult, isAuthenticated, onRequireAuth, onClose, onOpenLinkedIn }: RecruiterPanelProps) {
     const [score, setScore] = useState(0);
     const [showJDInput, setShowJDInput] = useState(false);
     const [activeTab, setActiveTab] = useState<'pulse' | 'strategy' | 'analysis'>('pulse');
@@ -263,7 +264,15 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                     </div>
                 </div>
                 <div className="relative z-10 flex items-center gap-3">
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5 items-center">
+                        <button
+                            onClick={onOpenLinkedIn}
+                            className="p-2 hover:bg-[#0077b5]/10 text-[var(--text-muted)] hover:text-[#0077b5] rounded-full transition-all group/li-btn"
+                            title="LinkedIn Sync"
+                        >
+                            <Linkedin size={18} className="group-hover/li-btn:scale-110 transition-transform" />
+                        </button>
+                        <div className="w-[1px] h-4 bg-[var(--border-color)] mx-1" />
                         <div className="w-2 h-2 rounded-full bg-purple-500/20" />
                         <div className="w-2 h-2 rounded-full bg-purple-500/20" />
                     </div>

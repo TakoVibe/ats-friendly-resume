@@ -69,7 +69,7 @@ export interface ResumeSchema {
     customSections?: Array<{
         id: string;
         title: string;
-        type?: 'custom' | 'summary' | 'experience' | 'projects' | 'education' | 'skills' | 'certifications';
+        type?: 'custom' | 'summary' | 'experience' | 'projects' | 'education' | 'skills' | 'certifications' | 'openSource';
         items: Array<any>;
     }>;
 

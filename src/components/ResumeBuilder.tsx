@@ -26,6 +26,7 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 import { GoogleLogin } from './GoogleLogin';
 import { api } from '../lib/api';
 import { LoadingScreen } from './ui/LoadingScreen';
+import { LinkedInExport } from './ui/LinkedInExport';
 
 function ResumeBuilderContent() {
     const { data, updateResume, resetToDefault, isLoaded, undo, redo, saveToBackend, saveVersionToBackend, isSaving, lastSaved, resumeMetadata, setResumeMetadata } = useResume();
@@ -49,7 +50,7 @@ function ResumeBuilderContent() {
     const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
     const [lastDownloadedFile, setLastDownloadedFile] = useState('');
     const [showLoginModal, setShowLoginModal] = useState(false);
-
+    const [showLinkedInExport, setShowLinkedInExport] = useState(false);
     const [isPublicView, setIsPublicView] = useState(false);
 
     // Close login modal when authenticated
@@ -307,7 +308,7 @@ function ResumeBuilderContent() {
             // Create custom section
             const id = `custom-${Date.now()}`;
             // Determine type
-            const supportedTypes = ['summary', 'experience', 'education', 'skills', 'projects', 'certifications'];
+            const supportedTypes = ['summary', 'experience', 'education', 'skills', 'projects', 'certifications', 'openSource'];
             const sectionType = supportedTypes.includes(type) ? type : 'custom';
 
             const newSection = {
@@ -690,6 +691,7 @@ function ResumeBuilderContent() {
                             onAuditResult={(result) => setGuidanceAuditResult(result)}
                             isAuthenticated={isAuthenticated}
                             onRequireAuth={() => setShowLoginModal(true)}
+                            onOpenLinkedIn={() => setShowLinkedInExport(true)}
                         />
                     </div>
                 )}
@@ -723,6 +725,7 @@ function ResumeBuilderContent() {
                                         onAuditResult={(result) => setGuidanceAuditResult(result)}
                                         isAuthenticated={isAuthenticated}
                                         onRequireAuth={() => window.dispatchEvent(new CustomEvent('show-login-modal'))}
+                                        onOpenLinkedIn={() => setShowLinkedInExport(true)}
                                     />
                                 </div>
                             </div>
@@ -732,6 +735,12 @@ function ResumeBuilderContent() {
             </main >
 
             <LoginModal />
+
+            <LinkedInExport
+                isOpen={showLinkedInExport}
+                onClose={() => setShowLinkedInExport(false)}
+                data={data}
+            />
         </div >
     );
 }

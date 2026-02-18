@@ -1,7 +1,6 @@
-import { Bold, Italic, Link, List, Download, Type, LayoutTemplate, AlignJustify, MessageSquarePlus, Save, Sun, Moon, ChevronDown } from 'lucide-react';
+import { Bold, Italic, List, Download, Type, LayoutTemplate, AlignJustify, MessageSquarePlus, Save, Sun, Moon, ChevronDown, Keyboard } from 'lucide-react';
 import { useResume } from '../../hooks/useResume';
 import { useState } from 'react';
-import { PromptDialog } from './PromptDialog';
 import { useTheme } from '../../context/ThemeContext';
 import { CustomSelect } from './CustomSelect';
 
@@ -9,8 +8,7 @@ export function EditorToolbar({ onAddSection, isMobile = false }: { onAddSection
     const { data, updateResume } = useResume();
     const { isDarkMode } = useTheme();
     const config = data.config || {};
-    const [showLinkPrompt, setShowLinkPrompt] = useState(false);
-    const [savedRange, setSavedRange] = useState<Range | null>(null);
+    // Removed link state and logic as per user request to use Ctrl+K instead
 
     // Helper to generic config update
     const updateConfig = (key: keyof typeof config, val: any) => {
@@ -23,29 +21,6 @@ export function EditorToolbar({ onAddSection, isMobile = false }: { onAddSection
     // Text formatting commands
     const exec = (cmd: string, val?: string) => {
         document.execCommand(cmd, false, val);
-    };
-
-    const handleLink = () => {
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-            setSavedRange(selection.getRangeAt(0));
-        }
-        setShowLinkPrompt(true);
-    };
-
-    const confirmLink = (url: string) => {
-        // Restore selection
-        if (savedRange) {
-            const selection = window.getSelection();
-            if (selection) {
-                selection.removeAllRanges();
-                selection.addRange(savedRange);
-            }
-        }
-
-        if (url) exec('createLink', url);
-        setShowLinkPrompt(false);
-        setSavedRange(null);
     };
 
     const fontOptions = [
@@ -92,13 +67,12 @@ export function EditorToolbar({ onAddSection, isMobile = false }: { onAddSection
                     <Italic size={16} className="sm:w-4 sm:h-4" />
                 </button>
                 <div className="w-[1px] h-4 bg-[var(--border-color)] mx-0.5"></div>
-                <button
-                    onMouseDown={(e) => { e.preventDefault(); handleLink(); }}
-                    className={`p-2 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg flex justify-center ${isMobile ? 'flex-1' : ''}`}
-                    title="Insert Link"
+                <div
+                    className={`p-2 sm:p-2 text-[var(--text-muted)] opacity-50 cursor-help flex justify-center ${isMobile ? 'flex-1' : ''}`}
+                    title="Press Ctrl+K to add link"
                 >
-                    <Link size={16} className="sm:w-4 sm:h-4" />
-                </button>
+                    <Keyboard size={16} className="sm:w-4 sm:h-4" />
+                </div>
                 <button
                     onMouseDown={(e) => { e.preventDefault(); exec('insertUnorderedList'); }}
                     className={`p-2 sm:p-2 text-[var(--text-muted)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] rounded-lg flex justify-center ${isMobile ? 'flex-1' : ''}`}
@@ -149,14 +123,6 @@ export function EditorToolbar({ onAddSection, isMobile = false }: { onAddSection
                     className={isMobile ? "flex-1" : "min-w-[110px]"}
                 />
             </div>
-
-            <PromptDialog
-                isOpen={showLinkPrompt}
-                title="Add link"
-                placeholder="https://..."
-                onConfirm={confirmLink}
-                onCancel={() => setShowLinkPrompt(false)}
-            />
         </div>
     );
 }
