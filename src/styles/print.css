@@ -28,9 +28,9 @@
         box-shadow: none !important;
         /* Ensure no extra scaling happens in print */
         transform: none !important;
-        width: 210mm !important;
+        width: 100% !important;
+        /* Changed from 210mm to allow @page margin to handle width */
         min-height: 297mm !important;
-        padding: 30pt !important;
     }
 
     /* Prevent page breaks inside elements */

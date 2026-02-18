@@ -165,7 +165,31 @@ function ResumeBuilderContent() {
         }
 
         const html = element.outerHTML;
-        return { html, css: resumeCss };
+
+        // Add dynamic @page margins based on user config to ensure every page has correct margins
+        const marginMap = {
+            compact: '30pt',
+            narrow: '40pt',
+            standard: '50pt',
+            wide: '60pt',
+            relaxed: '72pt'
+        };
+        const currentMargin = marginMap[data.config?.margins || 'standard'] || '50pt';
+
+        const dynamicStyles = `
+            <style>
+                @page { margin: ${currentMargin} !important; size: A4; }
+                body { background: white !important; }
+                #resume-preview-content, #resume-preview-for-generation { 
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: 100% !important;
+                    box-shadow: none !important;
+                }
+            </style>
+        `.replace(/\s+/g, ' ').trim();
+
+        return { html: dynamicStyles + html, css: resumeCss };
     };
 
     const handleDownload = async () => {
