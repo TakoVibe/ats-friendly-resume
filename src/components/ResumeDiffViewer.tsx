@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, X, ChevronDown, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
+import { Check, X, ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import type { ResumeSchema, BulletItem } from '../types/resume';
 
 interface ResumeDiffViewerProps {
@@ -8,6 +8,11 @@ interface ResumeDiffViewerProps {
     onAccept: () => void;
     onReject: () => void;
     onSelectiveApply?: (sections: Partial<ResumeSchema>) => void;
+    issues?: string[];
+    odds?: {
+        selectionChance: number;
+        rejectionReasoning: string;
+    };
 }
 
 interface DiffSection {
@@ -21,6 +26,8 @@ type SectionAction = 'accept' | 'reject' | 'pending';
 export default function ResumeDiffViewer({
     original,
     optimized,
+    issues = [],
+    odds,
     onAccept,
     onReject,
     onSelectiveApply
@@ -38,16 +45,26 @@ export default function ResumeDiffViewer({
         setExpandedSections(newExpanded);
     };
 
+    const stripIds = (obj: any): any => {
+        if (Array.isArray(obj)) return obj.map(stripIds);
+        if (obj !== null && typeof obj === 'object') {
+            const newObj: any = {};
+            Object.keys(obj).forEach(k => {
+                if (k !== 'id') newObj[k] = stripIds(obj[k]);
+            });
+            return newObj;
+        }
+        return obj;
+    };
+
     const hasChanges = (key: keyof ResumeSchema): boolean => {
-        return JSON.stringify(original[key]) !== JSON.stringify(optimized[key]);
+        return JSON.stringify(stripIds(original[key])) !== JSON.stringify(stripIds(optimized[key]));
     };
 
     const sections: DiffSection[] = [
         { title: 'Professional Summary', key: 'summary', hasChanges: hasChanges('summary') },
         { title: 'Skills', key: 'skills', hasChanges: hasChanges('skills') },
         { title: 'Experience', key: 'experience', hasChanges: hasChanges('experience') },
-        { title: 'Projects', key: 'projects', hasChanges: hasChanges('projects') },
-        { title: 'Education', key: 'education', hasChanges: hasChanges('education') },
         { title: 'Achievements', key: 'achievements', hasChanges: hasChanges('achievements') },
     ];
 
@@ -134,10 +151,13 @@ export default function ResumeDiffViewer({
         return (
             <div className="space-y-4">
                 {optimized.experience.map((optExp, idx) => {
-                    const origExp = original.experience.find(e => e.id === optExp.id);
+                    const origExp = original.experience.find(e => e.id === optExp.id)
+                        || original.experience.find(e => e.role === optExp.role && e.company === optExp.company)
+                        || original.experience[idx];
+
                     if (!origExp) return null;
 
-                    const metricsChanged = JSON.stringify(origExp.metrics) !== JSON.stringify(optExp.metrics);
+                    const metricsChanged = JSON.stringify(stripIds(origExp.metrics)) !== JSON.stringify(stripIds(optExp.metrics));
                     const roleChanged = origExp.role !== optExp.role;
 
                     if (!metricsChanged && !roleChanged) return null;
@@ -173,119 +193,6 @@ export default function ResumeDiffViewer({
                                                 <li key={i} className="flex items-start gap-1">
                                                     <span>•</span>
                                                     <span dangerouslySetInnerHTML={{ __html: typeof metric === 'string' ? metric : metric.text }} />
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    };
-
-    const renderProjectsDiff = () => {
-        if (JSON.stringify(original.projects) === JSON.stringify(optimized.projects)) {
-            return <p className="text-sm text-[var(--text-muted)] italic">No changes</p>;
-        }
-
-        return (
-            <div className="space-y-4">
-                {optimized.projects.map((optProj) => {
-                    const origProj = original.projects.find(p => p.id === optProj.id);
-                    if (!origProj) return null;
-
-                    const descChanged = origProj.description !== optProj.description;
-                    const metricsChanged = JSON.stringify(origProj.metrics) !== JSON.stringify(optProj.metrics);
-
-                    if (!descChanged && !metricsChanged) return null;
-
-                    return (
-                        <div key={optProj.id} className="border border-[var(--border-color)] bg-[var(--bg-input)]/30 rounded-lg p-3">
-                            <p className="text-sm font-bold text-[var(--text-main)] mb-2">{optProj.name}</p>
-
-                            {descChanged && (
-                                <div className="mb-2">
-                                    <div className="bg-red-500/10 rounded p-2 mb-2 border border-red-500/10">
-                                        <p className="text-[10px] font-black uppercase text-red-500 mb-1 opacity-70">ORIGINAL</p>
-                                        <p className="text-xs text-[var(--text-muted)] opacity-70">{origProj.description}</p>
-                                    </div>
-                                    <div className="bg-green-500/10 rounded p-2 border border-green-500/10">
-                                        <p className="text-[10px] font-black uppercase text-green-500 mb-1">OPTIMIZED</p>
-                                        <p className="text-xs text-[var(--text-main)] font-medium" dangerouslySetInnerHTML={{ __html: optProj.description || '' }} />
-                                    </div>
-                                </div>
-                            )}
-
-                            {metricsChanged && optProj.metrics && origProj.metrics && (
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="bg-red-500/10 rounded p-2 border border-red-500/10">
-                                        <p className="text-[10px] font-black uppercase text-red-500 mb-1.5 opacity-70">ORIGINAL</p>
-                                        <ul className="text-xs text-[var(--text-muted)] space-y-1">
-                                            {origProj.metrics.map((metric: BulletItem, i: number) => (
-                                                <li key={i} className="opacity-70">• {typeof metric === 'string' ? metric : metric.text}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                    <div className="bg-green-500/10 rounded p-2 border border-green-500/10">
-                                        <p className="text-[10px] font-black uppercase text-green-500 mb-1.5">OPTIMIZED</p>
-                                        <ul className="text-xs text-[var(--text-main)] font-medium space-y-1">
-                                            {optProj.metrics.map((metric: BulletItem, i: number) => (
-                                                <li key={i} className="flex items-start gap-1">
-                                                    <span>•</span>
-                                                    <span dangerouslySetInnerHTML={{ __html: typeof metric === 'string' ? metric : metric.text }} />
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    };
-
-    const renderEducationDiff = () => {
-        if (JSON.stringify(original.education) === JSON.stringify(optimized.education)) {
-            return <p className="text-sm text-[var(--text-muted)] italic">No changes</p>;
-        }
-
-        return (
-            <div className="space-y-3">
-                {optimized.education.map((optEdu) => {
-                    const origEdu = original.education.find(e => e.id === optEdu.id);
-                    if (!origEdu) return null;
-
-                    const detailsChanged = JSON.stringify(origEdu.details) !== JSON.stringify(optEdu.details);
-                    if (!detailsChanged) return null;
-
-                    return (
-                        <div key={optEdu.id} className="border border-[var(--border-color)] bg-[var(--bg-input)]/30 rounded-lg p-3">
-                            <p className="text-sm font-bold text-[var(--text-main)] mb-2">
-                                {optEdu.institution} - {optEdu.degree}
-                            </p>
-
-                            {detailsChanged && optEdu.details && origEdu.details && (
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="bg-red-500/10 rounded p-2 border border-red-500/10">
-                                        <p className="text-[10px] font-black uppercase text-red-500 mb-1.5 opacity-70">ORIGINAL</p>
-                                        <ul className="text-xs text-[var(--text-muted)] space-y-1">
-                                            {origEdu.details.map((detail: BulletItem, i: number) => (
-                                                <li key={i} className="opacity-70">• {typeof detail === 'string' ? detail : detail.text}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                    <div className="bg-green-500/10 rounded p-2 border border-green-500/10">
-                                        <p className="text-[10px] font-black uppercase text-green-500 mb-1.5">OPTIMIZED</p>
-                                        <ul className="text-xs text-[var(--text-main)] font-medium space-y-1">
-                                            {optEdu.details.map((detail: BulletItem, i: number) => (
-                                                <li key={i} className="flex items-start gap-1">
-                                                    <span>•</span>
-                                                    <span dangerouslySetInnerHTML={{ __html: typeof detail === 'string' ? detail : detail.text }} />
                                                 </li>
                                             ))}
                                         </ul>
@@ -337,10 +244,6 @@ export default function ResumeDiffViewer({
                 return renderSkillsDiff();
             case 'experience':
                 return renderExperienceDiff();
-            case 'projects':
-                return renderProjectsDiff();
-            case 'education':
-                return renderEducationDiff();
             case 'achievements':
                 return renderAchievementsDiff();
             default:
@@ -355,28 +258,74 @@ export default function ResumeDiffViewer({
     return (
         <div className="flex flex-col h-full max-h-[90vh] bg-[var(--bg-card)]">
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-5 text-white shadow-lg relative z-10">
-                <h2 className="text-2xl font-black tracking-tight">Review Expert Enhancements</h2>
-                <div className="flex items-center gap-2 mt-1">
-                    <span className="px-2 py-0.5 bg-white/20 rounded text-[10px] font-black uppercase tracking-widest">
-                        {totalChanges} section{totalChanges !== 1 ? 's' : ''} modified
-                    </span>
-                    {acceptedCount > 0 && (
-                        <span className="px-2 py-0.5 bg-green-500/30 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                            <Check size={10} /> {acceptedCount} accepted
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-5 text-white shadow-lg relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-black tracking-tight">Review Expert Enhancements</h2>
+                    <div className="flex items-center gap-2 mt-1">
+                        <span className="px-2 py-0.5 bg-white/20 rounded text-[10px] font-black uppercase tracking-widest">
+                            {totalChanges} section{totalChanges !== 1 ? 's' : ''} modified
                         </span>
-                    )}
-                    {rejectedCount > 0 && (
-                        <span className="px-2 py-0.5 bg-red-500/30 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                            <X size={10} /> {rejectedCount} rejected
-                        </span>
-                    )}
+                        {acceptedCount > 0 && (
+                            <span className="px-2 py-0.5 bg-green-500/30 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                <Check size={10} /> {acceptedCount} accepted
+                            </span>
+                        )}
+                        {rejectedCount > 0 && (
+                            <span className="px-2 py-0.5 bg-red-500/30 rounded text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                <X size={10} /> {rejectedCount} rejected
+                            </span>
+                        )}
+                    </div>
                 </div>
+                {odds && (
+                    <div className="bg-black/20 backdrop-blur-sm rounded-xl p-3 border border-white/10 flex items-center gap-4 group">
+                        <div className="relative w-12 h-12 flex-shrink-0">
+                            <svg className="w-full h-full transform -rotate-90">
+                                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-white/20" />
+                                <circle
+                                    cx="24" cy="24" r="20"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                    strokeDasharray={125.6}
+                                    strokeDashoffset={125.6 - (125.6 * odds.selectionChance) / 100}
+                                    strokeLinecap="round"
+                                    fill="transparent"
+                                    className={odds.selectionChance > 70 ? 'text-green-400' : odds.selectionChance > 40 ? 'text-amber-400' : 'text-red-400'}
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className={`text-sm font-black ${odds.selectionChance > 70 ? 'text-green-400' : odds.selectionChance > 40 ? 'text-amber-400' : 'text-red-400'}`}>{odds.selectionChance}%</span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col flex-1 max-w-[200px]">
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-70 mb-0.5">Selection Odds</span>
+                            <span className="text-[10px] leading-snug line-clamp-2 opacity-90 group-hover:line-clamp-none transition-all">{odds.rejectionReasoning}</span>
+                        </div>
+                    </div>
+                )}
             </div>
 
+            {/* Warning / Issues Banner */}
+            {issues && issues.length > 0 && (
+                <div className="mx-6 mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-start gap-3 shadow-inner">
+                    <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h4 className="text-sm font-bold text-orange-500 mb-1">Distant Job Match Detected</h4>
+                        <p className="text-xs text-[var(--text-muted)] mb-2">
+                            The target Job Description specifies requirements that differ significantly from your current resume. The AI tried its best to optimize, but be aware of these gaps:
+                        </p>
+                        <ul className="list-disc pl-4 space-y-1">
+                            {issues.map((issue, idx) => (
+                                <li key={idx} className="text-xs font-medium text-orange-500/80">{issue}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar bg-[var(--bg-main)]/30">
-                {sections.map((section) => {
+            <div className={`flex-1 overflow-y-auto ${issues?.length ? 'p-6 pt-4' : 'p-6'} space-y-4 no-scrollbar bg-[var(--bg-main)]/30`}>
+                {sections.filter(s => s.hasChanges).map((section) => {
                     const action = sectionActions[section.key];
 
                     return (

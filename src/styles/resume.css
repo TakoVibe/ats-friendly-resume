@@ -362,9 +362,9 @@ li {
 }
 
 .resume-company {
-    font-size: 9pt;
-    font-weight: 500;
-    color: var(--resume-gray);
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: var(--resume-dark);
 }
 
 .resume-tech-stack {
@@ -413,14 +413,15 @@ li {
 
 /* Education Specifics */
 .resume-location-text {
-    font-size: 9pt;
-    font-weight: 500;
-    color: var(--resume-light-gray);
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: var(--resume-gray);
 }
 
 .resume-duration-gray {
-    font-size: 9pt;
-    color: var(--resume-light-gray);
+    font-size: 8.5pt;
+    font-weight: 500;
+    color: var(--resume-dark);
     display: block;
 }
 
@@ -447,7 +448,7 @@ li {
 }
 
 .resume-project-name {
-    font-size: 9.5pt;
+    font-size: 10pt;
     font-weight: 700;
     color: var(--resume-dark);
 }

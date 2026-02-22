@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Target, CheckCircle2, AlertCircle, MessageSquare, Info, Sparkles, UserCheck, Lock, LogIn, TrendingUp, Cpu, BarChart, Bug, Zap, BarChart3, Settings2, X, ChevronDown, ChevronUp, Calendar, Linkedin } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Search, Target, CheckCircle2, AlertCircle, MessageSquare, Info, Sparkles, UserCheck, Lock, LogIn, TrendingUp, Cpu, BarChart, Bug, Zap, BarChart3, Settings2, X, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import { Logo } from './ui/Logo';
 import { ATSWarning } from './ui/ATSWarning';
 import type { ResumeSchema } from '../types/resume';
@@ -13,10 +14,9 @@ interface RecruiterPanelProps {
     isAuthenticated?: boolean;
     onRequireAuth?: () => void;
     onClose?: () => void;
-    onOpenLinkedIn?: () => void;
 }
 
-export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimizer, onAuditResult, isAuthenticated, onRequireAuth, onClose, onOpenLinkedIn }: RecruiterPanelProps) {
+export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimizer, onAuditResult, isAuthenticated, onRequireAuth, onClose }: RecruiterPanelProps) {
     const [score, setScore] = useState(0);
     const [showJDInput, setShowJDInput] = useState(false);
     const [activeTab, setActiveTab] = useState<'pulse' | 'strategy' | 'analysis'>('pulse');
@@ -265,14 +265,6 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                 </div>
                 <div className="relative z-10 flex items-center gap-3">
                     <div className="flex gap-1.5 items-center">
-                        <button
-                            onClick={onOpenLinkedIn}
-                            className="p-2 hover:bg-[#0077b5]/10 text-[var(--text-muted)] hover:text-[#0077b5] rounded-full transition-all group/li-btn"
-                            title="LinkedIn Sync"
-                        >
-                            <Linkedin size={18} className="group-hover/li-btn:scale-110 transition-transform" />
-                        </button>
-                        <div className="w-[1px] h-4 bg-[var(--border-color)] mx-1" />
                         <div className="w-2 h-2 rounded-full bg-purple-500/20" />
                         <div className="w-2 h-2 rounded-full bg-purple-500/20" />
                     </div>
@@ -665,15 +657,15 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
                 {/* JD Input Overlay */}
                 {
-                    showJDInput && (
-                        <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-md animate-in fade-in duration-150 flex items-start justify-center pt-10 px-4">
-                            <div className="w-full bg-[var(--bg-card)] rounded-3xl border border-purple-500/30 shadow-2xl p-6 animate-in zoom-in-95 duration-100">
+                    showJDInput && createPortal(
+                        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-md animate-in fade-in duration-200 flex items-center justify-center p-4">
+                            <div className="w-full max-w-2xl bg-[var(--bg-card)] rounded-3xl border border-purple-500/30 shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-[11px] font-black uppercase tracking-widest text-purple-500 flex items-center gap-2">
-                                        <Search size={14} /> Target Job Description
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-purple-500 flex items-center gap-2">
+                                        <Search size={16} /> Target Job Description
                                     </h3>
                                     <button onClick={() => setShowJDInput(false)} className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors">
-                                        <X size={16} className="text-[var(--text-muted)]" />
+                                        <X size={20} className="text-[var(--text-muted)]" />
                                     </button>
                                 </div>
                                 <textarea
@@ -682,37 +674,40 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                     value={data.targetJD || ''}
                                     onChange={(e) => onUpdateJD?.(e.target.value)}
                                     placeholder="Paste the job description here to enable the heatmap and deep AI audit..."
-                                    className="w-full h-64 p-4 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-2xl text-[12px] text-[var(--text-main)] placeholder:text-[var(--text-muted)]/40 focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500/40 outline-none resize-none transition-all leading-relaxed scrollbar-hide"
+                                    className="w-full h-80 p-4 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-2xl text-[13px] text-[var(--text-main)] placeholder:text-[var(--text-muted)]/40 focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500/40 outline-none resize-none transition-all leading-relaxed scrollbar-hide"
                                 />
                                 <div className="mt-6 flex flex-col gap-4">
-                                    <div className="p-3 bg-purple-500/5 rounded-xl flex items-center gap-3">
-                                        <Zap size={14} className="text-purple-500" />
-                                        <p className="text-[10px] font-bold text-purple-600/80 uppercase tracking-tighter">
+                                    <div className="p-4 bg-purple-500/5 border border-purple-500/10 rounded-xl flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
+                                            <Zap size={14} className="text-purple-500" />
+                                        </div>
+                                        <p className="text-xs font-bold text-[var(--text-main)] uppercase tracking-widest">
                                             Real-time scoring & heatmap active
                                         </p>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-4">
                                         {data.targetJD && (
                                             <button
                                                 onClick={() => {
                                                     onUpdateJD?.('');
                                                     setShowJDInput(false);
                                                 }}
-                                                className="flex-1 py-4 bg-rose-500/10 text-rose-500 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-rose-500/20 active:scale-95 transition-all"
+                                                className="flex-1 py-4 bg-rose-500/10 text-rose-500 rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-rose-500/20 active:scale-95 transition-all"
                                             >
                                                 Clear JD
                                             </button>
                                         )}
                                         <button
                                             onClick={() => setShowJDInput(false)}
-                                            className="flex-[2] py-4 bg-[var(--text-main)] text-[var(--bg-main)] rounded-2xl text-[11px] font-black uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-xl"
+                                            className="flex-[2] py-4 bg-[var(--text-main)] text-[var(--bg-main)] rounded-2xl text-[12px] font-black uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-xl"
                                         >
                                             {data.targetJD ? 'Apply Changes' : 'Close'}
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>,
+                        document.body
                     )
                 }
             </div>

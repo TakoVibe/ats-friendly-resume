@@ -3,7 +3,6 @@ import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
 import { Plus, Github } from 'lucide-react';
-import { DatePicker } from '../ui/DatePicker';
 import { ATSWarning } from '../ui/ATSWarning';
 
 type OpenSourceItem = NonNullable<ResumeSchema['openSource']>[0];
@@ -72,23 +71,6 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
         onUpdate([...safeOpenSource, newItem]);
     };
 
-    const addMetric = (osId: string) => {
-        if (!onUpdate) return;
-        const newOS = safeOpenSource.map(item => {
-            if (item.id !== osId) return item;
-            return { ...item, metrics: [...(item.metrics || []), 'New contribution detail...'] };
-        });
-        onUpdate(newOS);
-    };
-
-    const deleteMetric = (osId: string, metricIndex: number) => {
-        if (!onUpdate) return;
-        const newOS = safeOpenSource.map(item => {
-            if (item.id !== osId) return item;
-            return { ...item, metrics: item.metrics?.filter((_, i) => i !== metricIndex) };
-        });
-        onUpdate(newOS);
-    };
 
     return (
         <section className="resume-section mb-12">
@@ -99,7 +81,7 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                 showSeparator={showSeparator}
                 onToggleSeparator={onToggleSeparator}
             />
-            <div className="resume-space-y-4">
+            <ul className="resume-details-list">
                 {safeOpenSource.map((item, index) => (
                     <ItemControls
                         key={item.id}
@@ -111,96 +93,37 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                         onDuplicate={() => duplicateItem(index)}
                         isEditable={isEditable}
                     >
-                        <div className="resume-relative group/item-content">
-                            <div className="flex justify-between items-baseline mb-1">
-                                <div className="flex flex-wrap items-baseline gap-x-1">
-                                    <span className="resume-font-bold resume-text-dark">
-                                        <EditableField
-                                            tagName="span"
-                                            value={item.name}
-                                            onSave={(val) => updateItem(item.id, 'name', val)}
-                                            isEditable={isEditable}
-                                            placeholder="Project Name"
-                                        />
-                                    </span>
-                                    <span className="opacity-70 text-[var(--resume-gray)]">: </span>
-                                    <div className="inline-flex items-baseline">
-                                        <EditableField
-                                            tagName="span"
-                                            value={item.description || ''}
-                                            onSave={(val) => updateItem(item.id, 'description', val)}
-                                            isEditable={isEditable}
-                                            placeholder="Contribution description & references..."
-                                            aiProps={{
-                                                type: 'bullet',
-                                                context: { projectName: item.name }
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                <DatePicker
-                                    value={item.date || ''}
-                                    onSave={(val) => updateItem(item.id, 'date', val)}
-                                    isEditable={isEditable}
-                                    mode="single"
-                                    className="resume-duration-gray"
-                                />
+                        <li className="resume-list-item resume-text-justify group/item-content resume-relative">
+                            <span className="resume-bullet">•</span>
+                            <div className="resume-flex-1 resume-flex resume-items-baseline">
+                                <span className="resume-font-bold resume-text-dark">
+                                    <EditableField
+                                        tagName="span"
+                                        value={item.name}
+                                        onSave={(val) => updateItem(item.id, 'name', val)}
+                                        isEditable={isEditable}
+                                        placeholder="Project Name"
+                                    />
+                                </span>
+                                <span className="opacity-70 text-[var(--resume-gray)] mx-1">:</span>
+                                <span className="resume-text-dark">
+                                    <EditableField
+                                        tagName="span"
+                                        value={item.description || ''}
+                                        onSave={(val) => updateItem(item.id, 'description', val)}
+                                        isEditable={isEditable}
+                                        placeholder="Contribution description & references..."
+                                        aiProps={{
+                                            type: 'bullet',
+                                            context: { projectName: item.name }
+                                        }}
+                                    />
+                                </span>
                             </div>
-
-                            {/* Secondary points/bullets */}
-                            {(item.metrics || isEditable) && (
-                                <ul className="resume-details-list pl-4">
-                                    {item.metrics?.map((metric, idx) => {
-                                        const metricText = typeof metric === 'string' ? metric : metric.text;
-                                        return (
-                                            <li key={idx} className="resume-list-item group/metric resume-relative py-0.5">
-                                                <span className="resume-bullet">•</span>
-                                                <div className="resume-flex-1">
-                                                    <EditableField
-                                                        tagName="span"
-                                                        value={metricText}
-                                                        onSave={(val) => {
-                                                            const nm = [...(item.metrics || [])];
-                                                            nm[idx] = typeof nm[idx] === 'object' ? { ...(nm[idx] as object), text: val } : val;
-                                                            updateItem(item.id, 'metrics', nm);
-                                                        }}
-                                                        isEditable={isEditable}
-                                                        placeholder="Contribution detail..."
-                                                        controlsLayout="parent"
-                                                        aiProps={{
-                                                            type: 'bullet',
-                                                            context: { projectName: item.name }
-                                                        }}
-                                                        actions={
-                                                            <button
-                                                                onClick={() => deleteMetric(item.id, idx)}
-                                                                className="p-1 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                                                title="Delete point"
-                                                            >
-                                                                <span className="text-sm font-bold leading-none">×</span>
-                                                            </button>
-                                                        }
-                                                    />
-                                                </div>
-                                            </li>
-                                        );
-                                    })}
-                                    {isEditable && (
-                                        <li className="flex mt-0.5 opacity-0 group-hover/item-content:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={() => addMetric(item.id)}
-                                                className="text-[8pt] text-[var(--accent)] hover:underline flex items-center gap-1 font-bold uppercase tracking-wider"
-                                            >
-                                                <Plus size={10} /> Add Point
-                                            </button>
-                                        </li>
-                                    )}
-                                </ul>
-                            )}
-                        </div>
+                        </li>
                     </ItemControls>
                 ))}
-            </div>
+            </ul>
 
             {isEditable && (
                 <button

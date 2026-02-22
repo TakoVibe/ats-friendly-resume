@@ -15,6 +15,18 @@ interface OptimizeResumeModalProps {
 type ModalView = 'input' | 'diff' | 'history';
 
 const VERSIONS_STORAGE_KEY = 'resume-versions-v1';
+const OPTIMIZATION_CACHE_KEY = 'resume-optimization-cache-v1';
+
+const getCacheKeyHash = (resume: any, jd: string, audit: any) => {
+    const str = JSON.stringify({ resume, jd, audit });
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash).toString(36);
+};
 
 export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, auditResult }: OptimizeResumeModalProps) {
     const { data: resume, updateResume } = useResume();
@@ -52,6 +64,8 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
     };
 
     const [error, setError] = useState<string | null>(null);
+    const [optimizationIssues, setOptimizationIssues] = useState<string[]>([]);
+    const [odds, setOdds] = useState<{ selectionChance: number, rejectionReasoning: string } | null>(null);
     const [optimizedResume, setOptimizedResume] = useState<ResumeSchema | null>(null);
     const [originalResume, setOriginalResume] = useState<ResumeSchema | null>(null);
     const [versions, setVersions] = useState<ResumeVersion[]>(() => {
@@ -85,6 +99,27 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
         setError(null);
         setOriginalResume(resume);
 
+        const cacheKeyHash = getCacheKeyHash(resume, jobDescription.trim(), auditResult);
+        const cachedDataStr = localStorage.getItem(OPTIMIZATION_CACHE_KEY);
+        let cache: Record<string, any> = {};
+        if (cachedDataStr) {
+            try {
+                cache = JSON.parse(cachedDataStr);
+            } catch { }
+        }
+
+        if (cache[cacheKeyHash]) {
+            const cachedData = cache[cacheKeyHash];
+            setTimeout(() => {
+                setOptimizedResume(cachedData.optimizedResume);
+                setOptimizationIssues(cachedData.issues || []);
+                setOdds(cachedData.odds || null);
+                setView('diff');
+                setIsOptimizing(false);
+            }, 800); // Small artificial delay to show it's "loading" from cache 
+            return;
+        }
+
         try {
             const response = await fetch('/api/optimize-resume', {
                 method: 'POST',
@@ -105,7 +140,23 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
             }
 
             if (data.success && data.optimizedResume) {
+                // Update cache
+                cache[cacheKeyHash] = {
+                    optimizedResume: data.optimizedResume,
+                    issues: data.issues || [],
+                    odds: data.odds || null
+                };
+
+                // Keep only last 10 optimized queries to prevent localStorage bloat
+                const keys = Object.keys(cache);
+                if (keys.length > 10) {
+                    delete cache[keys[0]]; // FIFO
+                }
+                localStorage.setItem(OPTIMIZATION_CACHE_KEY, JSON.stringify(cache));
+
                 setOptimizedResume(data.optimizedResume);
+                setOptimizationIssues(data.issues || []);
+                setOdds(data.odds || null);
                 setView('diff');
             } else {
                 throw new Error('Invalid response from server');
@@ -143,6 +194,8 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
         setView('input');
         setOptimizedResume(null);
         setOriginalResume(null);
+        setOptimizationIssues([]);
+        setOdds(null);
     };
 
     const handleRestoreVersion = (version: ResumeVersion) => {
@@ -165,6 +218,8 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
         setError(null);
         setOptimizedResume(null);
         setOriginalResume(null);
+        setOptimizationIssues([]);
+        setOdds(null);
         onClose();
     };
 
@@ -192,6 +247,8 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
                     <ResumeDiffViewer
                         original={originalResume}
                         optimized={optimizedResume}
+                        issues={optimizationIssues}
+                        odds={odds || undefined}
                         onAccept={handleAcceptChanges}
                         onReject={handleRejectChanges}
                         onSelectiveApply={handleAcceptChanges}

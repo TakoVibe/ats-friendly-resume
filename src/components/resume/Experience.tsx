@@ -177,23 +177,27 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                             {/* Company & Location */}
                             <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
                                 {job.company && (
-                                    <EditableField
-                                        tagName="h4"
-                                        value={job.company}
-                                        onSave={(val) => updateJob(job.id, 'company', val)}
-                                        isEditable={isEditable}
-                                        className="resume-company"
-                                        placeholder="Company Name"
-                                    />
+                                    <div className="resume-flex-1">
+                                        <EditableField
+                                            tagName="h4"
+                                            value={job.company}
+                                            onSave={(val) => updateJob(job.id, 'company', val)}
+                                            isEditable={isEditable}
+                                            className="resume-company"
+                                            placeholder="Company Name"
+                                        />
+                                    </div>
                                 )}
                                 {job.location && (
-                                    <EditableField
-                                        value={job.location || ''}
-                                        onSave={(val) => updateJob(job.id, 'location', val)}
-                                        isEditable={isEditable}
-                                        className={`resume-location-text ${isMobile ? 'resume-mt-0.5' : ''}`}
-                                        placeholder="Location"
-                                    />
+                                    <div className={!isMobile ? "resume-text-right shrink-0 ml-2" : ""}>
+                                        <EditableField
+                                            value={job.location || ''}
+                                            onSave={(val) => updateJob(job.id, 'location', val)}
+                                            isEditable={isEditable}
+                                            className={`resume-location-text ${isMobile ? 'resume-mt-0.5' : ''}`}
+                                            placeholder="Location"
+                                        />
+                                    </div>
                                 )}
                             </div>
 

@@ -134,6 +134,29 @@ export function WhyResumeVibeContent() {
                     </div>
                 </section>
 
+                {/* Engine Upgrades Section */}
+                <section className="mb-32">
+                    <div className="flex items-center gap-4 mb-16">
+                        <h2 className="text-xs font-black uppercase tracking-widest text-emerald-500">Under the Hood: Engine Upgrades</h2>
+                        <div className="h-[1px] flex-1 bg-gradient-to-r from-emerald-500/50 to-transparent"></div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                        <div className="group p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-emerald-500/30 hover:bg-[var(--bg-input)] transition-all duration-500 animate-in fade-in shadow-sm hover:shadow-xl wait-200">
+                            <div className="w-14 h-14 rounded-2xl bg-[var(--bg-input)] flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-emerald-500/10 transition-all duration-500 shadow-md">
+                                <Target size={24} className="text-[var(--text-main)] group-hover:text-emerald-500 transition-colors" />
+                            </div>
+                            <h3 className="text-xl font-black tracking-tight text-[var(--text-main)] group-hover:text-emerald-500 transition-colors mb-4">
+                                Distant Match Odds
+                            </h3>
+                            <p className="text-[var(--text-muted)] font-medium leading-relaxed group-hover:text-[var(--text-main)] transition-colors">
+                                Applying for a wildly different role? The engine calculates your exact percentage odds of selection while presenting brutal, actionable warnings about core capability gaps.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Roadmap Section */}
                 <section className="mb-32 relative group">
                     <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/10 to-transparent blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>

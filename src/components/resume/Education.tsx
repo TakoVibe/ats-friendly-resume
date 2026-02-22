@@ -161,19 +161,23 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
 
                             {/* Institution & Location */}
                             <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
-                                <EditableField
-                                    tagName="h4"
-                                    value={edu.institution}
-                                    onSave={(val) => updateEdu(edu.id, 'institution', val)}
-                                    isEditable={isEditable}
-                                    className="resume-company"
-                                />
-                                <EditableField
-                                    value={edu.location || ''}
-                                    onSave={(val) => updateEdu(edu.id, 'location', val)}
-                                    isEditable={isEditable}
-                                    className={`resume-location-text ${isMobile ? 'resume-mt-0.5' : ''}`}
-                                />
+                                <div className="resume-flex-1">
+                                    <EditableField
+                                        tagName="h4"
+                                        value={edu.institution}
+                                        onSave={(val) => updateEdu(edu.id, 'institution', val)}
+                                        isEditable={isEditable}
+                                        className="resume-company"
+                                    />
+                                </div>
+                                <div className={!isMobile ? "resume-text-right shrink-0 ml-2" : ""}>
+                                    <EditableField
+                                        value={edu.location || ''}
+                                        onSave={(val) => updateEdu(edu.id, 'location', val)}
+                                        isEditable={isEditable}
+                                        className={`resume-location-text ${isMobile ? 'resume-mt-0.5' : ''}`}
+                                    />
+                                </div>
                             </div>
 
                             {(edu.details || isEditable) && (
