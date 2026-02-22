@@ -21,6 +21,7 @@ interface Props {
 
 export function Certifications({ certifications, isEditable = false, onUpdate, title = "Certifications", onTitleChange, showSeparator, onToggleSeparator, viewMode = 'desktop' }: Props) {
     if (!certifications) return null;
+    const isMobile = viewMode === 'mobile';
 
     const updateCert = (id: string, field: keyof CertificationItem, value: any) => {
         if (!onUpdate) return;
@@ -92,8 +93,8 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
                         <li className="resume-list-item resume-text-justify group/item-content resume-relative">
                             <span className="resume-bullet">•</span>
                             <div className="resume-flex-1 resume-break-avoid">
-                                <div className="resume-flex resume-justify-between resume-items-baseline">
-                                    <div className="resume-font-bold resume-text-dark resume-flex resume-gap-1 group/cert-row relative items-baseline">
+                                <div className={`resume-flex ${isMobile ? 'resume-flex-col resume-gap-0.5' : 'resume-justify-between resume-items-baseline'}`}>
+                                    <div className={`resume-font-bold resume-text-dark resume-flex resume-gap-1 group/cert-row relative items-baseline ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0' : ''}`}>
                                         <EditableField
                                             value={cert.name}
                                             onSave={(val) => updateCert(cert.id, 'name', val)}
@@ -108,7 +109,7 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
                                                 </button>
                                             }
                                         />
-                                        <span>-</span>
+                                        {!isMobile && <span>-</span>}
                                         <EditableField
                                             value={cert.issuer}
                                             onSave={(val) => updateCert(cert.id, 'issuer', val)}

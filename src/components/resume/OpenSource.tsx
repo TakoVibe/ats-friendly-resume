@@ -21,6 +21,7 @@ interface Props {
 export function OpenSource({ openSource, isEditable = false, onUpdate, title = "Open Source Contributions", onTitleChange, showSeparator, onToggleSeparator, viewMode = 'desktop' }: Props) {
     if (!openSource && !isEditable) return null;
     const safeOpenSource = openSource || [];
+    const isMobile = viewMode === 'mobile';
 
     const updateItem = (id: string, field: keyof NonNullable<Props['openSource']>[0], value: any) => {
         if (!onUpdate) return;
@@ -95,8 +96,8 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                     >
                         <li className="resume-list-item resume-text-justify group/item-content resume-relative">
                             <span className="resume-bullet">•</span>
-                            <div className="resume-flex-1 resume-flex resume-items-baseline">
-                                <span className="resume-font-bold resume-text-dark">
+                            <div className={`resume-flex-1 resume-flex ${isMobile ? 'resume-flex-col resume-gap-0.5' : 'resume-items-baseline'}`}>
+                                <span className={`resume-font-bold resume-text-dark ${isMobile ? 'resume-mb-0.5' : ''}`}>
                                     <EditableField
                                         tagName="span"
                                         value={item.name}
@@ -105,7 +106,7 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                                         placeholder="Project Name"
                                     />
                                 </span>
-                                <span className="opacity-70 text-[var(--resume-gray)] mx-1">:</span>
+                                {!isMobile && <span className="opacity-70 text-[var(--resume-gray)] mx-1">:</span>}
                                 <span className="resume-text-dark">
                                     <EditableField
                                         tagName="span"

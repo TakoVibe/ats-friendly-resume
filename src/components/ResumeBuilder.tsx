@@ -123,11 +123,22 @@ function ResumeBuilderContent() {
         return (
             <div className="min-h-screen bg-[var(--bg-main)] py-8 px-4 flex flex-col items-center">
                 <div className="w-full max-w-4xl">
-                    <ResumePreview
-                        data={data}
-                        id="public-resume-view"
-                        isEditable={false}
-                    />
+                    <div className="hidden md:block print:block">
+                        <ResumePreview
+                            data={data}
+                            id="public-resume-view-desktop"
+                            isEditable={false}
+                            viewMode="desktop"
+                        />
+                    </div>
+                    <div className="block md:hidden print:hidden w-full">
+                        <ResumePreview
+                            data={data}
+                            id="public-resume-view-mobile"
+                            isEditable={false}
+                            viewMode="mobile"
+                        />
+                    </div>
                 </div>
 
                 {/* Professional Badge */}
