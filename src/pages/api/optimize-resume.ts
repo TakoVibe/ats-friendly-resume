@@ -122,17 +122,16 @@ Your task is to rewrite the user's resume to align perfectly with the target job
 - You MUST respond with ONLY a valid JSON object, no additional text or explanation
 - Return a JSON object with this exact structure:
 {
-    "optimizedResume": { ... }, // COMPLETE ResumeSchema JSON object
+    "optimizedSummary": "Your rewritten professional summary",
+    "optimizedSkills": [ ... ], // Array of updated skill objects (keep original IDs)
+    "optimizedExperience": [ ... ], // Array of updated experience objects (keep original IDs)
     "issues": [ "List of critical alignment issues if the Job Description is drastically different from the user's actual skills/experience. Leave empty if reasonable match." ],
     "odds": {
         "selectionChance": 85,
         "rejectionReasoning": "Brief explanation of what factors might cause rejection despite optimization."
     }
 }
-- **OMIT UNMODIFIED SECTIONS**: To save tokens, DO NOT include sections (like 'education', 'certifications', 'personalInfo', or others) if you made no changes to them.
-- Ensure all required fields are present in the sections you DO return.
-- Maintain all existing IDs for items in returned sections.
-- Keep the same sectionOrder and visibleSections unless optimization requires changes`;
+- Do NOT include any other parts of the resume.`;
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -156,9 +155,6 @@ export const POST: APIRoute = async ({ request }) => {
 
         const openai = new OpenAI({ apiKey });
 
-        // Preserve projects and education: Remove them from the resume sent to AI so they are not modified
-        const { projects: originalProjects, education: originalEducation, ...resumeToOptimize } = resume;
-
         // Build context from Audit Result if available
         let auditContext = '';
         if (auditResult && auditResult.insights) {
@@ -168,19 +164,26 @@ export const POST: APIRoute = async ({ request }) => {
             }
         }
 
+        // Only send the parts of the resume we want the AI to optimize
+        const targetedResumeElements = {
+            summary: resume.summary,
+            skills: resume.skills,
+            experience: resume.experience
+        };
+
         // Create the user prompt
         const userPrompt = `** Job Description:**
     ${jobDescription}
 
-** Current Resume(JSON):**
-    ${JSON.stringify(resumeToOptimize, null, 2)}${auditContext}
+** Current Resume (Only Relevant Sections):**
+    ${JSON.stringify(targetedResumeElements, null, 2)}${auditContext}
 
-Please optimize this resume for the job description above. Return the data adhering to the required JSON structure including any 'issues' if they exist.
+Please optimize these sections for the job description above. Return the data adhering to the required JSON structure including any 'issues' if they exist.
 If critical gaps are listed above, prioritize fixing them by adding relevant skills, rewriting bullets to demonstrate those competencies, or adjusting the summary.`;
 
         // Call OpenAI with structured output
         const completion = await openai.chat.completions.create({
-            model: 'gpt-5-mini',
+            model: 'gpt-5-mini', // Assuming this is set up correctly in the environment
             messages: [
                 { role: 'system', content: SYSTEM_PROMPT },
                 { role: 'user', content: userPrompt }
@@ -200,30 +203,36 @@ If critical gaps are listed above, prioritize fixing them by adding relevant ski
         let optimizedResume;
         let issues: string[] = [];
         let odds: any = null;
+
         try {
             const parsed = JSON.parse(responseText);
-            const rawResume = parsed.optimizedResume || parsed; // Fallback to root if model ignores wrapper
             issues = Array.isArray(parsed.issues) ? parsed.issues : [];
             odds = parsed.odds || null;
 
             // Normalize summary if it's an array (AI quirk)
-            if (Array.isArray(rawResume.summary)) {
-                rawResume.summary = rawResume.summary.join('\n\n');
+            let newSummary = parsed.optimizedSummary || resume.summary;
+            if (Array.isArray(newSummary)) {
+                newSummary = newSummary.join('\n\n');
             }
 
-            // Ensure returned sections exist as arrays if missing (AI fallibility)
-            const requiredArrays = ['skills', 'experience', 'education', 'achievements', 'certifications'];
-            requiredArrays.forEach(key => {
-                if (rawResume[key] !== undefined && !Array.isArray(rawResume[key])) {
-                    rawResume[key] = [rawResume[key]];
-                }
-            });
+            // Fallback for arrays if AI failed to return them
+            const newSkills = Array.isArray(parsed.optimizedSkills) ? parsed.optimizedSkills : resume.skills;
+            const newExperience = Array.isArray(parsed.optimizedExperience) ? parsed.optimizedExperience : resume.experience;
 
-            // Re-attach the original projects and education, and any sections the AI omitted to save tokens
-            const fullResume = { ...resumeToOptimize, ...rawResume, projects: originalProjects, education: originalEducation };
+            // Reconstruct the full resume
+            const fullResume = {
+                ...resume,
+                summary: newSummary,
+                skills: newSkills,
+                experience: newExperience
+            };
+
+            // Validate the reconstructed resume
             optimizedResume = ResumeSchemaZod.parse(fullResume);
+
         } catch (parseError) {
             console.error('Failed to parse AI response:', parseError);
+            console.error('Raw response text:', responseText);
             return new Response(
                 JSON.stringify({
                     error: 'Invalid response format from AI',
