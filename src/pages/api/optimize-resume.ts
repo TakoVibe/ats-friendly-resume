@@ -85,7 +85,7 @@ const ResumeSchemaZod = z.object({
         baseFontSize: z.number().optional(),
         accentColor: z.string().optional(),
         fontFamily: z.string().optional(),
-        margins: z.enum(['compact', 'standard', 'relaxed']).optional(),
+        margins: z.enum(['compact', 'standard', 'relaxed', 'narrow']).optional(),
         lineHeight: z.number().optional()
     }).optional(),
     sectionOrder: z.array(z.string()),
@@ -209,15 +209,20 @@ If critical gaps are listed above, prioritize fixing them by adding relevant ski
             issues = Array.isArray(parsed.issues) ? parsed.issues : [];
             odds = parsed.odds || null;
 
-            // Normalize summary if it's an array (AI quirk)
+            // Normalize summary if it's an array or object (AI quirk)
             let newSummary = parsed.optimizedSummary || resume.summary;
             if (Array.isArray(newSummary)) {
                 newSummary = newSummary.join('\n\n');
+            } else if (typeof newSummary === 'object' && newSummary !== null) {
+                newSummary = newSummary.text || newSummary.summary || Object.values(newSummary).join(' ');
+            }
+            if (typeof newSummary !== 'string') {
+                newSummary = String(newSummary || '');
             }
 
             // Fallback for arrays if AI failed to return them
-            const newSkills = Array.isArray(parsed.optimizedSkills) ? parsed.optimizedSkills : resume.skills;
-            const newExperience = Array.isArray(parsed.optimizedExperience) ? parsed.optimizedExperience : resume.experience;
+            const newSkills = Array.isArray(parsed.optimizedSkills) ? parsed.optimizedSkills.map((s: any) => ({ ...s, id: s.id || `skill-${Math.random().toString(36).substr(2, 9)}` })) : resume.skills;
+            const newExperience = Array.isArray(parsed.optimizedExperience) ? parsed.optimizedExperience.map((e: any) => ({ ...e, id: e.id || `exp-${Math.random().toString(36).substr(2, 9)}` })) : resume.experience;
 
             // Reconstruct the full resume
             const fullResume = {
@@ -227,8 +232,15 @@ If critical gaps are listed above, prioritize fixing them by adding relevant ski
                 experience: newExperience
             };
 
-            // Validate the reconstructed resume
-            optimizedResume = ResumeSchemaZod.parse(fullResume);
+            // Validate the reconstructed resume gracefully
+            const parseResult = ResumeSchemaZod.safeParse(fullResume);
+            if (parseResult.success) {
+                optimizedResume = parseResult.data;
+            } else {
+                console.warn('Zod validation failed, using unvalidated payload fallback. Errors:', parseResult.error.issues);
+                optimizedResume = fullResume; // Pass through anyway to avoid crashing the user's flow
+                issues.push("There were minor validation warnings on the AI's format, but we attempted to recover the data.");
+            }
 
         } catch (parseError) {
             console.error('Failed to parse AI response:', parseError);
@@ -238,7 +250,7 @@ If critical gaps are listed above, prioritize fixing them by adding relevant ski
                     error: 'Invalid response format from AI',
                     details: parseError instanceof Error ? parseError.message : 'Unknown error'
                 }),
-                { status: 500, headers: { 'Content-Type': 'application/json' } }
+                { status: 422, headers: { 'Content-Type': 'application/json' } }
             );
         }
 

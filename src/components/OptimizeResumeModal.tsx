@@ -133,10 +133,16 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
                 }),
             });
 
-            const data = await response.json();
+            let data;
+            const textResponse = await response.text();
+            try {
+                data = JSON.parse(textResponse);
+            } catch (e) {
+                throw new Error('Our AI service returned an unexpected format. Please try again in a moment.');
+            }
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to optimize resume');
+                throw new Error(data?.error || data?.details || 'Failed to optimize resume');
             }
 
             if (data.success && data.optimizedResume) {
