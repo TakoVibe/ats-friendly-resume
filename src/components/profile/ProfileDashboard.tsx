@@ -6,6 +6,7 @@ import { LoginModal } from '../ui/LoginModal';
 import { Footer } from '../ui/Footer';
 import { ChevronLeft, ArrowRight, Zap, TrendingDown, TrendingUp } from 'lucide-react';
 import { useToken } from '../../context/TokenContext';
+import { api } from '../../lib/api';
 
 export function ProfileDashboard() {
     return (
@@ -16,28 +17,60 @@ export function ProfileDashboard() {
 }
 
 function ProfileDashboardInner() {
-    const [paymentMessage, setPaymentMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [paymentMessage, setPaymentMessage] = React.useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
     const { tokenBalance, totalConsumed, history, isLoading: tokenLoading } = useToken();
 
     React.useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const payment = params.get('payment');
-        const razorpayStatus = params.get('razorpay_payment_link_status');
+        const verifyPaymentStatus = async () => {
+            const params = new URLSearchParams(window.location.search);
+            const paymentId = params.get('razorpay_payment_id');
+            const paymentLinkId = params.get('razorpay_payment_link_id');
+            const hasPaymentContext = params.get('payment') || paymentId || paymentLinkId;
 
-        if (payment === 'success' || razorpayStatus === 'paid') {
-            setPaymentMessage({
-                type: 'success',
-                text: 'Payment received. Tokens will reflect in your balance shortly.'
-            });
-            return;
-        }
+            if (!hasPaymentContext) return;
 
-        if (payment === 'failed' || payment === 'cancelled' || razorpayStatus === 'cancelled') {
-            setPaymentMessage({
-                type: 'error',
-                text: 'Payment was not completed. No tokens were deducted. Please try again.'
-            });
-        }
+            if (!paymentId && !paymentLinkId) {
+                const payment = params.get('payment');
+                if (payment === 'failed' || payment === 'cancelled') {
+                    setPaymentMessage({
+                        type: 'error',
+                        text: 'Payment was not completed. No tokens were deducted. Please try again.'
+                    });
+                }
+                return;
+            }
+
+            try {
+                const response = await api.get(
+                    `/api/users/tokens/payment-status/?payment_id=${encodeURIComponent(paymentId || '')}&payment_link_id=${encodeURIComponent(paymentLinkId || '')}`
+                );
+
+                if (!response.ok) {
+                    setPaymentMessage({
+                        type: 'info',
+                        text: 'Payment is being verified. Please refresh in a few moments.'
+                    });
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    setPaymentMessage({ type: 'success', text: data.message || 'Payment successful. Tokens credited.' });
+                } else if (data.status === 'failed') {
+                    setPaymentMessage({ type: 'error', text: data.message || 'Payment failed. No tokens were deducted.' });
+                } else {
+                    setPaymentMessage({ type: 'info', text: data.message || 'Payment verification is in progress.' });
+                }
+            } catch (error) {
+                console.error('Failed to verify payment status:', error);
+                setPaymentMessage({
+                    type: 'info',
+                    text: 'Payment is being verified. Please refresh in a few moments.'
+                });
+            }
+        };
+
+        verifyPaymentStatus();
     }, []);
 
     return (
@@ -71,7 +104,9 @@ function ProfileDashboardInner() {
                             <div className={`mb-6 rounded-2xl px-4 py-3 text-sm font-bold border ${
                                 paymentMessage.type === 'success'
                                     ? 'bg-green-500/10 border-green-500/20 text-green-500'
-                                    : 'bg-red-500/10 border-red-500/20 text-red-500'
+                                    : paymentMessage.type === 'error'
+                                        ? 'bg-red-500/10 border-red-500/20 text-red-500'
+                                        : 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
                             }`}>
                                 {paymentMessage.text}
                             </div>

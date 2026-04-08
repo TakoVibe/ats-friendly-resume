@@ -6,7 +6,7 @@ import { LoginModal } from '../ui/LoginModal';
 import { api } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToken } from '../../context/TokenContext';
-import { Check, Lock, Zap } from 'lucide-react';
+import { Check, Lock, X, Zap } from 'lucide-react';
 
 const PACKS = [
     { tokens: 100, price: '$1.00', savings: null },
@@ -24,9 +24,56 @@ export function BuyTokensContent() {
 
 function BuyTokensInner() {
     const { isAuthenticated } = useAuth();
-    const { tokenBalance } = useToken();
+    const { tokenBalance, fetchTokenData } = useToken();
     const [loadingPack, setLoadingPack] = React.useState<number | null>(null);
     const [error, setError] = React.useState<string>('');
+    const [paymentModal, setPaymentModal] = React.useState<{ state: 'processing' | 'success' | 'failed'; message: string } | null>(null);
+    const pollTimerRef = React.useRef<number | null>(null);
+
+    const stopPolling = () => {
+        if (pollTimerRef.current !== null) {
+            window.clearInterval(pollTimerRef.current);
+            pollTimerRef.current = null;
+        }
+    };
+
+    const pollStatus = async (requestId: string, orderId: string, paymentId?: string) => {
+        try {
+            const response = await api.get(
+                `/api/users/tokens/payment-status/?request_id=${encodeURIComponent(requestId)}&payment_id=${encodeURIComponent(paymentId || '')}&payment_link_id=${encodeURIComponent(orderId)}`
+            );
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                stopPolling();
+                setPaymentModal({ state: 'success', message: data.message || 'Payment successful. Tokens credited.' });
+                fetchTokenData();
+                return;
+            }
+
+            if (data.status === 'failed') {
+                stopPolling();
+                setPaymentModal({ state: 'failed', message: data.message || 'Payment failed. Please try again.' });
+                setError(data.message || 'Payment failed. Please try again.');
+                return;
+            }
+        } catch (err) {
+            console.error('Failed to poll payment status:', err);
+        }
+    };
+
+    const loadRazorpayScript = async () => {
+        if ((window as any).Razorpay) return true;
+        return new Promise<boolean>((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.async = true;
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
 
     const handlePurchase = async (tokensAmount: number) => {
         setError('');
@@ -38,7 +85,12 @@ function BuyTokensInner() {
 
         setLoadingPack(tokensAmount);
         try {
-            const response = await api.post('/api/users/tokens/purchase/', {
+            const scriptLoaded = await loadRazorpayScript();
+            if (!scriptLoaded) {
+                throw new Error('Unable to load Razorpay Checkout.');
+            }
+
+            const response = await api.post('/api/users/tokens/create-order/', {
                 product: 'resumevibe',
                 tokens_amount: tokensAmount,
             });
@@ -53,10 +105,58 @@ function BuyTokensInner() {
                 throw new Error(message);
             }
             const data = await response.json();
-            if (data.checkout_url) {
-                window.location.href = data.checkout_url;
+            if (data.order_id && data.key) {
+                const requestId = data.request_id || `ord-${Date.now()}`;
+                setPaymentModal({ state: 'processing', message: 'Complete payment in the Razorpay popup. We will verify it automatically.' });
+
+                const razorpay = new (window as any).Razorpay({
+                    key: data.key,
+                    amount: data.amount,
+                    currency: data.currency || 'USD',
+                    name: 'ResumeVibe',
+                    description: `${tokensAmount} VibeTokens`,
+                    order_id: data.order_id,
+                    handler: async (paymentResponse: any) => {
+                        try {
+                            const verifyRes = await api.post('/api/users/tokens/verify-payment/', paymentResponse);
+                            if (!verifyRes.ok) {
+                                const verifyData = await verifyRes.json().catch(() => ({}));
+                                throw new Error(verifyData?.message || verifyData?.error || 'Payment verification failed.');
+                            }
+                            const verifyData = await verifyRes.json();
+                            setPaymentModal({ state: 'success', message: verifyData.message || 'Payment successful. Tokens credited.' });
+                            fetchTokenData();
+                        } catch (verifyErr) {
+                            console.error('Payment verify failed:', verifyErr);
+                            setPaymentModal({ state: 'processing', message: 'Payment received. Final verification in progress...' });
+                            stopPolling();
+                            pollTimerRef.current = window.setInterval(() => {
+                                pollStatus(requestId, data.order_id, paymentResponse?.razorpay_payment_id);
+                            }, 5000);
+                            pollStatus(requestId, data.order_id, paymentResponse?.razorpay_payment_id);
+                        }
+                    },
+                    modal: {
+                        ondismiss: () => {
+                            setPaymentModal({ state: 'failed', message: 'Payment popup closed before completion.' });
+                        },
+                    },
+                    prefill: {},
+                    notes: {
+                        request_id: requestId,
+                    },
+                    theme: {
+                        color: '#7c3aed',
+                    },
+                });
+
+                razorpay.on('payment.failed', () => {
+                    setPaymentModal({ state: 'failed', message: 'Payment failed. Please try again.' });
+                });
+
+                razorpay.open();
             } else {
-                setError('Checkout URL was not returned by the server.');
+                setError('Order details were not returned by the server.');
             }
         } catch (error) {
             console.error('Failed to initiate checkout', error);
@@ -65,6 +165,10 @@ function BuyTokensInner() {
             setLoadingPack(null);
         }
     };
+
+    React.useEffect(() => {
+        return () => stopPolling();
+    }, []);
 
     return (
         <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col">
@@ -141,6 +245,32 @@ function BuyTokensInner() {
             </main>
 
             <Footer />
+
+            {paymentModal && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6">
+                        <button
+                            onClick={() => {
+                                stopPolling();
+                                setPaymentModal(null);
+                            }}
+                            className="absolute top-3 right-3 p-2 rounded-lg hover:bg-[var(--bg-input)] text-[var(--text-muted)]"
+                        >
+                            <X size={16} />
+                        </button>
+                        <h3 className="text-lg font-black mb-2">
+                            {paymentModal.state === 'success' ? 'Payment Successful' : paymentModal.state === 'failed' ? 'Payment Failed' : 'Processing Payment'}
+                        </h3>
+                        <p className="text-sm text-[var(--text-muted)] mb-2">{paymentModal.message}</p>
+                        {paymentModal.state === 'processing' && (
+                            <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">
+                                Verifying with backend every 5 seconds
+                            </p>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
