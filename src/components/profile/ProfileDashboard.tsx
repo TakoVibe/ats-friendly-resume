@@ -1,13 +1,47 @@
+import React from 'react';
 import { AuthOnlyProviders } from '../Providers';
 import { Navbar } from '../ui/Navbar';
 import { UserResumes } from './UserResumes';
 import { LoginModal } from '../ui/LoginModal';
 import { Footer } from '../ui/Footer';
-import { ChevronLeft, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ArrowRight, Zap, TrendingDown, TrendingUp } from 'lucide-react';
+import { useToken } from '../../context/TokenContext';
 
 export function ProfileDashboard() {
     return (
         <AuthOnlyProviders>
+            <ProfileDashboardInner />
+        </AuthOnlyProviders>
+    );
+}
+
+function ProfileDashboardInner() {
+    const [paymentMessage, setPaymentMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const { tokenBalance, totalConsumed, history, isLoading: tokenLoading } = useToken();
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const payment = params.get('payment');
+        const razorpayStatus = params.get('razorpay_payment_link_status');
+
+        if (payment === 'success' || razorpayStatus === 'paid') {
+            setPaymentMessage({
+                type: 'success',
+                text: 'Payment received. Tokens will reflect in your balance shortly.'
+            });
+            return;
+        }
+
+        if (payment === 'failed' || payment === 'cancelled' || razorpayStatus === 'cancelled') {
+            setPaymentMessage({
+                type: 'error',
+                text: 'Payment was not completed. No tokens were deducted. Please try again.'
+            });
+        }
+    }, []);
+
+    return (
+            <>
             <Navbar>
                 <div className="flex items-center gap-4">
                     <a
@@ -33,6 +67,15 @@ export function ProfileDashboard() {
             >
                 <div className="max-w-6xl mx-auto">
                     <header className="mb-16">
+                        {paymentMessage && (
+                            <div className={`mb-6 rounded-2xl px-4 py-3 text-sm font-bold border ${
+                                paymentMessage.type === 'success'
+                                    ? 'bg-green-500/10 border-green-500/20 text-green-500'
+                                    : 'bg-red-500/10 border-red-500/20 text-red-500'
+                            }`}>
+                                {paymentMessage.text}
+                            </div>
+                        )}
                         <div
                             className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/10 text-purple-500 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4 border border-purple-500/20"
                         >
@@ -71,10 +114,74 @@ export function ProfileDashboard() {
                         </div>
                     </header>
 
+                    <section className="mb-12 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[28px] p-6 md:p-8">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-500 mb-2">Personal Wallet</p>
+                                <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[var(--text-main)]">Token Usage</h2>
+                            </div>
+                            <a
+                                href="/buy-tokens"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                            >
+                                Buy Tokens
+                            </a>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-input)]/40 p-4">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Current Balance</p>
+                                <div className="flex items-center gap-2">
+                                    <Zap size={16} className="text-purple-500" />
+                                    <span className="text-2xl font-black text-[var(--text-main)]">{tokenBalance}</span>
+                                </div>
+                            </div>
+                            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-input)]/40 p-4">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Total Debits</p>
+                                <div className="flex items-center gap-2">
+                                    <TrendingDown size={16} className="text-red-500" />
+                                    <span className="text-2xl font-black text-[var(--text-main)]">{totalConsumed}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-[var(--border-color)] overflow-hidden">
+                            <div className="px-4 py-3 bg-[var(--bg-input)]/50 border-b border-[var(--border-color)]">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Recent Credits / Debits</p>
+                            </div>
+                            <div className="max-h-72 overflow-y-auto">
+                                {tokenLoading ? (
+                                    <p className="p-4 text-sm text-[var(--text-muted)]">Loading token history...</p>
+                                ) : history.length === 0 ? (
+                                    <p className="p-4 text-sm text-[var(--text-muted)]">No token activity yet.</p>
+                                ) : (
+                                    history.slice(0, 12).map((entry, idx) => (
+                                        <div key={`${entry.created_at}-${idx}`} className="px-4 py-3 border-b border-[var(--border-color)] last:border-b-0 flex items-center justify-between gap-4">
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-bold text-[var(--text-main)] truncate">
+                                                    {entry.description || entry.action_type}
+                                                </p>
+                                                <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                                    {new Date(entry.created_at).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div className={`shrink-0 inline-flex items-center gap-1 text-xs font-black ${
+                                                entry.transaction_type === 'credit' ? 'text-green-500' : 'text-red-500'
+                                            }`}>
+                                                {entry.transaction_type === 'credit' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                                                {entry.transaction_type === 'credit' ? '+' : '-'}{entry.amount}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </section>
+
                     <UserResumes />
                 </div>
             </main>
             <Footer />
-        </AuthOnlyProviders>
+        </>
     );
 }

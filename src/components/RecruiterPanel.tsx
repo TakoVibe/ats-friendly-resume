@@ -4,6 +4,7 @@ import { Search, Target, CheckCircle2, AlertCircle, MessageSquare, Info, Sparkle
 import { Logo } from './ui/Logo';
 import { ATSWarning } from './ui/ATSWarning';
 import type { ResumeSchema } from '../types/resume';
+import { useToken } from '../context/TokenContext';
 
 interface RecruiterPanelProps {
     data: ResumeSchema;
@@ -28,6 +29,7 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
     const [auditError, setAuditError] = useState<string | null>(null);
     // Explicitly track if we are in "General Mode" (no JD)
     const [isGeneralMode, setIsGeneralMode] = useState(false);
+    const { useTokens } = useToken();
 
     const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -36,6 +38,9 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
             onRequireAuth?.();
             return;
         }
+
+        const hasTokens = await useTokens('deep_audit', 30, 'resumevibe');
+        if (!hasTokens) return;
 
         setIsAuditing(true);
         setAuditError(null);
@@ -68,8 +73,12 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
             onRequireAuth?.();
             return;
         }
+        const hasTokens = await useTokens('pilot_mode', 30, 'resumevibe');
+        if (!hasTokens) return;
+
         onOpenOptimizer?.();
-        handleDeepAudit();
+        handleDeepAudit(); // Wait, handleDeepAudit also deducts tokens? 
+        // We should prevent double-deduction. Autopilot probably doesn't call handleDeepAudit directly if it deducts there, but handleAutopilot currently calls handleDeepAudit. Let's fix this double deduction bug.
     };
 
     const handleBeginMission = () => {

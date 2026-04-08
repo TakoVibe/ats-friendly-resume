@@ -1,6 +1,8 @@
 ---
 import SEO from "../components/SEO.astro";
 import "../styles/global.css";
+import { AuthProvider } from "../context/AuthContext";
+import { TokenProvider } from "../context/TokenContext";
 
 interface Props {
     title?: string;
@@ -69,6 +71,10 @@ const { title, description, image, keywords } = Astro.props;
         </script>
     </head>
     <body>
-        <slot />
+        <AuthProvider client:load>
+        <TokenProvider>
+            <slot />
+        </TokenProvider>
+    </AuthProvider>
     </body>
 </html>

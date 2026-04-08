@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles, Loader2, Check, X } from 'lucide-react';
+import { useToken } from '../../context/TokenContext';
 
 interface InlineAIButtonProps {
     text: string;
@@ -26,9 +27,13 @@ export function InlineAIButton({
     const [isOptimizing, setIsOptimizing] = useState(false);
     const [optimizedText, setOptimizedText] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { useTokens } = useToken();
 
     const handleOptimize = async () => {
         if (!text.trim()) return;
+
+        const hasTokens = await useTokens('inline_edit', 5, 'resumevibe');
+        if (!hasTokens) return;
 
         setIsOptimizing(true);
         setError(null);

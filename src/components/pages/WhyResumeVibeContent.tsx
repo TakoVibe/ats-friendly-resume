@@ -276,25 +276,62 @@ export function WhyResumeVibeContent() {
                     </div>
                 </section>
 
-                {/* Pricing Philosophy / FAQ */}
+                {/* Pricing / Token System */}
                 <section className="mb-32">
                     <div className="flex items-center gap-4 mb-16">
-                        <h2 className="text-xs font-black uppercase tracking-widest text-purple-500">Pricing Philosophy</h2>
+                        <h2 className="text-xs font-black uppercase tracking-widest text-purple-500">VibeToken Pricing</h2>
                         <div className="h-[1px] flex-1 bg-gradient-to-r from-purple-500/50 to-transparent"></div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--border-color)]">
-                            <h3 className="text-lg font-black mb-4 text-[var(--text-main)]">Is it actually free?</h3>
-                            <p className="text-[var(--text-muted)] font-medium leading-relaxed">
-                                <strong>Yes.</strong> Every essential tool required to build, format, and export a world-class resume is free and will stay free. We don't believe in holding your career data hostage.
+                            <h3 className="text-lg font-black mb-1 text-[var(--text-main)]">Free Tier</h3>
+                            <div className="text-3xl font-black text-purple-500 mb-6">50 Tokens <span className="text-xs font-medium text-[var(--text-muted)] uppercase">on signup</span></div>
+                            <p className="text-[var(--text-muted)] font-medium leading-relaxed mb-6">
+                                Every new user gets 50 free VibeTokens to explore the platform. Building, formatting, and exporting your resume remains 100% free always.
                             </p>
+                            <ul className="space-y-3">
+                                <li className="flex items-center gap-2 text-sm text-[var(--text-main)] font-medium">
+                                    <Sparkles size={16} className="text-purple-500 shrink-0" />
+                                    <span>Free Resume Builder & Export</span>
+                                </li>
+                                <li className="flex items-center gap-2 text-sm text-[var(--text-main)] font-medium">
+                                    <Sparkles size={16} className="text-purple-500 shrink-0" />
+                                    <span>50 tokens for AI Actions</span>
+                                </li>
+                            </ul>
                         </div>
-                        <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border border-[var(--border-color)]">
-                            <h3 className="text-lg font-black mb-4 text-[var(--text-main)]">What's the catch?</h3>
-                            <p className="text-[var(--text-muted)] font-medium leading-relaxed">
-                                No catch. We are building the future of career tech. While core features remain free, we plan to introduce <strong>Premium AI Features</strong> (like automated custom tailoring & deep market analytics) in the future to sustain the platform.
+
+                        <div className="p-8 rounded-[2.5rem] bg-[var(--bg-card)] border-2 border-purple-500/30 relative shadow-xl shadow-purple-500/5">
+                            <div className="absolute top-0 right-8 -translate-y-1/2 bg-purple-500 text-white text-[10px] uppercase tracking-widest font-black px-3 py-1 rounded-full">
+                                Pay as you go
+                            </div>
+                            <h3 className="text-lg font-black mb-1 text-[var(--text-main)]">Starter Pack</h3>
+                            <div className="text-3xl font-black text-[var(--text-main)] mb-6">$1 <span className="text-xs font-medium text-[var(--text-muted)] uppercase">/ 100 Tokens</span></div>
+                            <p className="text-[var(--text-muted)] font-medium leading-relaxed mb-6">
+                                Run out of tokens? No monthly subscriptions. Just simple, transparent pricing. Refill your tokens whenever you need to execute heavy AI operations.
                             </p>
+                            <a href="/buy-tokens" className="block text-center w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[10px] font-black uppercase tracking-[.25em] transition-all shadow-xl shadow-purple-500/20 active:scale-95 mb-4">
+                                Buy Tokens
+                            </a>
+                        </div>
+
+                        <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-input)] border border-[var(--border-color)]">
+                            <h3 className="text-lg font-black mb-4 text-[var(--text-main)]">Action Costs</h3>
+                            <ul className="space-y-4">
+                                <li className="flex justify-between items-center pb-4 border-b border-[var(--border-color)]">
+                                    <span className="font-bold text-[var(--text-main)]">Pilot Mode</span>
+                                    <span className="text-xs font-black bg-purple-500/10 text-purple-500 px-2 py-1 rounded-lg">30 Tokens</span>
+                                </li>
+                                <li className="flex justify-between items-center pb-4 border-b border-[var(--border-color)]">
+                                    <span className="font-bold text-[var(--text-main)]">Deep AI Audit</span>
+                                    <span className="text-xs font-black bg-purple-500/10 text-purple-500 px-2 py-1 rounded-lg">30 Tokens</span>
+                                </li>
+                                <li className="flex justify-between items-center">
+                                    <span className="font-bold text-[var(--text-main)]">Inline Enhancements</span>
+                                    <span className="text-xs font-black bg-purple-500/10 text-purple-500 px-2 py-1 rounded-lg">5 Tokens</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </section>

@@ -5,6 +5,7 @@ import { Logo } from './Logo';
 import { ChevronDown, LogIn, User, FileText, Settings, LogOut, Zap, Globe, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeToggle } from './ThemeToggle';
+import { useToken } from '../../context/TokenContext';
 export { ThemeToggle };
 
 interface NavbarProps {
@@ -16,6 +17,7 @@ import { WhyMenu } from './WhyMenu';
 
 export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
     const { user, isAuthenticated, logout } = useAuth();
+    const { tokenBalance } = useToken();
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     return (
@@ -35,6 +37,19 @@ export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
                 {children}
 
                 {isAuthenticated && <div className="w-px h-6 bg-[var(--border-color)] hidden md:block mx-1 shrink-0"></div>}
+
+                {isAuthenticated && (
+                    <div className="hidden md:flex items-center gap-2">
+                        <a
+                            href="/buy-tokens"
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold text-xs uppercase tracking-widest transition-all ${tokenBalance <= 10 ? 'border-orange-500/30 bg-orange-500/10 text-orange-500 hover:bg-orange-500/20' : 'border-purple-500/30 bg-purple-500/10 text-purple-500 hover:bg-purple-500/20'}`}
+                            title="Buy VibeTokens"
+                        >
+                            <Zap size={14} className={tokenBalance <= 10 ? "animate-pulse" : ""} />
+                            <span>{tokenBalance} <span className="opacity-70">Tokens</span></span>
+                        </a>
+                    </div>
+                )}
 
                 {isAuthenticated ? (
                     <div className="relative shrink-0 ml-1">
@@ -76,6 +91,21 @@ export function Navbar({ children, showBrandOnly = false }: NavbarProps) {
                                                 <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[140px]">{user?.email}</span>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div className="p-2 border-b border-[var(--border-color)] flex justify-between items-center px-3 bg-[var(--bg-card)]">
+                                        <div className="flex items-center gap-2">
+                                            <Zap size={14} className={tokenBalance <= 10 ? 'text-orange-500' : 'text-purple-500'} />
+                                            <span className="text-xs font-bold text-[var(--text-main)]">{tokenBalance} Tokens</span>
+                                        </div>
+                                        <a
+                                            href="/buy-tokens"
+                                            onClick={() => {
+                                                setShowUserMenu(false);
+                                            }}
+                                            className="text-[10px] uppercase font-bold tracking-widest text-[var(--bg-main)] bg-[var(--text-main)] px-2 py-1 rounded-lg hover:opacity-90"
+                                        >
+                                            Buy
+                                        </a>
                                     </div>
                                     <div className="p-2 flex flex-col gap-1">
                                         <a

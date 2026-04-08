@@ -23,13 +23,17 @@ import { RecruiterPanel } from './RecruiterPanel';
 import { ShareModal } from './ShareModal';
 import { CareerGuidanceModal } from './editor/CareerGuidanceModal';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { TokenProvider } from '../context/TokenContext';
 import { GoogleLogin } from './GoogleLogin';
 import { api } from '../lib/api';
 import { LoadingScreen } from './ui/LoadingScreen';
+import { useToken } from '../context/TokenContext';
+import { UpgradeModal } from './ui/UpgradeModal';
 
 function ResumeBuilderContent() {
     const { data, updateResume, resetToDefault, isLoaded, undo, redo, saveToBackend, saveVersionToBackend, isSaving, lastSaved, resumeMetadata, setResumeMetadata } = useResume();
     const { user, isAuthenticated, logout } = useAuth();
+    const { showUpgradeModal, setShowUpgradeModal } = useToken();
     const { isDarkMode } = useTheme();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showMoreActions, setShowMoreActions] = useState(false);
@@ -741,6 +745,7 @@ function ResumeBuilderContent() {
                 )}
             </main >
 
+            <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
             <LoginModal />
         </div >
     );
@@ -750,16 +755,18 @@ export function ResumeBuilder() {
     return (
         <ThemeProvider>
             <AuthProvider>
-                <ResumeProvider>
-                    <ResumeBuilderContent />
-                    <Toaster position="bottom-center" toastOptions={{
-                        style: {
-                            background: 'var(--bg-card)',
-                            color: 'var(--text-main)',
-                            border: '1px solid var(--border-color)',
-                        },
-                    }} />
-                </ResumeProvider>
+                <TokenProvider>
+                    <ResumeProvider>
+                        <ResumeBuilderContent />
+                        <Toaster position="bottom-center" toastOptions={{
+                            style: {
+                                background: 'var(--bg-card)',
+                                color: 'var(--text-main)',
+                                border: '1px solid var(--border-color)',
+                            },
+                        }} />
+                    </ResumeProvider>
+                </TokenProvider>
             </AuthProvider>
         </ThemeProvider>
     );
