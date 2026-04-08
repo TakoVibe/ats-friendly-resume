@@ -74,10 +74,12 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
         }
 
         try {
+            const requestId = `${actionType}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
             const response = await api.post('/api/users/tokens/use/', {
                 action_type: actionType,
                 tokens: tokensRequired,
-                product
+                product,
+                request_id: requestId,
             });
 
             if (response.ok) {
