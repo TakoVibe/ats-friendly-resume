@@ -6,12 +6,12 @@ import { LoginModal } from '../ui/LoginModal';
 import { api } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToken } from '../../context/TokenContext';
-import { Check, Lock, X, Zap } from 'lucide-react';
+import { Check, CheckCircle, Loader2, Lock, XCircle, X, Zap } from 'lucide-react';
 
 const PACKS = [
-    { tokens: 100, price: '$1.00', savings: null },
-    { tokens: 500, price: '$4.50', savings: '10% off' },
-    { tokens: 1000, price: '$8.00', savings: '20% off' },
+    { tokens: 100,  price: '₹85',   usd: '~$1',   savings: null,      popular: false },
+    { tokens: 500,  price: '₹399',  usd: '~$4.75', savings: '~5% off', popular: true  },
+    { tokens: 1000, price: '₹699',  usd: '~$8.32', savings: '~17% off', popular: false },
 ];
 
 export function BuyTokensContent() {
@@ -23,7 +23,7 @@ export function BuyTokensContent() {
 }
 
 function BuyTokensInner() {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { tokenBalance, fetchTokenData } = useToken();
     const [loadingPack, setLoadingPack] = React.useState<number | null>(null);
     const [error, setError] = React.useState<string>('');
@@ -112,9 +112,10 @@ function BuyTokensInner() {
                 const razorpay = new (window as any).Razorpay({
                     key: data.key,
                     amount: data.amount,
-                    currency: data.currency || 'USD',
+                    currency: data.currency || 'INR',
                     name: 'ResumeVibe',
                     description: `${tokensAmount} VibeTokens`,
+                    image: '/favicon.svg',
                     order_id: data.order_id,
                     handler: async (paymentResponse: any) => {
                         try {
@@ -141,7 +142,16 @@ function BuyTokensInner() {
                             setPaymentModal({ state: 'failed', message: 'Payment popup closed before completion.' });
                         },
                     },
-                    prefill: {},
+                    prefill: {
+                        name: user ? `${user.first_name || ''}`.trim() : '',
+                        email: user?.email || '',
+                    },
+                    method: {
+                        upi: true,
+                        card: true,
+                        netbanking: true,
+                        wallet: true,
+                    },
                     notes: {
                         request_id: requestId,
                     },
@@ -192,12 +202,17 @@ function BuyTokensInner() {
                     {PACKS.map((pack) => (
                         <article
                             key={pack.tokens}
-                            className={`rounded-3xl p-6 border bg-[var(--bg-card)] ${
-                                pack.tokens === 500
-                                    ? 'border-purple-500/40 shadow-xl shadow-purple-500/10'
+                            className={`relative rounded-3xl p-6 border bg-[var(--bg-card)] ${
+                                pack.popular
+                                    ? 'border-purple-500/60 shadow-xl shadow-purple-500/10'
                                     : 'border-[var(--border-color)]'
                             }`}
                         >
+                            {pack.popular && (
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                                    Most Popular
+                                </div>
+                            )}
                             <div className="flex items-center justify-between mb-5">
                                 <h2 className="text-xl font-black">{pack.tokens} Tokens</h2>
                                 {pack.savings && (
@@ -207,7 +222,8 @@ function BuyTokensInner() {
                                 )}
                             </div>
 
-                            <p className="text-4xl font-black mb-6">{pack.price}</p>
+                            <p className="text-4xl font-black">{pack.price}</p>
+                            <p className="text-xs text-[var(--text-muted)] font-bold mb-6">{pack.usd}</p>
 
                             <ul className="space-y-3 mb-8">
                                 <li className="flex items-center gap-2 text-sm">
@@ -220,16 +236,20 @@ function BuyTokensInner() {
                                 </li>
                                 <li className="flex items-center gap-2 text-sm">
                                     <Check size={16} className="text-green-500" />
-                                    <span>Secure Stripe checkout</span>
+                                    <span>UPI, Cards &amp; Netbanking</span>
                                 </li>
                             </ul>
 
                             <button
                                 onClick={() => handlePurchase(pack.tokens)}
                                 disabled={loadingPack !== null}
-                                className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-black uppercase tracking-widest hover:opacity-95 transition disabled:opacity-60"
+                                className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-black uppercase tracking-widest hover:opacity-95 transition disabled:opacity-60 flex items-center justify-center gap-2"
                             >
-                                {loadingPack === pack.tokens ? 'Processing...' : `Buy ${pack.tokens} Tokens`}
+                                {loadingPack === pack.tokens ? (
+                                    <><Loader2 size={14} className="animate-spin" /> Processing...</>
+                                ) : (
+                                    `Buy ${pack.tokens} Tokens`
+                                )}
                             </button>
                         </article>
                     ))}
@@ -249,24 +269,57 @@ function BuyTokensInner() {
             {paymentModal && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-                    <div className="relative w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6">
-                        <button
-                            onClick={() => {
-                                stopPolling();
-                                setPaymentModal(null);
-                            }}
-                            className="absolute top-3 right-3 p-2 rounded-lg hover:bg-[var(--bg-input)] text-[var(--text-muted)]"
-                        >
-                            <X size={16} />
-                        </button>
+                    <div className="relative w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-8 flex flex-col items-center text-center">
+                        {paymentModal.state !== 'processing' && (
+                            <button
+                                onClick={() => {
+                                    stopPolling();
+                                    setPaymentModal(null);
+                                }}
+                                className="absolute top-3 right-3 p-2 rounded-lg hover:bg-[var(--bg-input)] text-[var(--text-muted)]"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                        <div className="mb-4">
+                            {paymentModal.state === 'success' && (
+                                <CheckCircle size={52} className="text-green-500" />
+                            )}
+                            {paymentModal.state === 'failed' && (
+                                <XCircle size={52} className="text-red-500" />
+                            )}
+                            {paymentModal.state === 'processing' && (
+                                <Loader2 size={52} className="text-purple-500 animate-spin" />
+                            )}
+                        </div>
                         <h3 className="text-lg font-black mb-2">
-                            {paymentModal.state === 'success' ? 'Payment Successful' : paymentModal.state === 'failed' ? 'Payment Failed' : 'Processing Payment'}
+                            {paymentModal.state === 'success'
+                                ? 'Payment Successful'
+                                : paymentModal.state === 'failed'
+                                ? 'Payment Failed'
+                                : 'Processing Payment'}
                         </h3>
-                        <p className="text-sm text-[var(--text-muted)] mb-2">{paymentModal.message}</p>
+                        <p className="text-sm text-[var(--text-muted)] mb-3">{paymentModal.message}</p>
                         {paymentModal.state === 'processing' && (
                             <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">
-                                Verifying with backend every 5 seconds
+                                Verifying with Razorpay every 5 seconds
                             </p>
+                        )}
+                        {paymentModal.state === 'failed' && (
+                            <button
+                                onClick={() => { stopPolling(); setPaymentModal(null); }}
+                                className="mt-4 px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black uppercase tracking-widest transition"
+                            >
+                                Try Again
+                            </button>
+                        )}
+                        {paymentModal.state === 'success' && (
+                            <button
+                                onClick={() => { stopPolling(); setPaymentModal(null); }}
+                                className="mt-4 px-5 py-2 rounded-xl bg-green-600 hover:bg-green-500 text-white text-xs font-black uppercase tracking-widest transition"
+                            >
+                                Done
+                            </button>
                         )}
                     </div>
                 </div>
