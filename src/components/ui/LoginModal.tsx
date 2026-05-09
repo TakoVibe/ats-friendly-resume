@@ -14,33 +14,29 @@ export function LoginModal() {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-in fade-in duration-300">
-            <div className="relative bg-[var(--bg-card)] p-[1px] rounded-[24px] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 group">
-                {/* Gradient Border */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 opacity-100"></div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[var(--text-main)]/10 backdrop-blur-sm animate-in fade-in duration-300 font-sans-ed">
+            <div className="relative bg-[var(--bg-card)] border border-[var(--border-color)] rounded-sm shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 group">
 
-                <div className="relative bg-[var(--bg-card)] p-8 rounded-[23px] h-full flex flex-col items-center text-center overflow-hidden">
-                    {/* Subtle Inner Glow */}
-                    <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
+                <div className="relative p-10 h-full flex flex-col items-center text-center">
 
-                    <div className="relative mb-6">
-                        <div className="w-16 h-16 rounded-2xl bg-[var(--bg-input)] flex items-center justify-center shadow-inner border border-[var(--border-color)]">
-                            <Lock className="w-7 h-7 text-[var(--text-main)] opacity-70" strokeWidth={1.5} />
+                    <div className="relative mb-8">
+                        <div className="w-16 h-16 border border-[var(--text-main)] flex items-center justify-center bg-[var(--text-main)]/5">
+                            <Lock className="w-6 h-6 text-[var(--text-main)] font-light" strokeWidth={1} />
                         </div>
                     </div>
 
-                    <h2 className="text-2xl font-bold text-[var(--text-main)] mb-3 tracking-tight">Unlock Full Access</h2>
-                    <p className="mb-8 text-[var(--text-muted)] text-sm leading-relaxed px-2 font-medium">
+                    <h2 className="font-serif-ed text-4xl text-[var(--text-main)] mb-4 tracking-tight">Unlock Access</h2>
+                    <p className="mb-10 text-[var(--text-muted)] text-[10px] uppercase tracking-[0.2em] leading-loose px-2">
                         Sign in to save your progress, create multiple versions, and share your resume with the world.
                     </p>
 
-                    <div className="w-full flex justify-center mb-6 transform transition-transform hover:scale-[1.02]">
+                    <div className="w-full flex justify-center mb-8">
                         <GoogleLogin />
                     </div>
 
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors py-2 px-6 rounded-full hover:bg-[var(--bg-input)]"
+                        className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors py-3 px-8 border border-transparent hover:border-[var(--text-main)]"
                     >
                         Close
                     </button>

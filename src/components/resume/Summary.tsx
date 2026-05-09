@@ -14,9 +14,10 @@ interface Props {
     onToggleSeparator?: (show: boolean) => void;
     viewMode?: 'desktop' | 'mobile';
     auditResult?: any;
+    targetJD?: string;
 }
 
-export function Summary({ summary, isEditable = false, onUpdate, title = "Summary", onTitleChange, showSeparator, onToggleSeparator, viewMode = 'desktop', auditResult }: Props) {
+export function Summary({ summary, isEditable = false, onUpdate, title = "Summary", onTitleChange, showSeparator, onToggleSeparator, viewMode = 'desktop', auditResult, targetJD }: Props) {
     const summaryGap = auditResult?.insights?.find((i: any) =>
         i.type === 'gap' && (i.category?.toLowerCase().includes('summary') || i.category?.toLowerCase().includes('narrative'))
     );
@@ -39,7 +40,10 @@ export function Summary({ summary, isEditable = false, onUpdate, title = "Summar
                 mode="html"
                 className="resume-summary-text"
                 aiProps={{
-                    type: 'summary'
+                    type: 'summary',
+                    context: {
+                        jobDescription: targetJD
+                    }
                 }}
             />
             {isEditable && summary.includes('<') && (

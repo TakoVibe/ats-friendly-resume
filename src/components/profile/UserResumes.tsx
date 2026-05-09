@@ -148,114 +148,117 @@ export function UserResumes() {
 
     return (
         <div className="relative">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {resumes.map((resume) => (
                     <div
                         key={resume.id}
-                        className="group bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[32px] p-6 transition-all hover:shadow-2xl hover:translate-y-[-4px] flex flex-col h-full relative overflow-hidden"
+                        className="group bg-[var(--bg-card)] border border-[var(--border-color)] p-8 transition-all hover:border-[var(--text-main)] flex flex-col h-full relative"
                     >
-                        {/* Background Glow */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-[60px] pointer-events-none" />
+                        {/* Minimalist Top Decorator */}
+                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-[var(--text-main)]/20 to-transparent"></div>
 
-                        <div className="flex justify-between items-start mb-6">
-                            <div className="w-12 h-12 bg-[var(--bg-input)] rounded-2xl flex items-center justify-center shadow-inner border border-[var(--border-color)] group-hover:scale-110 transition-transform">
-                                <FileText size={20} className="text-[var(--text-main)] opacity-70" />
+                        <div className="flex justify-between items-start mb-10">
+                            <div className="w-8 h-8 flex items-center justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                                <FileText size={24} className="text-[var(--text-main)]" />
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => setShowVersionsFor(resume)}
-                                    className="flex items-center gap-1.5 px-3 py-1 bg-purple-500/10 text-purple-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all shadow-sm"
+                                    className="flex items-center gap-1.5 font-sans-ed text-[9px] uppercase tracking-[0.25em] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all"
                                 >
-                                    <History size={10} /> {resume.versions?.length || 0} Versions
+                                    <History size={12} className="opacity-50" /> {resume.versions?.length || 0} Vols
                                 </button>
+                                <span className="text-[var(--border-color)]">|</span>
                                 {resume.is_public ? (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-500/20">
-                                        <Globe size={10} /> Public
+                                    <div className="flex items-center gap-1.5 font-sans-ed text-[9px] uppercase tracking-[0.25em] text-green-600 dark:text-green-400">
+                                        <Globe size={12} className="opacity-50" /> Public
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-[var(--bg-input)] text-[var(--text-muted)] rounded-full text-[10px] font-black uppercase tracking-widest border border-[var(--border-color)]">
-                                        <Lock size={10} /> Private
+                                    <div className="flex items-center gap-1.5 font-sans-ed text-[9px] uppercase tracking-[0.25em] text-[var(--text-muted)]">
+                                        <Lock size={12} className="opacity-50" /> Private
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        <h3 className="text-xl font-black text-[var(--text-main)] mb-2 tracking-tight line-clamp-1" title={resume.resume_name}>
+                        <h3 className="font-serif-ed text-3xl text-[var(--text-main)] mb-3 tracking-tight line-clamp-1" title={resume.resume_name}>
                             {resume.resume_name}
                         </h3>
 
-                        <div className="flex items-center gap-2 text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider mb-8 opacity-70">
-                            <Clock size={12} />
-                            Updated {new Date(resume.updated_at).toLocaleDateString()}
+                        <div className="flex items-center gap-2 text-[var(--text-muted)] font-sans-ed text-[10px] uppercase tracking-[0.25em] mb-10 opacity-70">
+                            <Clock size={12} className="opacity-50" />
+                            Edited {new Date(resume.updated_at).toLocaleDateString()}
                         </div>
 
-                        <div className="mt-auto grid grid-cols-2 gap-3">
-                            <a
-                                href={`/?edit=${resume.slug}`}
-                                className="flex items-center justify-center gap-2 py-3 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm"
-                            >
-                                <Edit size={14} /> Edit
-                            </a>
-                            <button
-                                onClick={() => handleDelete(resume.slug)}
-                                disabled={isDeleting === resume.slug}
-                                className="flex items-center justify-center gap-2 py-3 bg-[var(--bg-input)] hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 border border-[var(--border-color)] rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm disabled:opacity-50"
-                            >
-                                {isDeleting === resume.slug ? (
-                                    <Loader2 size={14} className="animate-spin" />
-                                ) : (
-                                    <Trash2 size={14} />
-                                )}
-                                Delete
-                            </button>
-                        </div>
+                        <div className="mt-auto flex flex-col gap-3">
+                            <div className="grid grid-cols-2 gap-3">
+                                <a
+                                    href={`/?edit=${resume.slug}`}
+                                    className="flex items-center justify-center gap-2 py-3 border border-[var(--border-color)] text-[var(--text-main)] hover:border-[var(--text-main)] font-sans-ed text-[10px] uppercase tracking-[0.2em] transition-all"
+                                >
+                                    <Edit size={12} /> Edit
+                                </a>
+                                <button
+                                    onClick={() => handleDelete(resume.slug)}
+                                    disabled={isDeleting === resume.slug}
+                                    className="flex items-center justify-center gap-2 py-3 border border-[var(--border-color)] text-[var(--text-muted)] hover:border-red-500/50 hover:text-red-500 dark:hover:text-red-400 font-sans-ed text-[10px] uppercase tracking-[0.2em] transition-all disabled:opacity-50"
+                                >
+                                    {isDeleting === resume.slug ? (
+                                        <Loader2 size={12} className="animate-spin" />
+                                    ) : (
+                                        <Trash2 size={12} />
+                                    )}
+                                    Delete
+                                </button>
+                            </div>
 
-                        {resume.is_public && (
-                            <a
-                                href={`/resume/${typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}').username || 'public' : 'public'}/${resume.slug}`}
-                                target="_blank"
-                                className="mt-3 flex items-center justify-center gap-2 py-3 bg-[var(--text-main)]/5 hover:bg-[var(--text-main)]/10 text-[var(--text-main)] rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all opacity-60 hover:opacity-100"
-                            >
-                                View Public Page <ExternalLink size={10} />
-                            </a>
-                        )}
+                            {resume.is_public && (
+                                <a
+                                    href={`/resume/${typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}').username || 'public' : 'public'}/${resume.slug}`}
+                                    target="_blank"
+                                    className="flex items-center justify-center gap-2 py-3 bg-[var(--text-main)] text-[var(--bg-main)] font-sans-ed text-[10px] uppercase tracking-[0.2em] transition-all hover:opacity-90 mt-2"
+                                >
+                                    View Public URL <ExternalLink size={12} />
+                                </a>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
 
             {/* Version History Modal */}
             {showVersionsFor && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6 font-sans-ed">
                     <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+                        className="absolute inset-0 bg-[var(--text-main)]/10 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setShowVersionsFor(null)}
                     />
-                    <div className="relative w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-                        <div className="p-6 border-b border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-input)]/20">
+                    <div className="relative w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 rounded-sm">
+                        <div className="p-8 border-b border-[var(--border-color)] flex justify-between items-start bg-[var(--bg-card)]">
                             <div>
-                                <h2 className="text-xl font-black text-[var(--text-main)] tracking-tight">Version History</h2>
-                                <p className="text-[var(--text-muted)] text-[10px] uppercase font-bold tracking-widest">
+                                <h2 className="font-serif-ed text-4xl text-[var(--text-main)] tracking-tight mb-2">Version History</h2>
+                                <p className="text-[var(--text-muted)] text-[10px] uppercase font-bold tracking-[0.2em]">
                                     {showVersionsFor.resume_name}
                                 </p>
                             </div>
                             <button
                                 onClick={() => setShowVersionsFor(null)}
-                                className="p-2 hover:bg-[var(--bg-input)] rounded-full transition-colors text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                                className="p-2 border border-transparent hover:border-[var(--text-main)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-main)]"
                             >
-                                <X size={20} />
+                                <X size={20} className="font-light" />
                             </button>
                         </div>
 
-                        <div className="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                            <div className="space-y-3">
-                                <div className="p-4 bg-purple-500/5 border border-purple-500/20 rounded-2xl flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-purple-500 text-white rounded-xl flex items-center justify-center shadow-lg">
-                                            <Check size={20} />
+                        <div className="p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <div className="space-y-4">
+                                <div className="p-6 border border-[var(--text-main)] flex items-center justify-between">
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-10 h-10 border border-[var(--text-main)] text-[var(--text-main)] flex items-center justify-center bg-[var(--text-main)]/5">
+                                            <Check size={18} />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-black text-[var(--text-main)]">Current Version</p>
-                                            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">
+                                            <p className="font-serif-ed text-2xl text-[var(--text-main)] mb-1">Current Version</p>
+                                            <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-[0.2em]">
                                                 Active Now
                                             </p>
                                         </div>
@@ -265,15 +268,15 @@ export function UserResumes() {
                                 {showVersionsFor.versions?.map((version) => (
                                     <div
                                         key={version.id}
-                                        className="p-4 bg-[var(--bg-input)]/50 border border-[var(--border-color)] rounded-2xl flex items-center justify-between group hover:border-purple-500/30 transition-all hover:bg-[var(--bg-input)]"
+                                        className="p-6 border border-[var(--border-color)] flex items-center justify-between group hover:border-[var(--text-main)] transition-all"
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] rounded-xl flex items-center justify-center font-black text-xs">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-10 h-10 border border-[var(--border-color)] text-[var(--text-muted)] group-hover:border-[var(--text-main)] group-hover:text-[var(--text-main)] flex items-center justify-center font-serif-ed text-lg italic transition-all">
                                                 v{version.version_number}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-[var(--text-main)]">Snapshot {version.version_number}</p>
-                                                <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">
+                                                <p className="font-serif-ed text-xl text-[var(--text-main)] mb-1">Snapshot {version.version_number}</p>
+                                                <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-[0.2em]">
                                                     Saved {new Date(version.created_at).toLocaleDateString()}
                                                 </p>
                                             </div>
@@ -281,7 +284,7 @@ export function UserResumes() {
                                         <button
                                             onClick={() => handleRestoreVersion(showVersionsFor, version)}
                                             disabled={isRestoring === version.id}
-                                            className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 text-purple-500 hover:bg-purple-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm disabled:opacity-50"
+                                            className="flex items-center justify-center gap-2 px-6 py-3 border border-[var(--border-color)] text-[var(--text-main)] hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] text-[9px] uppercase tracking-[0.2em] transition-all disabled:opacity-50"
                                         >
                                             {isRestoring === version.id ? (
                                                 <Loader2 size={12} className="animate-spin" />
@@ -294,17 +297,17 @@ export function UserResumes() {
                                 ))}
 
                                 {(!showVersionsFor.versions || showVersionsFor.versions.length === 0) && (
-                                    <div className="py-12 text-center opacity-40">
-                                        <History size={32} className="mx-auto mb-3" />
-                                        <p className="text-xs font-bold uppercase tracking-[0.2em]">No versions yet</p>
+                                    <div className="py-12 text-center opacity-40 border border-transparent">
+                                        <History size={32} className="mx-auto mb-4" />
+                                        <p className="text-[9px] uppercase tracking-[0.2em]">No versions yet</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        <div className="p-6 bg-[var(--bg-input)]/10 text-center border-t border-[var(--border-color)]">
-                            <p className="text-[10px] text-[var(--text-muted)] font-medium leading-relaxed max-w-[280px] mx-auto italic">
-                                Note: Restoring a version will replace your current resume data. We recommend making a copy before restoring.
+                        <div className="p-8 bg-[var(--bg-card)] border-t border-[var(--border-color)]">
+                            <p className="text-[10px] text-[var(--text-muted)] leading-relaxed uppercase tracking-[0.2em] opacity-80 text-center">
+                                Note: Restoring a version will replace your current resume data.
                             </p>
                         </div>
                     </div>

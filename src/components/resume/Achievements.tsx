@@ -2,8 +2,10 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
+import { DraggableBullet } from '../ui/DraggableBullet';
 import { Plus, List, ListMinus } from 'lucide-react';
 import { ATSWarning } from '../ui/ATSWarning';
+import { useCallback } from 'react';
 
 type BulletItem = ResumeSchema['achievements'][0];
 
@@ -81,6 +83,42 @@ export function Achievements({ achievements, isEditable = false, onUpdate, title
         onUpdate([...safeAchievements, 'New achievement...']);
     };
 
+    /** Insert a new item after a specific index and focus it */
+    const insertAfter = useCallback((afterIndex: number) => {
+        if (!onUpdate) return;
+        const newAch = [...safeAchievements];
+        newAch.splice(afterIndex + 1, 0, '');
+        onUpdate(newAch);
+        setTimeout(() => {
+            const allBullets = document.querySelectorAll(`[data-bullet-index="${afterIndex + 1}"]`);
+            const newBullet = allBullets[allBullets.length - 1] as HTMLElement;
+            if (newBullet) newBullet.focus();
+        }, 50);
+    }, [safeAchievements, onUpdate]);
+
+    /** Enhanced deleteItem with focus management */
+    const deleteItemWithFocus = useCallback((index: number) => {
+        if (!onUpdate) return;
+        const newAch = safeAchievements.filter((_, i) => i !== index);
+        onUpdate(newAch);
+        if (index > 0) {
+            setTimeout(() => {
+                const allBullets = document.querySelectorAll(`[data-bullet-index="${index - 1}"]`);
+                const prevBullet = allBullets[allBullets.length - 1] as HTMLElement;
+                if (prevBullet) prevBullet.focus();
+            }, 50);
+        }
+    }, [safeAchievements, onUpdate]);
+
+    /** Reorder items via drag and drop */
+    const reorderItem = useCallback((fromIndex: number, toIndex: number) => {
+        if (!onUpdate) return;
+        const newAch = [...safeAchievements];
+        const [moved] = newAch.splice(fromIndex, 1);
+        newAch.splice(toIndex, 0, moved);
+        onUpdate(newAch);
+    }, [safeAchievements, onUpdate]);
+
     return (
         <section className="resume-mb-8">
             <SectionTitle
@@ -107,7 +145,13 @@ export function Achievements({ achievements, isEditable = false, onUpdate, title
                             isEditable={isEditable}
                             forceMobileControls={viewMode === 'mobile'}
                         >
-                            <li className={`resume-list-item resume-text-justify group/item-content resume-relative`}>
+                            <DraggableBullet
+                                index={idx}
+                                onReorder={reorderItem}
+                                isEditable={isEditable}
+                                as="li"
+                                className="resume-list-item resume-text-justify group/item-content resume-relative"
+                            >
                                 {hasBullet && <span className="resume-bullet">•</span>}
                                 <div className="resume-flex-1">
                                     <EditableField
@@ -116,6 +160,10 @@ export function Achievements({ achievements, isEditable = false, onUpdate, title
                                         value={achievementText}
                                         onSave={(val) => updateAchievement(idx, val)}
                                         isEditable={isEditable}
+                                        bulletIndex={idx}
+                                        maxRecommendedLength={200}
+                                        onEnterKey={() => insertAfter(idx)}
+                                        onBackspaceEmpty={() => deleteItemWithFocus(idx)}
                                         aiProps={{
                                             type: 'bullet',
                                             context: {
@@ -145,7 +193,7 @@ export function Achievements({ achievements, isEditable = false, onUpdate, title
                                         <ATSWarning type="formatting" className="mt-2" />
                                     )}
                                 </div>
-                            </li>
+                            </DraggableBullet>
                         </ItemControls>
                     );
                 })}

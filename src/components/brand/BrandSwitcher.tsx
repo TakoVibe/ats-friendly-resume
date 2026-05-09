@@ -54,7 +54,7 @@ export function BrandSwitcher({ compact = false }: BrandSwitcherProps) {
                 <div className={`flex items-center gap-1 sm:gap-2 px-1 sm:px-3 py-1 sm:pr-4 text-[var(--text-main)] ${compact ? 'px-1' : ''}`}>
                     <div className="flex flex-col items-start">
                         <div className="flex items-center gap-1.5">
-                            <h1 className={`text-xs sm:text-sm font-bold whitespace-nowrap tracking-tight ${compact ? 'hidden md:block' : ''}`}>ResumeVibe</h1>
+                            <h1 className={`text-sm sm:text-lg font-serif-ed whitespace-nowrap tracking-tight ${compact ? 'hidden md:block' : ''}`}>ResumeVibe</h1>
                             {compact && (
                                 <div className="md:hidden shrink-0">
                                     <Logo className="w-8 h-8 rounded-xl shadow-lg border border-[var(--border-color)] bg-white p-0.5" />

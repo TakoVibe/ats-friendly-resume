@@ -2,9 +2,11 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
+import { DraggableBullet } from '../ui/DraggableBullet';
 import { Plus, List, ListMinus } from 'lucide-react';
 import { DatePicker } from '../ui/DatePicker';
 import { ATSWarning } from '../ui/ATSWarning';
+import { useCallback } from 'react';
 
 type EducationItem = ResumeSchema['education'][0];
 
@@ -112,6 +114,23 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
         onUpdate(newEdu);
     };
 
+    /** Insert a new detail after a specific index and focus it */
+    const insertDetailAfter = useCallback((eduId: string, afterIndex: number) => {
+        if (!onUpdate) return;
+        const newEdu = education.map(e => {
+            if (e.id !== eduId) return e;
+            const newDetails = [...(e.details || [])];
+            newDetails.splice(afterIndex + 1, 0, '');
+            return { ...e, details: newDetails };
+        });
+        onUpdate(newEdu);
+        setTimeout(() => {
+            const allBullets = document.querySelectorAll(`[data-bullet-index="${afterIndex + 1}"]`);
+            const newBullet = allBullets[allBullets.length - 1] as HTMLElement;
+            if (newBullet) newBullet.focus();
+        }, 50);
+    }, [education, onUpdate]);
+
     const deleteDetail = (eduId: string, detailIndex: number) => {
         if (!onUpdate) return;
         const newEdu = education.map(e => {
@@ -119,7 +138,27 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
             return { ...e, details: e.details?.filter((_, i) => i !== detailIndex) };
         });
         onUpdate(newEdu);
+        if (detailIndex > 0) {
+            setTimeout(() => {
+                const allBullets = document.querySelectorAll(`[data-bullet-index="${detailIndex - 1}"]`);
+                const prevBullet = allBullets[allBullets.length - 1] as HTMLElement;
+                if (prevBullet) prevBullet.focus();
+            }, 50);
+        }
     };
+
+    /** Reorder details via drag and drop */
+    const reorderDetail = useCallback((eduId: string, fromIndex: number, toIndex: number) => {
+        if (!onUpdate) return;
+        const newEdu = education.map(e => {
+            if (e.id !== eduId) return e;
+            const newDetails = [...(e.details || [])];
+            const [moved] = newDetails.splice(fromIndex, 1);
+            newDetails.splice(toIndex, 0, moved);
+            return { ...e, details: newDetails };
+        });
+        onUpdate(newEdu);
+    }, [education, onUpdate]);
 
     return (
         <section className="resume-section">
@@ -189,7 +228,14 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                             const hasBullet = typeof detail === 'string' ? true : (detail.hasBullet !== false);
 
                                             return (
-                                                <li key={idx} className={`resume-list-item resume-text-justify group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1'}`}>
+                                                <DraggableBullet
+                                                    key={idx}
+                                                    index={idx}
+                                                    onReorder={(from, to) => reorderDetail(edu.id, from, to)}
+                                                    isEditable={isEditable}
+                                                    as="li"
+                                                    className={`resume-list-item resume-text-justify group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1'}`}
+                                                >
                                                     {hasBullet && <span className="resume-bullet">•</span>}
                                                     <div className="resume-flex-1">
                                                         <EditableField
@@ -198,6 +244,9 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                                             value={detailText}
                                                             onSave={(val) => updateDetail(edu.id, idx, val)}
                                                             isEditable={isEditable}
+                                                            bulletIndex={idx}
+                                                            onEnterKey={() => insertDetailAfter(edu.id, idx)}
+                                                            onBackspaceEmpty={() => deleteDetail(edu.id, idx)}
                                                             aiProps={{
                                                                 type: 'bullet',
                                                                 context: {
@@ -228,11 +277,11 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                                                             <ATSWarning type="formatting" className="mt-2" />
                                                         )}
                                                     </div>
-                                                </li>
+                                                </DraggableBullet>
                                             );
                                         })}
                                     {isEditable && (
-                                        <li className="flex justify-center mt-1 opacity-0 group-hover/item-content:opacity-100 transition-opacity">
+                                        <li className="flex justify-center mt-1 opacity-40 hover:opacity-100 group-hover/item-content:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => addDetail(edu.id)}
                                                 className="text-[9pt] text-[var(--accent)] hover:underline flex items-center gap-1"

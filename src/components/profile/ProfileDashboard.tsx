@@ -91,124 +91,87 @@ function ProfileDashboardInner() {
             </Navbar>
             <LoginModal />
 
-            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
+            <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] font-sans-ed">
+                {/* Grain Overlay */}
+                <div className="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay z-50" style={{ backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png")' }}></div>
 
-                {/* ── Bento hero header ── */}
-                <div
-                    className="relative overflow-hidden border-b border-[var(--border-color)]"
-                    style={{
-                        background: 'radial-gradient(ellipse 80% 60% at 50% -20%, hsla(270,70%,40%,0.18) 0%, transparent 70%), var(--bg-card)',
-                    }}
-                >
-                    {/* subtle grid pattern overlay */}
-                    <div
-                        className="pointer-events-none absolute inset-0 opacity-[0.03]"
-                        style={{
-                            backgroundImage: 'linear-gradient(var(--text-main) 1px, transparent 1px), linear-gradient(90deg, var(--text-main) 1px, transparent 1px)',
-                            backgroundSize: '40px 40px',
-                        }}
-                    />
-
-                    <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-0">
+                {/* ── Editorial Header ── */}
+                <div className="relative border-b border-[var(--border-color)]">
+                    <div className="relative max-w-[100rem] mx-auto px-6 md:px-12 pt-16 pb-0">
 
                         {/* Payment flash */}
                         {paymentMessage && (
-                            <div className={`mb-5 rounded-xl px-4 py-2.5 text-xs font-bold border ${
-                                paymentMessage.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500'
-                                : paymentMessage.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500'
-                                : 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
+                            <div className={`mb-8 border px-6 py-4 text-xs font-sans-ed tracking-widest uppercase ${
+                                paymentMessage.type === 'success' ? 'bg-green-500/5 border-green-500/20 text-green-600 dark:text-green-400'
+                                : paymentMessage.type === 'error' ? 'bg-red-500/5 border-red-500/20 text-red-600 dark:text-red-400'
+                                : 'bg-yellow-500/5 border-yellow-500/20 text-yellow-600 dark:text-yellow-400'
                             }`}>
                                 {paymentMessage.text}
                             </div>
                         )}
 
-                        {/* Bento grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-4 mb-6 items-start">
-
-                            {/* ── Cell 1: Identity ── */}
-                            <div className="flex items-center gap-3">
-                                <div className="relative shrink-0">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border border-purple-500/30 flex items-center justify-center overflow-hidden text-lg font-black text-purple-300 shadow-lg shadow-purple-500/10">
-                                        {user?.profile_image
-                                            ? <img src={user.profile_image} alt="avatar" className="w-full h-full object-cover" />
-                                            : initials}
-                                    </div>
-                                    {/* online dot */}
-                                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2 border-[var(--bg-card)]" />
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-end">
+                            
+                            {/* Identity Section */}
+                            <div className="lg:col-span-6 flex gap-6 items-center">
+                                <div className="w-20 h-20 bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center font-serif-ed text-3xl tracking-tighter text-[var(--text-main)] shrink-0 shadow-sm relative group">
+                                    {user?.profile_image
+                                        ? <img src={user.profile_image} alt="avatar" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                                        : initials}
+                                    <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-green-500 border border-[var(--bg-main)]"></div>
                                 </div>
-                                <div className="min-w-0">
-                                    <p className="text-[9px] font-black uppercase tracking-[0.25em] text-purple-400 mb-0.5">Profile</p>
-                                    <h1 className="text-base font-black tracking-tight leading-tight truncate max-w-[160px]">{displayName || 'Hello!'}</h1>
-                                    {user?.email && <p className="text-[10px] text-[var(--text-muted)] truncate max-w-[160px]">{user.email}</p>}
+                                <div>
+                                    <p className="font-sans-ed text-[10px] uppercase tracking-[0.25em] mb-2 opacity-60">Identification</p>
+                                    <h1 className="font-serif-ed text-5xl tracking-tight leading-none mb-2 truncate max-w-[300px]">{displayName || 'Hello'}</h1>
+                                    {user?.email && <p className="font-sans-ed text-sm text-[var(--text-muted)] font-light truncate max-w-[300px]">{user.email}</p>}
                                 </div>
                             </div>
 
-                            {/* ── Cell 2: Token balance — hero centrepiece ── */}
-                            <div className="flex flex-col items-center justify-center py-2">
-                                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-purple-400 mb-1">Token Balance</p>
-                                <div className="flex items-end gap-2">
-                                    {tokenLoading
-                                        ? <div className="h-12 w-24 rounded-xl bg-purple-500/10 animate-pulse" />
-                                        : (
+                            {/* Token Section */}
+                            <div className="lg:col-span-6 flex flex-col md:flex-row md:items-end justify-between gap-8 border-l-0 md:border-l border-[var(--border-color)] md:pl-12">
+                                <div>
+                                    <p className="font-sans-ed text-[10px] uppercase tracking-[0.25em] mb-4 opacity-60">Token Balance</p>
+                                    <div className="flex items-baseline gap-3">
+                                        {tokenLoading ? (
+                                            <div className="h-16 w-32 bg-[var(--border-color)] animate-pulse" />
+                                        ) : (
                                             <>
-                                                <span
-                                                    className="text-5xl sm:text-6xl font-black tabular-nums leading-none"
-                                                    style={{ background: 'linear-gradient(135deg, #a78bfa, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                                                >
+                                                <span className="font-serif-ed text-7xl leading-none tracking-tighter text-[var(--accent)]">
                                                     {tokenBalance.toLocaleString()}
                                                 </span>
-                                                <Zap size={22} className="text-purple-400 mb-1 shrink-0" fill="currentColor" />
+                                                <span className="font-sans-ed text-sm uppercase tracking-widest text-[var(--text-muted)]">Tokens</span>
                                             </>
-                                        )
-                                    }
+                                        )}
+                                    </div>
                                 </div>
-                                <a
-                                    href="/buy-tokens"
-                                    className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-purple-600/90 hover:bg-purple-500 text-white text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:-translate-y-px"
-                                >
-                                    <Zap size={11} fill="currentColor" /> Top Up
-                                </a>
+                                <div className="pb-2">
+                                    <a
+                                        href="/buy-tokens"
+                                        className="inline-flex items-center justify-center px-8 py-3 font-sans-ed text-[10px] uppercase tracking-[0.2em] font-medium border border-[var(--text-main)] hover:bg-[var(--text-main)] hover:text-[var(--bg-main)] transition-all duration-500"
+                                    >
+                                        Acquire Tokens
+                                    </a>
+                                </div>
                             </div>
 
-                            {/* ── Cell 3: Mini stats ── */}
-                            <div className="flex sm:flex-col gap-2 sm:gap-2 justify-start sm:justify-center">
-                                <MiniStat
-                                    icon={<TrendingUp size={12} className="text-green-400" />}
-                                    label="Credited"
-                                    value={tokenLoading ? null : totalCredits}
-                                    color="green"
-                                />
-                                <MiniStat
-                                    icon={<TrendingDown size={12} className="text-red-400" />}
-                                    label="Spent"
-                                    value={tokenLoading ? null : totalConsumed}
-                                    color="red"
-                                />
-                                <MiniStat
-                                    icon={<Wallet size={12} className="text-blue-400" />}
-                                    label="Txns"
-                                    value={tokenLoading ? null : history.length}
-                                    color="blue"
-                                />
-                            </div>
                         </div>
 
                         {/* Tab bar */}
-                        <div className="flex gap-0">
+                        <div className="flex gap-12 border-b border-[var(--border-color)]">
                             {([
-                                { id: 'wallet',  label: 'Wallet',  icon: <Wallet size={13} /> },
-                                { id: 'resumes', label: 'Resumes', icon: <FileText size={13} /> },
+                                { id: 'wallet',  label: 'Ledger',  icon: <Wallet size={14} className="opacity-50" /> },
+                                { id: 'resumes', label: 'Documents', icon: <FileText size={14} className="opacity-50" /> },
                             ] as { id: Tab; label: string; icon: React.ReactNode }[]).map(tab => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-1.5 px-4 py-2.5 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all -mb-px ${
+                                    className={`flex items-center gap-2 pb-4 font-sans-ed text-[11px] uppercase tracking-[0.2em] transition-all -mb-[1px] ${
                                         activeTab === tab.id
-                                            ? 'border-purple-500 text-purple-400'
-                                            : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                                            ? 'border-b border-[var(--text-main)] text-[var(--text-main)] font-medium'
+                                            : 'border-b border-transparent text-[var(--text-muted)] hover:text-[var(--text-main)]'
                                     }`}
                                 >
-                                    {tab.icon}{tab.label}
+                                    {tab.label}
                                 </button>
                             ))}
                         </div>

@@ -248,8 +248,8 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
     // Render diff view
     if (view === 'diff' && optimizedResume && originalResume) {
         return (
-            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-                <div className="relative w-full max-w-5xl bg-[var(--bg-card)] rounded-2xl shadow-[var(--shadow)] overflow-hidden max-h-[90vh] flex flex-col border border-[var(--border-color)]">
+            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-[var(--text-main)]/10 backdrop-blur-sm transition-all duration-300 font-sans-ed">
+                <div className="relative w-full max-w-5xl bg-[var(--bg-card)] rounded-sm shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-[var(--border-color)]">
                     <ResumeDiffViewer
                         original={originalResume}
                         optimized={optimizedResume}
@@ -266,42 +266,41 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
 
     // Render input view (default)
     return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-            <div className="relative w-full max-w-2xl bg-[var(--bg-card)] rounded-2xl shadow-[var(--shadow)] overflow-hidden border border-[var(--border-color)] animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-[var(--text-main)]/10 backdrop-blur-sm transition-all duration-300 font-sans-ed">
+            <div className="relative w-full max-w-2xl bg-[var(--bg-card)] rounded-sm shadow-2xl overflow-hidden border border-[var(--border-color)] animate-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-5 text-white shadow-lg relative z-10">
-                    <div className="flex items-center justify-between">
+                <div className="bg-[var(--bg-card)] border-b border-[var(--border-color)] px-8 py-6 relative z-10">
+                    <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                            <Sparkles className="w-6 h-6 animate-pulse" />
-                            <h2 className="text-xl font-black tracking-tight">{auditResult ? 'Deep Contextual Rescue' : 'Expert Resume Optimizer'}</h2>
+                            <h2 className="font-serif-ed text-4xl text-[var(--text-main)] tracking-tight">{auditResult ? 'Deep Contextual Rescue' : 'Expert Resume Optimizer'}</h2>
                         </div>
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setView('history')}
-                                className="p-2 hover:bg-white/20 rounded-lg transition-colors active:scale-95"
+                                className="p-2 border border-transparent hover:border-[var(--text-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
                                 title="Version History"
                             >
-                                <History className="w-5 h-5" />
+                                <History className="w-5 h-5 font-light" />
                             </button>
                             <button
                                 onClick={handleClose}
-                                className="p-2 hover:bg-white/20 rounded-lg transition-colors active:scale-95"
+                                className="p-2 border border-transparent hover:border-[var(--text-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
                                 disabled={isOptimizing}
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-5 h-5 font-light" />
                             </button>
                         </div>
                     </div>
-                    <p className="mt-2 text-xs font-medium text-purple-100 uppercase tracking-widest opacity-80">
+                    <p className="mt-2 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em]">
                         {auditResult ? 'Fixing identified gaps for max ATS impact' : 'Maximize your ATS score with AI'}
                     </p>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-5 bg-[var(--bg-main)]/5">
+                <div className="p-8 space-y-5 bg-[var(--bg-main)]/5">
                     {/* Job Description Input */}
                     <div>
-                        <label className="block text-xs font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 px-1">
+                        <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-3 px-1">
                             Target Job Description
                         </label>
                         <textarea
@@ -311,7 +310,7 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
                                 updateResume({ ...resume, targetJD: e.target.value });
                             }}
                             placeholder="Paste the full job description here..."
-                            className="w-full h-64 px-4 py-4 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500/40 outline-none transition-all resize-none font-sans text-sm text-[var(--text-main)] placeholder:text-[var(--text-muted)]/50 leading-relaxed"
+                            className="w-full h-64 px-4 py-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-none focus:ring-1 focus:ring-[var(--text-main)] focus:border-[var(--text-main)] outline-none transition-all resize-none font-sans text-sm text-[var(--text-main)] placeholder:text-[var(--text-muted)]/50 leading-relaxed"
                             disabled={isOptimizing}
                         />
                     </div>
@@ -372,14 +371,14 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-5 bg-[var(--bg-card)] border-t border-[var(--border-color)] flex items-center justify-between">
-                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest opacity-60">
+                <div className="px-8 py-6 bg-[var(--bg-card)] border-t border-[var(--border-color)] flex items-center justify-between">
+                    <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-[0.2em] opacity-60">
                         Powered by Expert Analysis • {versions.length} versions archived
                     </p>
-                    <div className="flex gap-3">
+                    <div className="flex gap-4">
                         <button
                             onClick={handleClose}
-                            className="px-6 py-2.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-xl transition-all active:scale-95"
+                            className="px-8 py-3 text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-transparent hover:border-[var(--text-main)] transition-all"
                             disabled={isOptimizing}
                         >
                             Cancel
@@ -387,12 +386,12 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
                         <button
                             onClick={handleOptimize}
                             disabled={isOptimizing || !jobDescription.trim()}
-                            className="px-8 py-2.5 text-xs font-black text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl transition-all shadow-xl shadow-purple-900/20 disabled:opacity-50 disabled:shadow-none active:scale-95 flex items-center gap-2"
+                            className="px-8 py-3 text-[10px] uppercase tracking-[0.2em] bg-[var(--text-main)] text-[var(--bg-main)] hover:bg-[var(--bg-card)] hover:text-[var(--text-main)] border border-transparent hover:border-[var(--text-main)] transition-all disabled:opacity-50 flex items-center gap-2"
                         >
                             {isOptimizing ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin" />
-                                    <span className="font-mono tabular-nums bg-white/10 px-1.5 py-0.5 rounded text-[10px] border border-white/20 mr-1 animate-pulse flex items-center gap-1">
+                                    <span className="font-mono tabular-nums bg-transparent px-1.5 py-0.5 text-[10px] border border-[var(--bg-main)]/20 mr-1 flex items-center gap-1">
                                         <Timer size={10} />
                                         {formatTime(elapsedTime)}
                                     </span>
@@ -400,7 +399,7 @@ export default function OptimizeResumeModal({ isOpen, onClose, autoOptimize, aud
                                 </>
                             ) : (
                                 <>
-                                    <Sparkles className="w-4 h-4" />
+                                    <Sparkles className="w-4 h-4 font-light" />
                                     {auditResult ? 'Fix Audit Gaps & Optimize' : 'Optimize'}
                                 </>
                             )}

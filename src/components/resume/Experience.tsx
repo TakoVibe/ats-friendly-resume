@@ -2,10 +2,12 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
+import { DraggableBullet } from '../ui/DraggableBullet';
 import { Plus, List, ListMinus, Sparkles, X, AlertTriangle } from 'lucide-react';
 import { InlineAIButton } from '../ui/InlineAIButton';
 import { DatePicker } from '../ui/DatePicker';
 import { ATSWarning } from '../ui/ATSWarning';
+import { useCallback } from 'react';
 
 type ExperienceItem = ResumeSchema['experience'][0];
 
@@ -19,9 +21,10 @@ interface Props {
     onToggleSeparator?: (show: boolean) => void;
     viewMode?: 'desktop' | 'mobile';
     auditResult?: any;
+    targetJD?: string;
 }
 
-export function Experience({ experience, isEditable = false, onUpdate, title = "Work Experience", onTitleChange, showSeparator, onToggleSeparator, viewMode = 'desktop', auditResult }: Props) {
+export function Experience({ experience, isEditable = false, onUpdate, title = "Work Experience", onTitleChange, showSeparator, onToggleSeparator, viewMode = 'desktop', auditResult, targetJD }: Props) {
     const experienceGap = auditResult?.insights?.find((i: any) =>
         i.type === 'gap' && (i.category?.toLowerCase().includes('experience') || i.category?.toLowerCase().includes('impact') || i.category?.toLowerCase().includes('quant'))
     );
@@ -125,6 +128,27 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
         onUpdate(newExp);
     };
 
+    /** Insert a new metric after a specific index and focus it */
+    const insertMetricAfter = useCallback((jobId: string, afterIndex: number) => {
+        if (!onUpdate) return;
+        const newExp = experience.map(job => {
+            if (job.id !== jobId) return job;
+            const newMetrics = [...(job.metrics || [])];
+            newMetrics.splice(afterIndex + 1, 0, '');
+            return { ...job, metrics: newMetrics };
+        });
+        onUpdate(newExp);
+        // Focus the new bullet after React re-renders
+        setTimeout(() => {
+            const allBullets = document.querySelectorAll(`[data-bullet-index="${afterIndex + 1}"]`);
+            // Focus the last matching element (most likely the one just created)
+            const newBullet = allBullets[allBullets.length - 1] as HTMLElement;
+            if (newBullet) {
+                newBullet.focus();
+            }
+        }, 50);
+    }, [experience, onUpdate]);
+
     const deleteMetric = (jobId: string, metricIndex: number) => {
         if (!onUpdate) return;
         const newExp = experience.map(job => {
@@ -132,7 +156,30 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
             return { ...job, metrics: (job.metrics || []).filter((_, i) => i !== metricIndex) };
         });
         onUpdate(newExp);
+        // Focus the previous bullet after deletion
+        if (metricIndex > 0) {
+            setTimeout(() => {
+                const allBullets = document.querySelectorAll(`[data-bullet-index="${metricIndex - 1}"]`);
+                const prevBullet = allBullets[allBullets.length - 1] as HTMLElement;
+                if (prevBullet) {
+                    prevBullet.focus();
+                }
+            }, 50);
+        }
     };
+
+    /** Reorder metrics via drag and drop */
+    const reorderMetric = useCallback((jobId: string, fromIndex: number, toIndex: number) => {
+        if (!onUpdate) return;
+        const newExp = experience.map(job => {
+            if (job.id !== jobId) return job;
+            const newMetrics = [...(job.metrics || [])];
+            const [moved] = newMetrics.splice(fromIndex, 1);
+            newMetrics.splice(toIndex, 0, moved);
+            return { ...job, metrics: newMetrics };
+        });
+        onUpdate(newExp);
+    }, [experience, onUpdate]);
 
     return (
         <section className="resume-section">
@@ -274,7 +321,14 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                         const hasBullet = typeof metric === 'string' ? true : (metric.hasBullet !== false);
 
                                         return (
-                                            <li key={idx} className={`resume-list-item resume-text-justify group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1'}`}>
+                                            <DraggableBullet
+                                                key={idx}
+                                                index={idx}
+                                                onReorder={(from, to) => reorderMetric(job.id, from, to)}
+                                                isEditable={isEditable}
+                                                as="li"
+                                                className={`resume-list-item resume-text-justify group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1'}`}
+                                            >
                                                 {hasBullet && <span className="resume-bullet">•</span>}
                                                 <div className="resume-flex-1">
                                                     <EditableField
@@ -284,11 +338,16 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                                         onSave={(val) => updateMetric(job.id, idx, val)}
                                                         isEditable={isEditable}
                                                         controlsLayout="parent"
+                                                        bulletIndex={idx}
+                                                        maxRecommendedLength={200}
+                                                        onEnterKey={() => insertMetricAfter(job.id, idx)}
+                                                        onBackspaceEmpty={() => deleteMetric(job.id, idx)}
                                                         aiProps={{
                                                             type: 'bullet',
                                                             context: {
                                                                 role: job.role,
-                                                                company: job.company
+                                                                company: job.company,
+                                                                jobDescription: targetJD
                                                             }
                                                         }}
                                                         actions={
@@ -314,11 +373,11 @@ export function Experience({ experience, isEditable = false, onUpdate, title = "
                                                         <ATSWarning type="formatting" className="mt-2" />
                                                     )}
                                                 </div>
-                                            </li>
+                                            </DraggableBullet>
                                         );
                                     })}
                                 {isEditable && (
-                                    <li className="flex justify-center mt-1 opacity-0 group-hover/item-content:opacity-100 transition-opacity">
+                                    <li className="flex justify-center mt-1 opacity-40 hover:opacity-100 group-hover/item-content:opacity-100 transition-opacity">
                                         <button
                                             onClick={() => addMetric(job.id)}
                                             className="text-[9pt] text-[var(--accent)] hover:underline flex items-center gap-1"

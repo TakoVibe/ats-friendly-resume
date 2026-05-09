@@ -23,6 +23,7 @@ import { RecruiterPanel } from './RecruiterPanel';
 import { ShareModal } from './ShareModal';
 import { CareerGuidanceModal } from './editor/CareerGuidanceModal';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { CoverLetterModal } from './CoverLetterModal';
 import { TokenProvider } from '../context/TokenContext';
 import { GoogleLogin } from './GoogleLogin';
 import { api } from '../lib/api';
@@ -46,6 +47,7 @@ function ResumeBuilderContent() {
     const [showRecruiterAI, setShowRecruiterAI] = useState(true);
     const [showShareModal, setShowShareModal] = useState(false);
     const [showGuidanceModal, setShowGuidanceModal] = useState(false);
+    const [showCoverLetterModal, setShowCoverLetterModal] = useState(false);
     const [showAutoOptimize, setShowAutoOptimize] = useState(false);
     const [guidanceInsights, setGuidanceInsights] = useState<Array<{ type: 'good' | 'warning' | 'info'; text: string }>>([]);
     const [guidanceAuditResult, setGuidanceAuditResult] = useState<any>(null);
@@ -398,6 +400,15 @@ function ResumeBuilderContent() {
                         </button>
 
                         <button
+                            onClick={() => setShowCoverLetterModal(true)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest shadow-sm transition-all"
+                            title="Cover Letter"
+                        >
+                            <FileText size={16} />
+                            <span className="text-[10px]">Letter</span>
+                        </button>
+
+                        <button
                             onClick={() => setShowShareModal(true)}
                             className="flex items-center gap-2 px-3 py-2 text-xs bg-[var(--bg-input)] hover:bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl font-bold uppercase tracking-widest shadow-sm transition-all"
                         >
@@ -549,7 +560,7 @@ function ResumeBuilderContent() {
                         </div>
                     )}
                     {activeTab === 'editor' && (
-                        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col items-center bg-[var(--bg-main)] scroll-smooth pt-4 md:pt-24 pb-32">
+                        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col items-center bg-[var(--bg-main)] scroll-smooth pt-4 md:pt-24 pb-32" style={{ overscrollBehaviorY: 'contain' }}>
                             {/* Mobile-optimized Container - Fits Width Automatically */}
                             <div className="w-full md:w-auto relative mt-4 md:mt-8 px-2 md:px-0 flex justify-center">
                                 {/* Only apply transform scale on non-mobile, on mobile we use CSS Zoom or Width constraints */}
@@ -637,6 +648,12 @@ function ResumeBuilderContent() {
                         }}
                         isAuthenticated={isAuthenticated}
                         onRequireAuth={() => setShowLoginModal(true)}
+                    />
+
+                    <CoverLetterModal
+                        isOpen={showCoverLetterModal}
+                        onClose={() => setShowCoverLetterModal(false)}
+                        resume={data}
                     />
 
                     {showGuidanceModal && (

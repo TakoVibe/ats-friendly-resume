@@ -2,9 +2,11 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
+import { DraggableBullet } from '../ui/DraggableBullet';
 import { Plus, List, ListMinus } from 'lucide-react';
 import { DatePicker } from '../ui/DatePicker';
 import { ATSWarning } from '../ui/ATSWarning';
+import { useCallback } from 'react';
 
 type ProjectItem = ResumeSchema['projects'][0];
 // ... rest of file until the error spot
@@ -80,6 +82,23 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
         onUpdate(newProj);
     };
 
+    /** Insert a new metric after a specific index and focus it */
+    const insertMetricAfter = useCallback((projId: string, afterIndex: number) => {
+        if (!onUpdate) return;
+        const newProj = projects.map(p => {
+            if (p.id !== projId) return p;
+            const newMetrics = [...(p.metrics || [])];
+            newMetrics.splice(afterIndex + 1, 0, '');
+            return { ...p, metrics: newMetrics };
+        });
+        onUpdate(newProj);
+        setTimeout(() => {
+            const allBullets = document.querySelectorAll(`[data-bullet-index="${afterIndex + 1}"]`);
+            const newBullet = allBullets[allBullets.length - 1] as HTMLElement;
+            if (newBullet) newBullet.focus();
+        }, 50);
+    }, [projects, onUpdate]);
+
     const deleteMetric = (projId: string, metricIndex: number) => {
         if (!onUpdate) return;
         const newProj = projects.map(p => {
@@ -87,7 +106,27 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
             return { ...p, metrics: p.metrics?.filter((_, i) => i !== metricIndex) };
         });
         onUpdate(newProj);
+        if (metricIndex > 0) {
+            setTimeout(() => {
+                const allBullets = document.querySelectorAll(`[data-bullet-index="${metricIndex - 1}"]`);
+                const prevBullet = allBullets[allBullets.length - 1] as HTMLElement;
+                if (prevBullet) prevBullet.focus();
+            }, 50);
+        }
     };
+
+    /** Reorder metrics via drag and drop */
+    const reorderMetric = useCallback((projId: string, fromIndex: number, toIndex: number) => {
+        if (!onUpdate) return;
+        const newProj = projects.map(p => {
+            if (p.id !== projId) return p;
+            const newMetrics = [...(p.metrics || [])];
+            const [moved] = newMetrics.splice(fromIndex, 1);
+            newMetrics.splice(toIndex, 0, moved);
+            return { ...p, metrics: newMetrics };
+        });
+        onUpdate(newProj);
+    }, [projects, onUpdate]);
 
     return (
         <section className="resume-section">
@@ -244,7 +283,14 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                             const hasBullet = typeof metric === 'string' ? true : (metric.hasBullet !== false);
 
                                             return (
-                                                <li key={idx} className={`resume-list-item resume-text-justify group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1'}`}>
+                                                <DraggableBullet
+                                                    key={idx}
+                                                    index={idx}
+                                                    onReorder={(from, to) => reorderMetric(project.id, from, to)}
+                                                    isEditable={isEditable}
+                                                    as="li"
+                                                    className={`resume-list-item resume-text-justify group/metric resume-relative ${hasBullet ? '' : 'resume-mb-1'}`}
+                                                >
                                                     {hasBullet && <span className="resume-bullet">•</span>}
                                                     <div className="resume-flex-1">
                                                         <EditableField
@@ -268,6 +314,10 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                                             }}
                                                             isEditable={isEditable}
                                                             controlsLayout="parent"
+                                                            bulletIndex={idx}
+                                                            maxRecommendedLength={200}
+                                                            onEnterKey={() => insertMetricAfter(project.id, idx)}
+                                                            onBackspaceEmpty={() => deleteMetric(project.id, idx)}
                                                             aiProps={{
                                                                 type: 'bullet',
                                                                 context: {
@@ -312,11 +362,11 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                                             <ATSWarning type="formatting" className="mt-2" />
                                                         )}
                                                     </div>
-                                                </li>
+                                                </DraggableBullet>
                                             );
                                         })}
                                     {isEditable && (
-                                        <li className="flex justify-center mt-1 opacity-0 group-hover/item-content:opacity-100 transition-opacity">
+                                        <li className="flex justify-center mt-1 opacity-40 hover:opacity-100 group-hover/item-content:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => addMetric(project.id)}
                                                 className="text-[9pt] text-[var(--accent)] hover:underline flex items-center gap-1"

@@ -77,7 +77,10 @@ export function WhyResumeVibeContent() {
             </Navbar>
             <LoginModal />
 
-            <main className="relative z-10 max-w-7xl mx-auto px-6 py-20 lg:py-32 selection:bg-purple-500/30">
+            <main className="relative z-10 max-w-7xl mx-auto px-6 py-20 lg:py-32 selection:bg-[#8B7355]/30 font-sans-ed">
+                {/* Grain Overlay */}
+                <div className="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay z-50" style={{ backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png")' }}></div>
+
                 {/* Background Orbs */}
                 <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
                     <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[120px] animate-pulse"></div>
@@ -87,12 +90,12 @@ export function WhyResumeVibeContent() {
 
                 {/* Hero Section */}
                 <header className="mb-32 max-w-3xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 mb-8">
-                        <Sparkles size={12} className="text-purple-500" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-purple-500">The New Standard</span>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 mb-8">
+                        <Sparkles size={12} className="text-[var(--accent)]" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--accent)]">The New Standard</span>
                     </div>
-                    <h1 className="text-5xl lg:text-7xl font-black tracking-tighter mb-8 bg-gradient-to-r from-[var(--text-main)] via-[var(--text-main)] to-[var(--text-main)]/40 bg-clip-text text-transparent">
-                        Why settle for a <span className="text-purple-500">Static</span> Resume?
+                    <h1 className="text-5xl lg:text-7xl font-serif-ed font-normal tracking-tight mb-8 bg-gradient-to-r from-[var(--text-main)] via-[var(--text-main)] to-[var(--text-main)]/40 bg-clip-text text-transparent">
+                        Why settle for a <span className="text-[#8B7355] italic">Static</span> Resume?
                     </h1>
                     <p className="text-xl text-[var(--text-muted)] leading-relaxed font-medium">
                         ResumeVibe isn't just a builder. It's an autonomous career

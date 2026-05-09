@@ -24,6 +24,14 @@ interface Props {
     };
     actions?: React.ReactNode;
     controlsLayout?: 'local' | 'parent';
+    /** Called when Enter is pressed (without Shift). If provided, Enter adds a new bullet instead of blurring. */
+    onEnterKey?: () => void;
+    /** Called when Backspace is pressed on an empty field. Typically deletes the bullet. */
+    onBackspaceEmpty?: () => void;
+    /** If set, shows a warning when text exceeds this character count. */
+    maxRecommendedLength?: number;
+    /** data-bullet-index for focusing after Enter/Backspace */
+    bulletIndex?: number;
 }
 
 export function EditableField({
@@ -36,7 +44,11 @@ export function EditableField({
     mode = 'text',
     aiProps,
     actions,
-    controlsLayout = 'local'
+    controlsLayout = 'local',
+    onEnterKey,
+    onBackspaceEmpty,
+    maxRecommendedLength,
+    bulletIndex
 }: Props) {
     const [isFocused, setIsFocused] = useState(false);
     const [showLinkPrompt, setShowLinkPrompt] = useState(false);
@@ -78,11 +90,36 @@ export function EditableField({
         }
     }, [mode, value]);
 
+    // Keep refs for callbacks to keep handleKeyDown stable
+    const onEnterKeyRef = useRef(onEnterKey);
+    React.useEffect(() => { onEnterKeyRef.current = onEnterKey; }, [onEnterKey]);
+    const onBackspaceEmptyRef = useRef(onBackspaceEmpty);
+    React.useEffect(() => { onBackspaceEmptyRef.current = onBackspaceEmpty; }, [onBackspaceEmpty]);
+
     const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLElement>) => {
         if (e.key === 'Enter') {
             if (Tag === 'h1' || Tag === 'h2' || Tag === 'h3' || Tag === 'span') {
                 e.preventDefault();
-                e.currentTarget.blur();
+                // If onEnterKey is provided and Shift is NOT held, create a new bullet
+                if (onEnterKeyRef.current && !e.shiftKey) {
+                    // Save current content first
+                    const hasTags = /<[a-z][\s\S]*>/i.test(e.currentTarget.innerHTML);
+                    const currentValue = (hasTags) ? e.currentTarget.innerHTML : e.currentTarget.innerText;
+                    if (currentValue !== value) {
+                        onSaveRef.current(currentValue);
+                    }
+                    onEnterKeyRef.current();
+                } else {
+                    e.currentTarget.blur();
+                }
+            }
+        }
+        if (e.key === 'Backspace') {
+            const el = e.currentTarget;
+            const text = el.innerText?.trim() || '';
+            if (text.length === 0 && onBackspaceEmptyRef.current) {
+                e.preventDefault();
+                onBackspaceEmptyRef.current();
             }
         }
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -96,7 +133,7 @@ export function EditableField({
                 showLinkPromptRef.current = true;
             }
         }
-    }, [Tag]);
+    }, [Tag, value]);
 
     const handleLinkConfirm = React.useCallback((url: string) => {
         setShowLinkPrompt(false);
@@ -168,6 +205,10 @@ export function EditableField({
         }
     }, [isEmpty, isEditable, placeholder]);
 
+    // Bullet length warning
+    const plainText = value?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ') || '';
+    const isOverLength = maxRecommendedLength && plainText.length > maxRecommendedLength;
+
     // Memoize props to prevent unnecessary updates to element
     const commonProps = React.useMemo(() => ({
         ref: contentRef,
@@ -178,8 +219,9 @@ export function EditableField({
         onBlur: handleBlur,
         onKeyDown: handleKeyDown,
         onMouseOver: handleMouseOver,
-        'data-placeholder': placeholder
-    }), [containerClasses, isEditable, placeholder, handleFocus, handleBlur, handleKeyDown, handleMouseOver]);
+        'data-placeholder': placeholder,
+        ...(bulletIndex !== undefined ? { 'data-bullet-index': bulletIndex } : {})
+    }), [containerClasses, isEditable, placeholder, handleFocus, handleBlur, handleKeyDown, handleMouseOver, bulletIndex]);
 
     // Memoize the element to prevent re-rendering when prompt opens (unless value changes)
     const contentElement = React.useMemo(() => (
@@ -264,6 +306,15 @@ export function EditableField({
         return (
             <Wrapper className={wrapperClasses}>
                 {contentElement}
+                {isOverLength && (
+                    <span
+                        className="inline-flex items-center gap-1 text-[10px] text-amber-600 mt-0.5 print:hidden"
+                        title={`This bullet is ${plainText.length} characters. Keep bullets to 1-2 lines for best readability.`}
+                    >
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        {plainText.length} chars — consider shortening
+                    </span>
+                )}
                 {prompt}
                 {linkTooltip}
                 <div className={`absolute ${positionClass} flex items-center z-[100] print:hidden`}>

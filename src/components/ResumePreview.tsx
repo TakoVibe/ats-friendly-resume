@@ -225,6 +225,7 @@ export function ResumePreview({ data, id, isEditable = false, onUpdate, onEditHe
                     onToggleSeparator={(val) => handleSeparatorUpdate('summary', val)}
                     viewMode={viewMode}
                     auditResult={auditResult}
+                    targetJD={data.targetJD}
                 />;
             case 'skills':
                 return <Skills
@@ -249,6 +250,7 @@ export function ResumePreview({ data, id, isEditable = false, onUpdate, onEditHe
                     onToggleSeparator={(val) => handleSeparatorUpdate('experience', val)}
                     viewMode={viewMode}
                     auditResult={auditResult}
+                    targetJD={data.targetJD}
                 />;
             case 'projects':
                 return <Projects
