@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Upload, FileText, Sparkles, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { useToken } from '../context/TokenContext';
 
 interface Props {
     isOpen: boolean;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function ImportResumeModal({ isOpen, onClose, onImport }: Props) {
+    const { useTokens } = useToken();
     const [activeTab, setActiveTab] = useState<'text' | 'pdf'>('text');
     const [textInput, setTextInput] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -22,6 +24,9 @@ export function ImportResumeModal({ isOpen, onClose, onImport }: Props) {
             setError('Please paste your resume text');
             return;
         }
+
+        const hasTokens = await useTokens('import_resume_text', 50);
+        if (!hasTokens) return;
 
         setIsProcessing(true);
         setError('');
@@ -55,6 +60,12 @@ export function ImportResumeModal({ isOpen, onClose, onImport }: Props) {
 
         if (file.type !== 'application/pdf') {
             setError('Please upload a PDF file');
+            return;
+        }
+
+        const hasTokens = await useTokens('import_resume_pdf', 50);
+        if (!hasTokens) {
+            e.target.value = '';
             return;
         }
 
@@ -181,7 +192,7 @@ export function ImportResumeModal({ isOpen, onClose, onImport }: Props) {
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                     disabled={isProcessing}
                                 />
-                                <div className={`h-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${isProcessing ? 'border-purple-500/40 bg-purple-500/5' : 'border-[var(--border-color)] hover:border-purple-500/40 hover:bg-[var(--bg-input)]'}`}>
+                                <div className={`group relative h-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${isProcessing ? 'border-purple-500/40 bg-purple-500/5' : 'border-[var(--border-color)] hover:border-purple-500/40 hover:bg-[var(--bg-input)]'}`}>
                                     {isProcessing ? (
                                         <div className="flex flex-col items-center text-center">
                                             <div className="relative">
@@ -193,6 +204,15 @@ export function ImportResumeModal({ isOpen, onClose, onImport }: Props) {
                                         </div>
                                     ) : (
                                         <>
+                                            <div className="absolute top-4 right-4 pointer-events-none z-20 flex flex-col items-end">
+                                                <div className="px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg text-xs font-black shadow-sm flex items-center gap-1.5 group-hover:border-purple-500/30 transition-colors">
+                                                    <Sparkles size={12} className="text-purple-500" />
+                                                    50 Tokens
+                                                </div>
+                                                <div className="mt-2 px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg shadow-xl text-[10px] text-[var(--text-main)] font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    Parsing costs 50 Vibe Tokens
+                                                </div>
+                                            </div>
                                             <div className="p-5 bg-[var(--bg-input)] rounded-2xl mb-5 group-hover:scale-110 transition-transform">
                                                 <Upload size={40} className="text-[var(--text-muted)]" />
                                             </div>
@@ -242,7 +262,7 @@ export function ImportResumeModal({ isOpen, onClose, onImport }: Props) {
                             <button
                                 onClick={handleTextImport}
                                 disabled={isProcessing || !textInput.trim()}
-                                className="flex-1 sm:flex-none px-8 py-3 text-sm font-black text-white bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl transition-all shadow-xl shadow-purple-900/20 disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2 active:scale-95"
+                                className="group relative flex-1 sm:flex-none px-8 py-3 text-sm font-black text-white bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl transition-all shadow-xl shadow-purple-900/20 disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2 active:scale-95"
                             >
                                 {isProcessing ? (
                                     <>
@@ -253,6 +273,12 @@ export function ImportResumeModal({ isOpen, onClose, onImport }: Props) {
                                     <>
                                         <Sparkles size={18} />
                                         Magic Import
+                                        <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-[10px]">⚡ 50</span>
+                                        
+                                        <div className="absolute bottom-full right-0 mb-3 px-3 py-2 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-lg shadow-xl text-[10px] text-[var(--text-main)] font-medium opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 flex items-center gap-2">
+                                            <Sparkles size={12} className="text-purple-500" />
+                                            Costs 50 Vibe Tokens
+                                        </div>
                                     </>
                                 )}
                             </button>

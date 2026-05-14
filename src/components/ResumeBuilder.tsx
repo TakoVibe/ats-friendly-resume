@@ -16,6 +16,7 @@ import { ResumeProvider } from '../context/ResumeContext';
 import { BrandSwitcher } from './brand/BrandSwitcher';
 import { CareerInsights } from './brand/CareerInsights';
 import { SuccessModal } from './brand/SuccessModal';
+import { SuccessJobsScreen } from './brand/SuccessJobsScreen';
 import OptimizeResumeModal from './OptimizeResumeModal';
 import { ImportResumeModal } from './ImportResumeModal';
 import { SectionTypeDialog } from './ui/SectionTypeDialog';
@@ -41,6 +42,7 @@ function ResumeBuilderContent() {
     const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'parser'>('editor');
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showJobSearchScreen, setShowJobSearchScreen] = useState(false);
     const [showOptimizeModal, setShowOptimizeModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [showSectionTypeModal, setShowSectionTypeModal] = useState(false);
@@ -602,6 +604,17 @@ function ResumeBuilderContent() {
                         <SuccessModal
                             fileName={lastDownloadedFile}
                             onClose={() => setShowSuccessModal(false)}
+                            onViewJobs={() => {
+                                setShowSuccessModal(false);
+                                setShowJobSearchScreen(true);
+                            }}
+                        />
+                    )}
+
+                    {showJobSearchScreen && (
+                        <SuccessJobsScreen
+                            resumeData={data}
+                            onBack={() => setShowJobSearchScreen(false)}
                         />
                     )}
 

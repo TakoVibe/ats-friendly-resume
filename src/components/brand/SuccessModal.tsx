@@ -1,11 +1,12 @@
-import { CheckCircle2, ArrowRight, ShieldCheck, Trophy, ExternalLink } from 'lucide-react';
+import { CheckCircle2, ArrowRight, ShieldCheck, Trophy, ExternalLink, Briefcase } from 'lucide-react';
 
 interface SuccessModalProps {
     onClose: () => void;
     fileName: string;
+    onViewJobs: () => void;
 }
 
-export function SuccessModal({ onClose, fileName }: SuccessModalProps) {
+export function SuccessModal({ onClose, fileName, onViewJobs }: SuccessModalProps) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="bg-[var(--bg-card)] rounded-2xl shadow-[var(--shadow)] w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-[var(--border-color)]">
@@ -44,6 +45,14 @@ export function SuccessModal({ onClose, fileName }: SuccessModalProps) {
                                 <p className="text-xs text-[var(--text-muted)] mt-1 font-medium">Explore more tools and resources on our platform.</p>
                             </div>
                         </div>
+
+                        <button
+                            onClick={onViewJobs}
+                            className="flex items-center justify-center w-full px-6 py-3.5 bg-yellow-500 hover:opacity-90 text-black rounded-xl font-bold text-sm transition-all shadow-xl active:scale-95"
+                        >
+                            <Briefcase size={16} className="mr-2" />
+                            View Matching Jobs
+                        </button>
 
                         <a
                             href="https://takovibe.com"

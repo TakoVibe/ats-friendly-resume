@@ -60,7 +60,7 @@ export function BrandSwitcher({ compact = false }: BrandSwitcherProps) {
                                     <Logo className="w-8 h-8 rounded-xl shadow-lg border border-[var(--border-color)] bg-white p-0.5" />
                                 </div>
                             )}
-                            <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-md bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 translate-y-[-1px] ${compact ? 'hidden md:block' : ''}`}>Beta</span>
+                            {/* <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-md bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 translate-y-[-1px] ${compact ? 'hidden md:block' : ''}`}>Beta</span> */}
                         </div>
                         <a
                             href="https://takovibe.com"

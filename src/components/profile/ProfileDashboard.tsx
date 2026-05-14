@@ -2,6 +2,7 @@ import React from 'react';
 import { AuthOnlyProviders } from '../Providers';
 import { Navbar } from '../ui/Navbar';
 import { UserResumes } from './UserResumes';
+import { RecommendedJobs } from './RecommendedJobs';
 import { LoginModal } from '../ui/LoginModal';
 import { Footer } from '../ui/Footer';
 import {
@@ -9,6 +10,7 @@ import {
     FileText,
     Loader2,
     Plus,
+    Briefcase,
     TrendingDown,
     TrendingUp,
     User,
@@ -27,7 +29,7 @@ export function ProfileDashboard() {
     );
 }
 
-type Tab = 'wallet' | 'resumes';
+type Tab = 'wallet' | 'resumes' | 'jobs';
 
 function ProfileDashboardInner() {
     const { user } = useAuth();
@@ -161,6 +163,7 @@ function ProfileDashboardInner() {
                             {([
                                 { id: 'wallet',  label: 'Ledger',  icon: <Wallet size={14} className="opacity-50" /> },
                                 { id: 'resumes', label: 'Documents', icon: <FileText size={14} className="opacity-50" /> },
+                                { id: 'jobs', label: 'Opportunities', icon: <Briefcase size={14} className="opacity-50" /> },
                             ] as { id: Tab; label: string; icon: React.ReactNode }[]).map(tab => (
                                 <button
                                     key={tab.id}
@@ -254,6 +257,12 @@ function ProfileDashboardInner() {
                                 </a>
                             </div>
                             <UserResumes />
+                        </section>
+                    )}
+
+                    {activeTab === 'jobs' && (
+                        <section id="jobs">
+                            <RecommendedJobs />
                         </section>
                     )}
                 </div>

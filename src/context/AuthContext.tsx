@@ -6,6 +6,7 @@ interface User {
     first_name: string;
     last_name: string;
     profile_image?: string;
+    vibe_tokens?: number;
 }
 
 interface AuthContextType {

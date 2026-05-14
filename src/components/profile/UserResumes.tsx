@@ -122,7 +122,12 @@ export function UserResumes() {
     }
 
     if (isLoading) {
-        return <LoadingScreen message="Retrieving your professional portfolio..." />;
+        return (
+            <div className="py-24 flex flex-col items-center justify-center border border-[var(--border-color)] bg-[var(--bg-card)]">
+                <Loader2 size={32} className="text-[var(--text-main)] mb-6 animate-spin opacity-50" />
+                <p className="font-sans-ed text-[11px] uppercase tracking-widest text-[var(--text-muted)]">Retrieving your portfolio...</p>
+            </div>
+        );
     }
 
     if (resumes.length === 0) {
