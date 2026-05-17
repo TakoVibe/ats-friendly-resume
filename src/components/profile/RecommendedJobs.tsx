@@ -24,7 +24,7 @@ export function RecommendedJobs() {
     const [isSearching, setIsSearching] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const { refreshTokens } = useToken();
+    const { fetchTokenData } = useToken();
 
     useEffect(() => {
         const init = async () => {
@@ -86,7 +86,7 @@ export function RecommendedJobs() {
                 location,
                 company
             });
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('auth_token');
             const response = await fetch(`/api/jobs?${queryParams.toString()}`, {
                 headers: {
                     'Authorization': token ? `Token ${token}` : ''
@@ -103,7 +103,7 @@ export function RecommendedJobs() {
             if (data.error) throw new Error(data.error);
             
             setJobs(data.results || []);
-            refreshTokens();
+            fetchTokenData();
         } catch (err) {
             console.error("Error fetching jobs:", err);
             setError("We couldn't load jobs at this moment. Please try again later.");
