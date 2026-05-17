@@ -26,7 +26,7 @@ export function SuccessJobsScreen({ resumeData, onBack }: SuccessJobsScreenProps
     const [error, setError] = useState<string | null>(null);
     const [hasAccess, setHasAccess] = useState(false);
     const [isCheckingAccess, setIsCheckingAccess] = useState(true);
-    const [tokenBalance, setTokenBalance] = useState(0);
+    const [tokenBalance, setTokenBalance] = useState(user?.vibe_credits || 0);
 
     useEffect(() => {
         checkAccessAndFetchJobs();
@@ -59,6 +59,9 @@ export function SuccessJobsScreen({ resumeData, onBack }: SuccessJobsScreenProps
 
             if (response.status === 402) {
                 setError(data.message || 'Insufficient tokens');
+                if (data.token_balance !== undefined) {
+                    setTokenBalance(data.token_balance);
+                }
                 setHasAccess(false);
             } else if (!response.ok) {
                 throw new Error(data.error || 'Failed to fetch jobs');
@@ -117,7 +120,7 @@ export function SuccessJobsScreen({ resumeData, onBack }: SuccessJobsScreenProps
                                 <Crown size={14} className="text-yellow-500" />
                                 <span>Your Balance</span>
                             </div>
-                            <div className="text-3xl font-bold text-[var(--text-main)]">{user?.vibe_tokens || 0}</div>
+                            <div className="text-3xl font-bold text-[var(--text-main)]">{tokenBalance}</div>
                             <div className="text-xs text-[var(--text-muted)] mt-1">VibeTokens</div>
                         </div>
 

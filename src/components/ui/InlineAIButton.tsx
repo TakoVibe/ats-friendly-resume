@@ -32,11 +32,14 @@ export function InlineAIButton({
     const handleOptimize = async () => {
         if (!text.trim()) return;
 
-        const hasTokens = await useTokens('inline_edit', 5, 'resumevibe');
-        if (!hasTokens) return;
-
         setIsOptimizing(true);
         setError(null);
+
+        const hasTokens = await useTokens('inline_edit', 5, 'resumevibe');
+        if (!hasTokens) {
+            setIsOptimizing(false);
+            return;
+        }
 
         try {
             const response = await fetch('/api/optimize-text', {

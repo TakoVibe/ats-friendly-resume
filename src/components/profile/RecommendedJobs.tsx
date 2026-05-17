@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { Briefcase, Building2, ExternalLink, Loader2, MapPin, Search, Target, Zap } from 'lucide-react';
+import { useToken } from '../../context/TokenContext';
 
 interface Job {
     id: string;
@@ -23,9 +24,24 @@ export function RecommendedJobs() {
     const [isSearching, setIsSearching] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const { refreshTokens } = useToken();
+
     useEffect(() => {
         const init = async () => {
             try {
+                const params = new URLSearchParams(window.location.search);
+                const queryKeyword = params.get('keyword');
+                
+                if (queryKeyword) {
+                    const loc = params.get('location') || '';
+                    const comp = params.get('company') || '';
+                    setSearchKeyword(queryKeyword);
+                    setSearchLocation(loc);
+                    setSearchCompany(comp);
+                    await fetchJobs(queryKeyword, loc, comp);
+                    return;
+                }
+
                 // 1. Fetch resumes to find the target role
                 const resumeRes = await api.get('/api/resumes/');
                 let keyword = 'Software Developer';
@@ -70,14 +86,24 @@ export function RecommendedJobs() {
                 location,
                 company
             });
-            const response = await fetch(`/api/jobs?${queryParams.toString()}`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/jobs?${queryParams.toString()}`, {
+                headers: {
+                    'Authorization': token ? `Token ${token}` : ''
+                }
+            });
             if (!response.ok) {
+                if (response.status === 402) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Insufficient tokens for this search.');
+                }
                 throw new Error('Failed to fetch jobs');
             }
             const data = await response.json();
             if (data.error) throw new Error(data.error);
             
             setJobs(data.results || []);
+            refreshTokens();
         } catch (err) {
             console.error("Error fetching jobs:", err);
             setError("We couldn't load jobs at this moment. Please try again later.");

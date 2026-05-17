@@ -38,8 +38,14 @@ function ProfileDashboardInner() {
     const [activeTab, setActiveTab] = React.useState<Tab>('wallet');
 
     React.useEffect(() => {
-        if (typeof window !== 'undefined' && window.location.hash === '#resumes') {
-            setActiveTab('resumes');
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            if (tab === 'opportunities' || tab === 'jobs') {
+                setActiveTab('jobs');
+            } else if (tab === 'resumes' || window.location.hash === '#resumes') {
+                setActiveTab('resumes');
+            }
         }
     }, []);
 

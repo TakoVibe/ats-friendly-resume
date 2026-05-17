@@ -42,8 +42,9 @@ export const POST: APIRoute = async ({ request }) => {
                     JSON.stringify({ 
                         error: 'Insufficient tokens',
                         requires_tokens: true,
-                        tokens_required: 10,
-                        message: 'You need 10 VibeTokens to view job listings. Purchase tokens to continue.'
+                        tokens_required: 5,
+                        token_balance: errorData.token_balance || 0,
+                        message: 'You need 5 VibeTokens to view job listings. Purchase tokens to continue.'
                     }),
                     { status: 402, headers: { 'Content-Type': 'application/json' } }
                 );
@@ -80,22 +81,31 @@ export const POST: APIRoute = async ({ request }) => {
 
         const jobsData = await jobsResponse.json();
 
+        let results = jobsData.results.map((job: any) => ({
+            id: job.id,
+            title: job.title,
+            company: job.company?.display_name || 'Unknown Company',
+            location: job.location?.display_name || 'Remote/India',
+            description: job.description,
+            url: job.redirect_url,
+            created_at: job.created,
+            salary_min: job.salary_min,
+            salary_max: job.salary_max
+        }));
+
+        if (company) {
+            const companyLower = company.toLowerCase().trim();
+            results = results.filter((job: any) => 
+                job.company.toLowerCase().includes(companyLower)
+            );
+        }
+
         return new Response(
             JSON.stringify({
                 success: true,
                 token_balance: tokenData.token_balance,
-                count: jobsData.count,
-                results: jobsData.results.map((job: any) => ({
-                    id: job.id,
-                    title: job.title,
-                    company: job.company?.display_name || 'Unknown Company',
-                    location: job.location?.display_name || 'Remote/India',
-                    description: job.description,
-                    url: job.redirect_url,
-                    created_at: job.created,
-                    salary_min: job.salary_min,
-                    salary_max: job.salary_max
-                }))
+                count: results.length,
+                results: results
             }),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
