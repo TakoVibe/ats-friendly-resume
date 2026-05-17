@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 
+const BACKEND_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+
 export const GET: APIRoute = async ({ request }) => {
     try {
         const url = new URL(request.url);
@@ -27,7 +29,7 @@ export const GET: APIRoute = async ({ request }) => {
         }
 
         // Consume 10 vibetokens for job search
-        const useTokenResponse = await fetch('http://localhost:8000/api/users/tokens/use/', {
+        const useTokenResponse = await fetch(`${BACKEND_URL}/api/users/tokens/use/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Token ${token}`,

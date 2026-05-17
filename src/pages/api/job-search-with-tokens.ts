@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { api } from '../../lib/api';
+
+const BACKEND_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
@@ -28,11 +29,18 @@ export const POST: APIRoute = async ({ request }) => {
 
         const finalKeyword = company ? `${company} ${searchKeyword}` : searchKeyword;
 
-        // Consume 10 vibetokens for job search
-        const useTokenResponse = await api.post('/api/users/tokens/use/', {
-            action_type: 'job_search',
-            product: 'resumevibe',
-            request_id: `job_search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        // Consume 5 vibetokens for job search
+        const useTokenResponse = await fetch(`${BACKEND_URL}/api/users/tokens/use/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action_type: 'job_search',
+                product: 'resumevibe',
+                request_id: `job_search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            })
         });
 
         if (!useTokenResponse.ok) {
