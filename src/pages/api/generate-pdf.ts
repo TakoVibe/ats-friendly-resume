@@ -22,9 +22,11 @@ export const POST: APIRoute = async ({ request }) => {
             <html>
             <head>
                 <meta charset="UTF-8">
-                <!-- Using system fonts to reduce PDF size -->
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Merriweather:wght@300;400;700;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
                 <style>
-                    body { font-family: sans-serif; }
+                    body { font-family: Inter, sans-serif; }
                     @page { margin: 0; size: A4; }
                     body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                     * { box-sizing: border-box; }

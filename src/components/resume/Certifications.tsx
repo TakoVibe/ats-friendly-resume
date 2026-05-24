@@ -22,11 +22,30 @@ interface Props {
 export function Certifications({ certifications, isEditable = false, onUpdate, title = "Certifications", onTitleChange, showSeparator, onToggleSeparator, viewMode = 'desktop' }: Props) {
     if (!certifications) return null;
     const isMobile = viewMode === 'mobile';
+    const stripHtml = (value: string) => value
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
 
     const updateCert = (id: string, field: keyof CertificationItem, value: any) => {
         if (!onUpdate) return;
         const newCerts = certifications.map(c =>
             c.id === id ? { ...c, [field]: value } : c
+        );
+        onUpdate(newCerts);
+    };
+
+    const updateCertFields = (id: string, fields: Partial<CertificationItem>) => {
+        if (!onUpdate) return;
+        const newCerts = certifications.map(c =>
+            c.id === id ? { ...c, ...fields } : c
         );
         onUpdate(newCerts);
     };
@@ -71,13 +90,13 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
     };
 
     return (
-        <section className="resume-mb-8">
+        <section className="resume-mb-8 resume-certifications-section">
             <SectionTitle
                 title={title}
                 isEditable={isEditable}
                 onChange={onTitleChange}
             />
-            <ul className="resume-details-list">
+            <ul className="resume-details-list resume-certifications-list">
                 {certifications.map((cert, index) => (
                     <ItemControls
                         key={cert.id}
@@ -90,38 +109,71 @@ export function Certifications({ certifications, isEditable = false, onUpdate, t
                         isEditable={isEditable}
                         forceMobileControls={viewMode === 'mobile'}
                     >
-                        <li className="resume-list-item resume-text-justify group/item-content resume-relative">
+                        <li className="resume-list-item resume-certification-item group/item-content resume-relative">
                             <span className="resume-bullet">•</span>
-                            <div className="resume-flex-1 resume-break-avoid">
-                                <div className={`resume-flex ${isMobile ? 'resume-flex-col resume-gap-0.5' : 'resume-justify-between resume-items-baseline'}`}>
-                                    <div className={`resume-font-bold resume-text-dark resume-flex resume-gap-1 group/cert-row relative items-baseline ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0' : ''}`}>
-                                        <EditableField
-                                            value={cert.name}
-                                            onSave={(val) => updateCert(cert.id, 'name', val)}
-                                            isEditable={isEditable}
-                                            actions={
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); deleteItem(index); }}
-                                                    className="p-1 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                                    title="Delete item"
-                                                >
-                                                    <span className="text-lg leading-none">×</span>
-                                                </button>
-                                            }
-                                        />
-                                        {!isMobile && <span>-</span>}
-                                        <EditableField
-                                            value={cert.issuer}
-                                            onSave={(val) => updateCert(cert.id, 'issuer', val)}
-                                            isEditable={isEditable}
-                                            className="resume-font-normal resume-text-gray"
-                                        />
+                            <div className="resume-flex-1 resume-break-avoid resume-certification-content">
+                                <div className={`resume-flex resume-certification-row ${isMobile ? 'resume-flex-col resume-gap-0.5' : 'resume-justify-between resume-items-baseline'}`}>
+                                    <div className={`resume-flex resume-gap-1 resume-certification-identity group/cert-row relative items-baseline ${isMobile ? 'resume-font-bold resume-text-dark resume-flex-col resume-items-start resume-gap-0' : ''}`}>
+                                        {isMobile ? (
+                                            <>
+                                                <EditableField
+                                                    value={cert.name}
+                                                    onSave={(val) => updateCert(cert.id, 'name', val)}
+                                                    isEditable={isEditable}
+                                                    className="resume-certification-name"
+                                                    actions={
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); deleteItem(index); }}
+                                                            className="p-1 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                            title="Delete item"
+                                                        >
+                                                            <span className="text-lg leading-none">×</span>
+                                                        </button>
+                                                    }
+                                                />
+                                                <EditableField
+                                                    value={cert.issuer}
+                                                    onSave={(val) => updateCert(cert.id, 'issuer', val)}
+                                                    isEditable={isEditable}
+                                                    className="resume-font-normal resume-text-gray resume-certification-issuer"
+                                                />
+                                            </>
+                                        ) : (
+                                            <EditableField
+                                                mode="html"
+                                                tagName="span"
+                                                value={`${stripHtml(cert.name)} - <strong>${stripHtml(cert.issuer || '')}</strong>`}
+                                                onSave={(val) => {
+                                                    const clean = stripHtml(val);
+                                                    const separatorIndex = clean.indexOf(' - ');
+                                                    if (separatorIndex === -1) {
+                                                        updateCert(cert.id, 'name', clean);
+                                                        return;
+                                                    }
+                                                    const nextName = clean.slice(0, separatorIndex).trim();
+                                                    const nextIssuer = clean.slice(separatorIndex + 3).trim();
+                                                    updateCertFields(cert.id, { name: nextName, issuer: nextIssuer });
+                                                }}
+                                                isEditable={isEditable}
+                                                className="resume-certification-line"
+                                                placeholder="Certification - Issuer"
+                                                actions={
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); deleteItem(index); }}
+                                                        className="p-1 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                        title="Delete item"
+                                                    >
+                                                        <span className="text-lg leading-none">×</span>
+                                                    </button>
+                                                }
+                                            />
+                                        )}
                                     </div>
                                     <DatePicker
                                         value={cert.date || ''}
                                         onSave={(val) => updateCert(cert.id, 'date', val)}
                                         isEditable={isEditable}
-                                        className="resume-duration-gray"
+                                        className="resume-duration-gray resume-certification-date"
                                         mode="single"
                                     />
                                 </div>

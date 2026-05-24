@@ -180,9 +180,9 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                         isEditable={isEditable}
                         forceMobileControls={viewMode === 'mobile'}
                     >
-                        <div className="resume-relative group/item-content">
+                        <div className="resume-relative resume-education-item group/item-content">
                             {/* Degree & Duration */}
-                            <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
+                            <div className={`resume-flex resume-education-primary-row resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
                                 <EditableField
                                     tagName="h3"
                                     value={edu.degree}
@@ -199,7 +199,7 @@ export function Education({ education, isEditable = false, onUpdate, title = "Ed
                             </div>
 
                             {/* Institution & Location */}
-                            <div className={`resume-flex resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
+                            <div className={`resume-flex resume-education-secondary-row resume-items-baseline resume-mb-1 ${isMobile ? 'resume-flex-col resume-items-start resume-gap-0.5' : 'resume-justify-between'}`}>
                                 <div className="resume-flex-1">
                                     <EditableField
                                         tagName="h4"

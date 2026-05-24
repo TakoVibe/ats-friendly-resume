@@ -163,7 +163,8 @@ export const initialResume: ResumeSchema = {
     ],
     customSections: [],
     config: {
-        baseFontSize: 10
+        baseFontSize: 10,
+        documentMode: 'standard'
     },
     sectionOrder: [
         "summary",

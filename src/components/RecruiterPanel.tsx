@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, Target, CheckCircle2, AlertCircle, MessageSquare, Info, Sparkles, UserCheck, Lock, LogIn, TrendingUp, Cpu, BarChart, Bug, Zap, BarChart3, Settings2, X, ChevronDown, ChevronUp, Calendar, Terminal, Activity, ShieldAlert, Crosshair } from 'lucide-react';
-import { Logo } from './ui/Logo';
+import { Search, Target, CheckCircle2, AlertCircle, Info, Sparkles, Lock, LogIn, TrendingUp, Cpu, Bug, Zap, Settings2, X, ChevronDown, Activity, ShieldAlert, Crosshair } from 'lucide-react';
 import { ATSWarning } from './ui/ATSWarning';
 import type { ResumeSchema } from '../types/resume';
 import { useToken } from '../context/TokenContext';
@@ -33,6 +32,12 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
     const { useTokens } = useToken();
 
     const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const itemText = (item: any) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') return item.text || '';
+        return '';
+    };
+    const itemListText = (items: any[] = []) => items.map(itemText).filter(Boolean).join(' ');
 
     const handleDeepAudit = async (skipTokens = false) => {
         if (!isAuthenticated) {
@@ -142,7 +147,7 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
         // Analysis: Metrics / Quantifiable results
         const metricBullets = data.experience.flatMap((exp: any) =>
-            exp.metrics.filter((m: any) => METRICS_REGEX.test(typeof m === 'string' ? m : m.text))
+            (exp.metrics || []).filter((m: any) => METRICS_REGEX.test(itemText(m)))
         );
 
         if (metricBullets.length >= 3) {
@@ -157,8 +162,9 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
         // Analysis: Action Verbs
         const actionVerbBullets = data.experience.flatMap((exp: any) =>
-            exp.metrics.filter((m: any) => {
-                const text = typeof m === 'string' ? m : m.text;
+            (exp.metrics || []).filter((m: any) => {
+                const text = itemText(m);
+                if (!text.trim()) return false;
                 const firstWord = text.trim().split(' ')[0].toLowerCase();
                 return ACTION_VERBS.includes(firstWord);
             })
@@ -191,11 +197,11 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
             // Critical Fix: Only search in actual resume content, NOT the entire data object (which includes targetJD)
             const resumeContent = [
                 data.summary,
-                ...data.experience.map((e: any) => `${e.company} ${e.role} ${(e.metrics || []).map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
+                ...data.experience.map((e: any) => `${e.company} ${e.role} ${itemListText(e.metrics || [])}`),
                 ...data.skills.map((s: any) => `${s.name} ${s.items.join(' ')}`),
-                ...(data.projects || []).map((p: any) => `${p.name} ${p.description || ''} ${(p.metrics || []).map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
+                ...(data.projects || []).map((p: any) => `${p.name} ${p.description || ''} ${itemListText(p.metrics || [])}`),
                 ...(data.openSource || []).map((os: any) => `${os.name} ${os.description || ''}`),
-                ...(data.customSections || []).map((cs: any) => `${cs.title} ${cs.items.map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
+                ...(data.customSections || []).map((cs: any) => `${cs.title} ${itemListText(cs.items || [])}`),
             ].join(' ').toLowerCase();
 
             const foundKeywords = uniqueKeywords.filter(k => {
@@ -236,11 +242,11 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
         const resumeContent = [
             data.summary,
-            ...data.experience.map((e: any) => `${e.company} ${e.role} ${(e.metrics || []).map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
+            ...data.experience.map((e: any) => `${e.company} ${e.role} ${itemListText(e.metrics || [])}`),
             ...data.skills.map((s: any) => `${s.name} ${s.items.join(' ')}`),
-            ...(data.projects || []).map((p: any) => `${p.name} ${p.description || ''} ${(p.metrics || []).map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
+            ...(data.projects || []).map((p: any) => `${p.name} ${p.description || ''} ${itemListText(p.metrics || [])}`),
             ...(data.openSource || []).map((os: any) => `${os.name} ${os.description || ''}`),
-            ...(data.customSections || []).map((cs: any) => `${cs.title} ${cs.items.map((m: any) => typeof m === 'string' ? m : m.text).join(' ')}`),
+            ...(data.customSections || []).map((cs: any) => `${cs.title} ${itemListText(cs.items || [])}`),
         ].join(' ').toLowerCase();
 
         return unique.map(word => ({
@@ -257,8 +263,8 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
     const keywordHeatmap = getKeywords();
     const hasMetrics = data.experience.some((exp: any) =>
-        exp.metrics.some((m: any) => {
-            const text = typeof m === 'string' ? m : m.text;
+        (exp.metrics || []).some((m: any) => {
+            const text = itemText(m);
             return /[0-9]+%|[0-9]+\+|[0-9]+x|\$[0-9]+|over [0-9]+|more than [0-9]+/i.test(text);
         })
     );
@@ -271,12 +277,12 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
 
     return (
         <div className="w-full xl:w-[420px] h-full bg-[var(--bg-card)] text-[var(--text-main)] border-l border-[var(--border-color)] flex flex-col overflow-hidden animate-in slide-in-from-right duration-500 relative font-sans-ed selection:bg-[#8B7355]/30"
-             style={{ boxShadow: '-10px 0 30px rgba(0,0,0,0.5)' }}>
+             style={{ boxShadow: '-10px 0 30px rgba(0,0,0,0.18)' }}>
              
-            {/* Technical Grid Background */}
-            <div className="absolute inset-0 pointer-events-none opacity-20" 
+            {/* Soft panel texture */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.04]" 
                  style={{
-                     backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
+                     backgroundImage: 'linear-gradient(rgba(128,128,128,0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,0.28) 1px, transparent 1px)',
                      backgroundSize: '24px 24px'
                  }} 
             />
@@ -285,16 +291,22 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
             <div className="px-5 py-4 bg-[var(--bg-card)] border-b border-[var(--border-color)]/80 flex items-center justify-between relative z-10 backdrop-blur-md">
                 <div className="flex items-center gap-3">
                     <div className="relative flex items-center justify-center">
-                        <div className="w-2 h-2 bg-purple-500 rounded-sm animate-pulse" style={{ boxShadow: '0 0 10px #a855f7' }} />
-                        <div className="absolute w-4 h-4 border border-purple-500/50 rounded-sm rotate-45" />
+                        <div className="w-9 h-9 rounded-lg border border-[var(--accent)]/20 bg-[var(--accent-subtle)] flex items-center justify-center text-[var(--accent)]">
+                            <Sparkles size={16} />
+                        </div>
                     </div>
                     <div className="flex flex-col">
-                        <h2 className="text-[12px] font-black text-[var(--text-main)] uppercase tracking-[0.3em] leading-none">SYS.COCKPIT</h2>
-                        <span className="text-[8px] font-mono text-[var(--text-muted)] mt-1 uppercase tracking-widest">Target Acquisition Mode</span>
+                        <h2 className="text-[12px] font-black text-[var(--text-main)] uppercase tracking-[0.22em] leading-none">Job Match Helper</h2>
+                        <span className="text-[9px] font-medium text-[var(--text-muted)] mt-1">Tailor your resume faster</span>
                     </div>
                 </div>
                 {onClose && (
-                    <button onClick={onClose} className="p-1.5 hover:bg-[var(--bg-input)] rounded-md transition-colors xl:hidden text-[var(--text-muted)] hover:text-[var(--text-main)]">
+                    <button
+                        onClick={onClose}
+                        className="p-1.5 hover:bg-[var(--bg-input)] rounded-md transition-colors text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                        title="Hide cockpit"
+                        aria-label="Hide cockpit"
+                    >
                         <X size={18} />
                     </button>
                 )}
@@ -306,94 +318,83 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                 {/* LOCKED OVERLAY */}
                 {!isAuthenticated && (
                     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 text-center bg-[var(--bg-card)]/90 backdrop-blur-xl">
-                        <div className="w-16 h-16 border border-[var(--border-color)] bg-[var(--bg-input)] rounded-none flex items-center justify-center text-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.15)] mb-6 relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-purple-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                        <div className="w-16 h-16 border border-[var(--border-color)] bg-[var(--bg-input)] rounded-xl flex items-center justify-center text-[var(--accent)] shadow-[0_16px_34px_-24px_rgba(0,0,0,0.55)] mb-6 relative overflow-hidden group">
                             <Lock size={24} className="relative z-10" />
-                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-purple-500" />
-                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-purple-500" />
                         </div>
-                        <h3 className="text-[12px] font-black text-[var(--text-main)] uppercase tracking-[0.4em] mb-4">
-                            System Locked
+                        <h3 className="text-[13px] font-black text-[var(--text-main)] uppercase tracking-[0.22em] mb-3">
+                            Sign in to tailor resumes
                         </h3>
-                        <p className="text-[10px] font-mono text-[var(--text-muted)] mb-8 max-w-[220px] leading-relaxed">
-                            &gt; AUTHENTICATION REQUIRED TO ACCESS TELEMETRY AND AUTOPILOT PROTOCOLS.
+                        <p className="text-sm text-[var(--text-muted)] mb-8 max-w-[260px] leading-relaxed">
+                            Paste a job description, find missing keywords, and apply focused edits in minutes.
                         </p>
                         <button
                             onClick={onRequireAuth}
-                            className="w-full py-4 bg-transparent border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white rounded-none text-[10px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 relative overflow-hidden group"
+                            className="w-full py-4 bg-[var(--text-main)] text-[var(--bg-card)] hover:opacity-90 rounded-xl text-[11px] font-black uppercase tracking-[0.18em] transition-all flex items-center justify-center gap-3 relative overflow-hidden group"
                         >
-                            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <LogIn size={14} /> AUTHENTICATE
+                            <LogIn size={14} /> Sign in to continue
                         </button>
                     </div>
                 )}
 
                 <div className={`flex flex-col flex-1 ${!isAuthenticated ? 'blur-md opacity-20 pointer-events-none select-none' : ''}`}>
                     
-                    {/* MISSION PHASE / WORKFLOW INDICATOR */}
+                    {/* Workflow indicator */}
                     <div className="px-5 py-4 border-b border-[var(--border-color)]/80 bg-[var(--bg-input)]">
                         <div className="flex items-center justify-between mb-4">
-                            <span className="text-[9px] font-mono font-bold text-purple-400 uppercase tracking-[0.2em]">SEQ_{String(currentStep).padStart(2, '0')}</span>
+                            <span className="text-[9px] font-bold text-[var(--accent)] uppercase tracking-[0.18em]">Step {currentStep} of 3</span>
                             <div className="flex gap-1">
                                 {[1, 2, 3].map(i => (
-                                    <div key={i} className={`h-1 transition-all duration-500 ${i === currentStep ? 'w-6 bg-purple-500' : i < currentStep ? 'w-3 bg-zinc-600' : 'w-3 bg-[var(--bg-input)]'}`} />
+                                    <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i === currentStep ? 'w-6 bg-[var(--accent)]' : i < currentStep ? 'w-3 bg-[var(--text-muted)]' : 'w-3 bg-[var(--border-color)]'}`} />
                                 ))}
                             </div>
                         </div>
                         <div
                             onClick={handleBeginMission}
-                            className="p-3 border border-[var(--border-color)] bg-[var(--bg-card)] hover:border-purple-500/50 flex items-center justify-between group cursor-pointer transition-all relative overflow-hidden"
+                            className="p-3 border border-[var(--border-color)] bg-[var(--bg-card)] hover:border-[var(--accent)]/50 rounded-xl flex items-center justify-between group cursor-pointer transition-all relative overflow-hidden"
                         >
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500/0 group-hover:bg-purple-500/50 transition-colors" />
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent)]/0 group-hover:bg-[var(--accent)]/50 transition-colors" />
                             <div className="flex items-center gap-4 pl-2">
-                                <Target size={16} className="text-[var(--text-muted)] group-hover:text-purple-400 transition-colors" />
+                                <Target size={16} className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" />
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-black text-[var(--text-main)] uppercase tracking-widest">Target Objective</span>
-                                    <span className="text-[9px] font-mono text-[var(--text-muted)] uppercase tracking-wider mt-0.5">{data.targetJD ? 'Objective Defined' : 'Awaiting Input'}</span>
+                                    <span className="text-[11px] font-black text-[var(--text-main)] uppercase tracking-widest">Job description</span>
+                                    <span className="text-[10px] text-[var(--text-muted)] mt-0.5">{data.targetJD ? 'Added' : 'Not added yet'}</span>
                                 </div>
                             </div>
-                            <div className="w-6 h-6 border border-[var(--border-color)] group-hover:border-purple-500/30 flex items-center justify-center text-[var(--text-muted)] group-hover:text-purple-400 bg-[var(--bg-input)] transition-colors">
+                            <div className="w-7 h-7 rounded-lg border border-[var(--border-color)] group-hover:border-[var(--accent)]/30 flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--accent)] bg-[var(--bg-input)] transition-colors">
                                 <Search size={12} />
                             </div>
                         </div>
                     </div>
 
                     {!showContent ? (
-                        /* EMPTY STATE - AWAITING JD */
+                        /* Empty state - awaiting job description */
                         <div className="flex-1 flex flex-col items-center justify-center p-8 relative">
                             <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
                                 <Target size={240} strokeWidth={0.5} />
                             </div>
                             
-                            <div className="w-full max-w-[280px] bg-[var(--bg-input)] border border-[var(--border-color)] p-5 relative">
-                                {/* Corner Accents */}
-                                <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-purple-500/50" />
-                                <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-purple-500/50" />
-                                <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-purple-500/50" />
-                                <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-purple-500/50" />
-                                
-                                <div className="flex items-center gap-2 mb-4 text-purple-400">
-                                    <Terminal size={14} />
-                                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Terminal</span>
+                            <div className="w-full max-w-[300px] bg-[var(--bg-input)] border border-[var(--border-color)] rounded-2xl p-5 relative">
+                                <div className="flex items-center gap-2 mb-4 text-[var(--accent)]">
+                                    <Sparkles size={14} />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest">Tailor in 3 steps</span>
                                 </div>
-                                <div className="space-y-2 text-[10px] font-mono text-[var(--text-muted)] leading-relaxed mb-6">
-                                    <p className="text-[var(--text-muted)]">&gt; SYSTEM IDLE.</p>
-                                    <p>&gt; AWAITING TARGET JOB DESCRIPTION.</p>
-                                    <p>&gt; PASTE PARAMETERS TO INITIALIZE AUTOPILOT OR PROCEED TO GENERAL DIAGNOSTICS.</p>
-                                    <p className="animate-pulse text-purple-500">_</p>
+                                <div className="space-y-2 text-sm text-[var(--text-muted)] leading-relaxed mb-6">
+                                    <p>Paste a job description.</p>
+                                    <p>We compare it with your resume.</p>
+                                    <p>You choose which edits to apply.</p>
                                 </div>
                                 
                                 <button
                                     onClick={handleBeginMission}
-                                    className="w-full py-3 bg-[var(--text-main)] text-[var(--bg-card)] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-3"
+                                    className="w-full py-3 bg-[var(--text-main)] text-[var(--bg-card)] text-[10px] font-black uppercase tracking-[0.18em] hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-3 rounded-xl"
                                 >
-                                    Input Parameters
+                                    Paste job description
                                 </button>
                                 <button
                                     onClick={handleSkipToGeneral}
-                                    className="w-full py-2 text-[9px] font-mono text-[var(--text-muted)] hover:text-[var(--text-main)] uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                                    className="w-full py-2 text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
                                 >
-                                    Override <TrendingUp size={10} />
+                                    Review without a job <TrendingUp size={10} />
                                 </button>
                             </div>
                         </div>
@@ -401,21 +402,12 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                         /* ACTIVE CONTENT STATE */
                         <div className="flex flex-col flex-1">
                             
-                            {/* TELEMETRY DASHBOARD (Score + Tabs) */}
+                            {/* Match overview */}
                             <div className="p-5 border-b border-[var(--border-color)] bg-[var(--bg-input)]">
                                 <div className="flex items-start gap-6">
-                                    {/* Score Module */}
-                                    <div className="relative w-28 h-28 shrink-0 flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-sm">
-                                        {/* Decorative corners */}
-                                        <div className="absolute top-1 left-1 w-1.5 h-1.5 border-t border-l border-[var(--border-color)]" />
-                                        <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-b border-r border-[var(--border-color)]" />
-                                        
+                                    <div className="relative w-28 h-28 shrink-0 flex items-center justify-center bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl">
                                         <svg className="absolute inset-0 w-full h-full transform -rotate-90">
-                                            {/* Outer dashed track */}
-                                            <circle cx="56" cy="56" r="46" stroke="#1f1f22" strokeWidth="1" fill="none" strokeDasharray="2 4" />
-                                            {/* Inner solid track */}
-                                            <circle cx="56" cy="56" r="38" stroke="#1f1f22" strokeWidth="4" fill="none" />
-                                            {/* Progress Arc */}
+                                            <circle cx="56" cy="56" r="38" stroke="currentColor" strokeWidth="4" fill="none" className="text-[var(--border-color)]" />
                                             <circle
                                                 cx="56"
                                                 cy="56"
@@ -426,13 +418,12 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                                 strokeDashoffset={238.76 - (238.76 * score) / 100}
                                                 strokeLinecap="butt"
                                                 fill="transparent"
-                                                className="text-purple-500 transition-[stroke-dashoffset] duration-1000 ease-out"
-                                                style={{ filter: 'drop-shadow(0 0 4px rgba(168,85,247,0.4))' }}
+                                                className="text-[var(--accent)] transition-[stroke-dashoffset] duration-1000 ease-out"
                                             />
                                         </svg>
                                         <div className="flex flex-col items-center justify-center z-10">
-                                            <span className="text-3xl font-black font-mono text-[var(--text-main)] leading-none">{score}</span>
-                                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] mt-1">Match</span>
+                                            <span className="text-3xl font-black text-[var(--text-main)] leading-none">{score}</span>
+                                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] mt-1">Job match</span>
                                         </div>
                                     </div>
 
@@ -444,11 +435,11 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                                 onClick={() => setActiveTab(tab)}
                                                 className={`py-2 px-3 text-left text-[9px] font-black uppercase tracking-[0.2em] transition-all border-l-2 ${
                                                     activeTab === tab
-                                                        ? 'border-purple-500 bg-purple-500/10 text-purple-100'
+                                                        ? 'border-[var(--accent)] bg-[var(--accent-subtle)] text-[var(--text-main)]'
                                                         : 'border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-muted)] hover:border-[var(--border-color)]'
                                                 }`}
                                             >
-                                                {tab === 'pulse' ? 'Diagnostics' : tab === 'strategy' ? 'Matrix' : 'Deep Scan'}
+                                                {tab === 'pulse' ? 'Quick tips' : tab === 'strategy' ? 'Job keywords' : 'Full review'}
                                             </button>
                                         ))}
                                     </div>
@@ -472,27 +463,27 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                             >
                                                 {/* Scanline effect on hover */}
                                                 {!(isStartingAutopilot || isAuditing) && (
-                                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/10 to-transparent -translate-y-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+                                                    <div className="absolute inset-0 bg-[var(--accent-subtle)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                                 )}
                                                 
                                                 <div className="flex items-center gap-4 relative z-10">
-                                                    <div className="w-8 h-8 border border-purple-500/30 bg-[var(--bg-card)] flex items-center justify-center text-purple-400">
+                                                    <div className="w-8 h-8 border border-[var(--accent)]/30 bg-[var(--bg-card)] rounded-lg flex items-center justify-center text-[var(--accent)]">
                                                         <Zap size={14} className={!(isStartingAutopilot || isAuditing) ? "animate-pulse" : ""} />
                                                     </div>
                                                     <div className="text-left">
                                                         <p className="text-[11px] font-black text-[var(--text-main)] uppercase tracking-widest leading-none">
-                                                            {isStartingAutopilot ? 'Initializing...' : 'Engage Autopilot'}
+                                                            {isStartingAutopilot ? 'Preparing edits...' : 'Tailor my resume'}
                                                         </p>
-                                                        <p className="text-[9px] font-mono text-[var(--text-muted)] mt-1.5 uppercase tracking-wider">Execute Auto-Optimization</p>
+                                                        <p className="text-[10px] text-[var(--text-muted)] mt-1.5">Create targeted edits from this job</p>
                                                     </div>
                                                 </div>
-                                                <ChevronDown size={14} className="text-purple-500/50 -rotate-90 group-hover:translate-x-1 transition-transform" />
+                                                <ChevronDown size={14} className="text-[var(--accent)]/70 -rotate-90 group-hover:translate-x-1 transition-transform" />
                                             </button>
                                         )}
 
                                         <div>
-                                            <h3 className="text-[10px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-4 border-b border-[var(--border-color)] pb-2 flex items-center gap-2">
-                                                <Activity size={12} /> Diagnostic Logs
+                                            <h3 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-4 border-b border-[var(--border-color)] pb-2 flex items-center gap-2">
+                                                <Activity size={12} /> Suggestions
                                             </h3>
                                             <div className="space-y-3">
                                                 {insights.map((insight, i) => (
@@ -517,7 +508,7 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                                                     insight.type === 'warning' ? 'text-amber-500/70' :
                                                                     'text-blue-500/70'
                                                                 }`}>
-                                                                    {insight.type === 'good' ? 'PASS' : insight.type === 'warning' ? 'WARN' : 'INFO'} // {String(i).padStart(2,'0')}
+                                                                    {insight.type === 'good' ? 'Looks good' : insight.type === 'warning' ? 'Needs work' : 'Tip'}
                                                                 </span>
                                                             </div>
                                                             <p className="text-[11px] font-medium text-[var(--text-main)] leading-snug">
@@ -534,7 +525,7 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                 {activeTab === 'strategy' && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
                                         <div>
-                                            <h3 className="text-[10px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-4 border-b border-[var(--border-color)] pb-2">Optimization Matrix</h3>
+                                            <h3 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-4 border-b border-[var(--border-color)] pb-2">Resume checklist</h3>
                                             <div className="space-y-4">
                                                 {[
                                                     { label: 'Summary', score: data.summary?.length > 50 ? 15 : 0, max: 15 },
@@ -545,12 +536,12 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                                     <div key={i} className="flex flex-col gap-1.5">
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-[9px] font-black text-[var(--text-main)] uppercase tracking-widest">{item.label}</span>
-                                                            <span className="text-[9px] font-mono text-[var(--text-muted)]">{item.score} / {item.max}</span>
+                                                            <span className="text-[9px] text-[var(--text-muted)]">{item.score} / {item.max}</span>
                                                         </div>
                                                         <div className="flex gap-[2px] h-1.5">
                                                             {Array.from({ length: 10 }).map((_, step) => (
                                                                 <div key={step} className={`flex-1 transition-all ${
-                                                                    (item.score / item.max) * 10 > step ? 'bg-purple-500' : 'bg-[var(--bg-input)]'
+                                                                    (item.score / item.max) * 10 > step ? 'bg-[var(--accent)]' : 'bg-[var(--bg-input)]'
                                                                 }`} />
                                                             ))}
                                                         </div>
@@ -560,7 +551,7 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                         </div>
 
                                         <div>
-                                            <h3 className="text-[10px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-4 border-b border-[var(--border-color)] pb-2">Keyword Heatmap</h3>
+                                            <h3 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mb-4 border-b border-[var(--border-color)] pb-2">Job keywords</h3>
                                             <div className="flex flex-wrap gap-2">
                                                 {keywordHeatmap.length > 0 ? (
                                                     keywordHeatmap.map((k, i) => (
@@ -573,8 +564,8 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <button onClick={() => setShowJDInput(true)} className="text-[10px] font-mono text-purple-400 hover:text-purple-300 uppercase tracking-widest py-2">
-                                                        &gt; INPUT TARGET JD
+                                                    <button onClick={() => setShowJDInput(true)} className="text-[10px] font-bold text-[var(--accent)] hover:text-[var(--accent-hover)] uppercase tracking-widest py-2">
+                                                        Paste a job description
                                                     </button>
                                                 )}
                                             </div>
@@ -591,20 +582,20 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                                 isAuditing
                                                 ? 'bg-[var(--bg-input)] border-[var(--border-color)] text-[var(--text-muted)] cursor-wait'
                                                 : auditResult 
-                                                    ? 'bg-transparent border-purple-500/30 text-purple-400 hover:border-purple-500' 
-                                                    : 'bg-[var(--text-main)] border-transparent text-[var(--bg-card)] hover:bg-white active:scale-[0.98]'
+                                                    ? 'bg-transparent border-[var(--accent)]/30 text-[var(--accent)] hover:border-[var(--accent)] rounded-xl' 
+                                                    : 'bg-[var(--text-main)] border-transparent text-[var(--bg-card)] hover:opacity-90 active:scale-[0.98] rounded-xl'
                                             }`}
                                         >
                                             {isAuditing ? (
                                                 <>
                                                     <div className="w-3 h-3 border-2 border-[var(--border-color)] border-t-transparent rounded-full animate-spin" />
-                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Scanning...</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Reviewing...</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Search size={14} className={!auditResult ? "text-[var(--bg-card)]" : "text-purple-400"} />
+                                                    <Search size={14} className={!auditResult ? "text-[var(--bg-card)]" : "text-[var(--accent)]"} />
                                                     <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-                                                        {auditResult ? 'Rerun Deep Scan' : 'Initialize Deep Scan'}
+                                                        {auditResult ? 'Run review again' : 'Run full review'}
                                                     </span>
                                                 </>
                                             )}
@@ -617,12 +608,12 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                                         <Cpu size={64} />
                                                     </div>
                                                     <div className="flex items-center gap-2 mb-3">
-                                                        <div className="px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 text-purple-400 text-[9px] font-mono font-bold uppercase tracking-widest">
+                                                        <div className="px-2 py-0.5 bg-[var(--accent-subtle)] border border-[var(--accent)]/30 text-[var(--accent)] text-[9px] font-bold uppercase tracking-widest rounded">
                                                             MATCH {auditResult.aiScore}%
                                                         </div>
                                                     </div>
-                                                    <p className="text-[11px] font-mono text-[var(--text-main)] leading-relaxed">
-                                                        &gt; {auditResult.narrativeAnalysis}
+                                                    <p className="text-[12px] text-[var(--text-main)] leading-relaxed">
+                                                        {auditResult.narrativeAnalysis}
                                                     </p>
                                                 </div>
 
@@ -650,11 +641,11 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center py-12 text-center opacity-30">
-                                                <div className="w-12 h-12 border border-[var(--border-color)] flex items-center justify-center mb-4">
+                                                <div className="w-12 h-12 border border-[var(--border-color)] rounded-xl flex items-center justify-center mb-4">
                                                     <Cpu size={20} className="text-[var(--text-muted)]" />
                                                 </div>
-                                                <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">NO DATA</p>
-                                                <p className="text-[9px] font-mono text-[var(--text-muted)] max-w-[180px]">Execute deep scan to retrieve detailed trajectory analysis.</p>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">No review yet</p>
+                                                <p className="text-[11px] text-[var(--text-muted)] max-w-[200px]">Run a full review to see clear improvement suggestions.</p>
                                             </div>
                                         )}
                                     </div>
@@ -691,37 +682,36 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                     )}
                     <Settings2 size={14} className="relative z-10" /> 
                     <span className="relative z-10 text-[10px] font-black uppercase tracking-[0.2em]">
-                        {isAuthenticated ? 'Manual Override Guide' : 'Unlock Guide'}
+                        {isAuthenticated ? 'Open improvement guide' : 'Sign in for guide'}
                     </span>
                 </button>
             </div>
 
             {/* JD INPUT OVERLAY */}
             {showJDInput && createPortal(
-                <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans selection:bg-purple-500/30">
-                    <div className="w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 relative overflow-hidden">
-                        {/* Grid Background */}
-                        <div className="absolute inset-0 pointer-events-none opacity-10" 
-                            style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-                        
+                <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans-ed selection:bg-[var(--accent)]/30">
+                    <div className="w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 relative overflow-hidden">
                         <div className="flex items-center justify-between mb-6 relative z-10">
-                            <h3 className="text-[12px] font-black uppercase tracking-[0.3em] text-[var(--text-main)] flex items-center gap-3">
-                                <Crosshair size={16} className="text-purple-500" /> Target Parameters
-                            </h3>
-                            <button onClick={() => setShowJDInput(false)} className="p-2 border border-transparent hover:border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
+                            <div>
+                                <h3 className="text-[13px] font-black uppercase tracking-[0.22em] text-[var(--text-main)] flex items-center gap-3">
+                                    <Crosshair size={16} className="text-[var(--accent)]" /> Job description
+                                </h3>
+                                <p className="mt-2 text-sm text-[var(--text-muted)]">Paste the job post so we can compare it with your resume.</p>
+                            </div>
+                            <button onClick={() => setShowJDInput(false)} className="p-2 border border-transparent hover:border-[var(--border-color)] rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
                                 <X size={18} />
                             </button>
                         </div>
                         
                         <div className="relative z-10 group">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-0 group-focus-within:opacity-20 blur transition-opacity duration-500" />
+                            <div className="absolute -inset-0.5 bg-[var(--accent)] opacity-0 group-focus-within:opacity-10 blur transition-opacity duration-500" />
                             <textarea
                                 ref={jdRef}
                                 autoFocus
                                 value={data.targetJD || ''}
                                 onChange={(e) => onUpdateJD?.(e.target.value)}
-                                placeholder="> PASTE JOB DESCRIPTION RAW TEXT HERE..."
-                                className="w-full h-80 p-5 bg-[var(--bg-card)] border border-[var(--border-color)] text-[12px] font-mono text-[var(--text-main)] placeholder:text-zinc-700 focus:outline-none focus:border-purple-500/50 resize-none transition-colors leading-relaxed scrollbar-hide relative z-10"
+                                placeholder="Paste the job description here..."
+                                className="w-full h-80 p-5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-sm text-[var(--text-main)] placeholder:text-[var(--text-muted)]/55 focus:outline-none focus:border-[var(--accent)]/50 resize-none transition-colors leading-relaxed scrollbar-hide relative z-10"
                             />
                         </div>
                         
@@ -733,16 +723,16 @@ export function RecruiterPanel({ data, onUpdateJD, onOpenGuidance, onOpenOptimiz
                                             onUpdateJD?.('');
                                             setShowJDInput(false);
                                         }}
-                                        className="px-6 py-3 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/10 active:scale-95 transition-all"
+                                        className="px-6 py-3 border border-red-500/30 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/10 active:scale-95 transition-all rounded-xl"
                                     >
-                                        Abort
+                                        Clear
                                     </button>
                                 )}
                                 <button
                                     onClick={() => setShowJDInput(false)}
-                                    className="flex-1 py-3 bg-[var(--text-main)] text-[var(--bg-card)] border border-transparent hover:bg-white text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                                    className="flex-1 py-3 bg-[var(--text-main)] text-[var(--bg-card)] border border-transparent hover:opacity-90 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all rounded-xl shadow-[0_18px_34px_-22px_rgba(0,0,0,0.65)]"
                                 >
-                                    {data.targetJD ? 'Lock Parameters' : 'Close Terminal'}
+                                    {data.targetJD ? 'Use this job description' : 'Close'}
                                 </button>
                             </div>
                         </div>

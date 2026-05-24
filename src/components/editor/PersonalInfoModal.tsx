@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, Plus, Trash2, Link as LinkIcon, Linkedin, Github, Globe, Twitter, Mail, Smartphone, AtSign } from 'lucide-react';
+import { X, Plus, Trash2, Linkedin, Github, Globe, Twitter, Mail, Smartphone } from 'lucide-react';
 import type { PersonalInfo } from '../../types/resume';
 
 interface Props {
@@ -10,6 +10,10 @@ interface Props {
 
 export function PersonalInfoModal({ data, onSave, onClose }: Props) {
     const [formData, setFormData] = useState<PersonalInfo>(data);
+    const labelClass = "block text-[10px] font-sans-ed font-bold uppercase tracking-[0.22em] text-[var(--text-muted)] mb-2";
+    const inputClass = "w-full h-11 px-3.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg outline-none text-[15px] text-[var(--text-main)] placeholder:text-[var(--text-muted)]/40 focus:border-[var(--accent)] focus:bg-[var(--bg-card)] transition-all";
+    const iconInputClass = "w-full h-11 pl-10 pr-3.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg outline-none text-[15px] text-[var(--text-main)] placeholder:text-[var(--text-muted)]/40 focus:border-[var(--accent)] focus:bg-[var(--bg-card)] transition-all";
+    const sectionTitleClass = "flex items-center gap-3 text-[10px] font-sans-ed font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]";
 
     const updateField = (field: keyof PersonalInfo, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -44,36 +48,49 @@ export function PersonalInfoModal({ data, onSave, onClose }: Props) {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
-            <div className="bg-[var(--bg-card)] rounded-xl shadow-[var(--shadow)] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--border-color)] animate-in zoom-in-95 duration-300">
+            <div className="bg-[var(--bg-card)]/95 rounded-xl shadow-[0_24px_80px_-32px_rgba(0,0,0,0.55)] w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-[var(--border-color)] animate-in zoom-in-95 duration-300 font-sans-ed">
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-[var(--border-color)]">
-                    <h2 className="text-xl font-bold text-[var(--text-main)] tracking-tight">Personal Information</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-[var(--bg-input)] rounded-full transition-all active:scale-95 text-[var(--text-muted)]">
-                        <X size={20} />
+                <div className="flex items-start justify-between px-7 py-6 border-b border-[var(--border-color)]">
+                    <div>
+                        <h2 className="font-serif-ed text-3xl font-normal tracking-tight text-[var(--text-main)] leading-none">Personal Information</h2>
+                        <p className="mt-2 text-[9px] font-medium uppercase tracking-[0.25em] text-[var(--text-muted)] opacity-80">
+                            Resume header and contact identity
+                        </p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-lg transition-all active:scale-95"
+                        aria-label="Close personal information"
+                    >
+                        <X size={18} />
                     </button>
                 </div>
 
-                <div className="p-6 space-y-8 flex-1 overflow-y-auto no-scrollbar">
+                <div className="px-7 py-6 space-y-8 flex-1 overflow-y-auto no-scrollbar">
 
                     {/* Basic Info */}
                     <div className="space-y-4">
+                        <div className={sectionTitleClass}>
+                            <span>Identity</span>
+                            <span className="h-px flex-1 bg-[var(--border-color)]" />
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-1">
-                                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Full Name <span className="text-red-500">*</span></label>
+                                <label className={labelClass}>Full Name <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
-                                    className="w-full px-4 py-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-[var(--text-main)] placeholder:text-[var(--text-muted)]/40"
+                                    className={inputClass}
                                     value={formData.fullName}
                                     onChange={(e) => updateField('fullName', e.target.value)}
                                     placeholder="e.g. John Doe"
                                 />
                             </div>
                             <div className="md:col-span-1">
-                                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Job Title</label>
+                                <label className={labelClass}>Job Title</label>
                                 <input
                                     type="text"
-                                    className="w-full px-4 py-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-[var(--text-main)] placeholder:text-[var(--text-muted)]/40"
+                                    className={inputClass}
                                     value={formData.title || ''}
                                     onChange={(e) => updateField('title', e.target.value)}
                                     placeholder="e.g. Senior Software Engineer"
@@ -84,37 +101,40 @@ export function PersonalInfoModal({ data, onSave, onClose }: Props) {
 
                     {/* Contacts */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] border-b border-[var(--border-color)] pb-2 ml-1">Contacts</h3>
+                        <div className={sectionTitleClass}>
+                            <span>Contact</span>
+                            <span className="h-px flex-1 bg-[var(--border-color)]" />
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Email</label>
+                                <label className={labelClass}>Email</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-4 top-3 text-[var(--text-muted)]" size={16} />
+                                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={15} />
                                     <input
                                         type="email"
-                                        className="w-full pl-11 pr-4 py-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-[var(--text-main)]"
+                                        className={iconInputClass}
                                         value={formData.email}
                                         onChange={(e) => updateField('email', e.target.value)}
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Phone</label>
+                                <label className={labelClass}>Phone</label>
                                 <div className="relative">
-                                    <Smartphone className="absolute left-4 top-3 text-[var(--text-muted)]" size={16} />
+                                    <Smartphone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={15} />
                                     <input
                                         type="text"
-                                        className="w-full pl-11 pr-4 py-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-[var(--text-main)]"
+                                        className={iconInputClass}
                                         value={formData.phone}
                                         onChange={(e) => updateField('phone', e.target.value)}
                                     />
                                 </div>
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1.5 ml-1">Location</label>
+                                <label className={labelClass}>Location</label>
                                 <input
                                     type="text"
-                                    className="w-full px-4 py-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-[var(--text-main)]"
+                                    className={inputClass}
                                     value={formData.location}
                                     onChange={(e) => updateField('location', e.target.value)}
                                     placeholder="City, Country"
@@ -125,39 +145,42 @@ export function PersonalInfoModal({ data, onSave, onClose }: Props) {
 
                     {/* Dimensions / Socials */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] border-b border-[var(--border-color)] pb-2 ml-1">Websites & Social Links</h3>
-                        <div className="space-y-3">
+                        <div className={sectionTitleClass}>
+                            <span>Links</span>
+                            <span className="h-px flex-1 bg-[var(--border-color)]" />
+                        </div>
+                        <div className="divide-y divide-[var(--border-color)] border-y border-[var(--border-color)]">
                             {formData.profiles?.map((profile, idx) => (
-                                <div key={idx} className="flex gap-4 items-start bg-[var(--bg-input)] p-4 rounded-xl border border-[var(--border-color)] group">
-                                    <div className="pt-2.5 text-[var(--text-muted)] transition-colors group-hover:text-blue-400">
+                                <div key={idx} className="grid grid-cols-[24px_minmax(0,1fr)_auto] gap-3 py-4 group">
+                                    <div className="pt-8 text-[var(--text-muted)] transition-colors group-hover:text-[var(--accent)]">
                                         {getIcon(profile.network)}
                                     </div>
-                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1 block">Network / Label</label>
+                                            <label className={labelClass}>Network / Label</label>
                                             <input
                                                 type="text"
-                                                className="w-full px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-main)] focus:border-blue-500/40 outline-none transition-all"
+                                                className={inputClass}
                                                 value={profile.network}
                                                 onChange={(e) => updateProfile(idx, 'network', e.target.value)}
                                                 placeholder="e.g. LinkedIn"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1 block">Username / Display Text</label>
+                                            <label className={labelClass}>Username / Display Text</label>
                                             <input
                                                 type="text"
-                                                className="w-full px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-main)] focus:border-blue-500/40 outline-none transition-all"
+                                                className={inputClass}
                                                 value={profile.username}
                                                 onChange={(e) => updateProfile(idx, 'username', e.target.value)}
                                                 placeholder="@username"
                                             />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1 block">URL</label>
+                                            <label className={labelClass}>URL</label>
                                             <input
                                                 type="text"
-                                                className="w-full px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-main)] focus:border-blue-500/40 outline-none transition-all"
+                                                className={inputClass}
                                                 value={profile.url}
                                                 onChange={(e) => updateProfile(idx, 'url', e.target.value)}
                                                 placeholder="https://..."
@@ -166,7 +189,8 @@ export function PersonalInfoModal({ data, onSave, onClose }: Props) {
                                     </div>
                                     <button
                                         onClick={() => removeProfile(idx)}
-                                        className="p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all active:scale-90 self-start mt-1"
+                                        className="mt-8 p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all active:scale-90 self-start"
+                                        aria-label={`Remove ${profile.network || 'profile'} link`}
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -174,14 +198,14 @@ export function PersonalInfoModal({ data, onSave, onClose }: Props) {
                             ))}
                         </div>
 
-                        <div className="flex flex-wrap gap-2 pt-2">
+                        <div className="flex flex-wrap gap-2 pt-1">
                             {['LinkedIn', 'GitHub', 'Portfolio', 'Twitter', 'Behance'].map(net => (
                                 <button
                                     key={net}
                                     onClick={() => {
                                         updateField('profiles', [...(formData.profiles || []), { network: net, username: '', url: '' }]);
                                     }}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] transition-all active:scale-95"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-input)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)] hover:text-[var(--accent)] transition-all active:scale-95"
                                 >
                                     <Plus size={14} /> {net}
                                 </button>
@@ -190,7 +214,7 @@ export function PersonalInfoModal({ data, onSave, onClose }: Props) {
                                 onClick={() => {
                                     updateField('profiles', [...(formData.profiles || []), { network: 'Website', username: '', url: '' }]);
                                 }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg text-xs font-bold uppercase tracking-wider text-blue-400 transition-all active:scale-95"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent-subtle)] hover:bg-[var(--accent-subtle)] border border-[var(--accent)]/20 rounded-lg text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--accent)] transition-all active:scale-95"
                             >
                                 <Plus size={14} /> Custom
                             </button>
@@ -198,13 +222,13 @@ export function PersonalInfoModal({ data, onSave, onClose }: Props) {
                     </div>
                 </div>
 
-                <div className="p-6 border-t border-[var(--border-color)] bg-[var(--bg-main)] flex justify-end gap-3">
-                    <button onClick={onClose} className="px-6 py-2.5 text-sm font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-xl transition-all active:scale-95">
+                <div className="px-7 py-5 border-t border-[var(--border-color)] bg-[var(--bg-main)]/70 backdrop-blur-md flex justify-end gap-3">
+                    <button onClick={onClose} className="px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-input)] rounded-lg transition-all active:scale-95">
                         Cancel
                     </button>
                     <button
                         onClick={() => { onSave(formData); onClose(); }}
-                        className="px-10 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 shadow-xl shadow-blue-900/40 transition-all active:scale-95"
+                        className="px-8 py-2.5 bg-[var(--text-main)] text-[var(--bg-main)] text-[11px] font-bold uppercase tracking-[0.18em] rounded-lg hover:opacity-90 shadow-[0_18px_34px_-22px_rgba(0,0,0,0.65)] transition-all active:scale-95"
                     >
                         Done
                     </button>

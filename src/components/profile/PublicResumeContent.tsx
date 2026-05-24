@@ -26,8 +26,43 @@ export function PublicResumeContent({ resumeData }: PublicResumeContentProps) {
         const element = document.getElementById('resume-preview-for-generation');
         if (!element) return null;
 
+        let resumeCss = '';
+        try {
+            const cssRes = await fetch('/resume.css');
+            if (cssRes.ok) resumeCss = await cssRes.text();
+            const singlePageCssRes = await fetch('/single-page-resume.css');
+            if (singlePageCssRes.ok) {
+                resumeCss += `\n${await singlePageCssRes.text()}`;
+            }
+        } catch (error) {
+            console.error('Error fetching resume.css:', error);
+        }
+
         const html = element.outerHTML;
-        return { html };
+        const marginMap = {
+            compact: '30pt',
+            narrow: '40pt',
+            standard: '50pt',
+            wide: '60pt',
+            relaxed: '72pt'
+        };
+        const isSinglePageMode = resumeData.config?.documentMode === 'singlePage';
+        const marginKey = (resumeData.config?.margins || 'standard') as keyof typeof marginMap;
+        const currentMargin = isSinglePageMode ? '0' : (marginMap[marginKey] || '50pt');
+        const dynamicStyles = `
+            <style>
+                @page { margin: ${currentMargin} !important; size: A4; }
+                body { background: white !important; }
+                #resume-preview-for-generation {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: 100% !important;
+                    box-shadow: none !important;
+                }
+            </style>
+        `.replace(/\s+/g, ' ').trim();
+
+        return { html: dynamicStyles + html, css: resumeCss };
     };
 
     const handleDownload = async () => {

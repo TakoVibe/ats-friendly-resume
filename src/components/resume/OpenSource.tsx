@@ -2,8 +2,7 @@ import type { ResumeSchema } from '../../types/resume';
 import { SectionTitle } from './SectionTitle';
 import { EditableField } from '../ui/EditableField';
 import { ItemControls } from '../ui/ItemControls';
-import { Plus, Github } from 'lucide-react';
-import { ATSWarning } from '../ui/ATSWarning';
+import { Plus } from 'lucide-react';
 
 type OpenSourceItem = NonNullable<ResumeSchema['openSource']>[0];
 
@@ -22,6 +21,32 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
     if (!openSource && !isEditable) return null;
     const safeOpenSource = openSource || [];
     const isMobile = viewMode === 'mobile';
+
+    const stripHtml = (value: string) => value
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .trim();
+
+    const sanitizeInlineHtml = (value: string) => value
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<\/?(span|font|div|p)[^>]*>/gi, '')
+        .replace(/<b[^>]*>/gi, '<strong>')
+        .replace(/<\/b>/gi, '</strong>')
+        .replace(/<strong[^>]*>/gi, '<strong>')
+        .replace(/<em[^>]*>/gi, '<em>')
+        .replace(/<i[^>]*>/gi, '<em>')
+        .replace(/<\/i>/gi, '</em>')
+        .replace(/<u[^>]*>/gi, '<u>')
+        .replace(/<a\s+[^>]*href=["']([^"']+)["'][^>]*>/gi, '<a href="$1">')
+        .replace(/<(?!\/?(strong|em|u|a)(\s|>|\/))/gi, '&lt;')
+        .replace(/\s+/g, ' ')
+        .trim();
 
     const updateItem = (id: string, field: keyof NonNullable<Props['openSource']>[0], value: any) => {
         if (!onUpdate) return;
@@ -82,7 +107,7 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                 showSeparator={showSeparator}
                 onToggleSeparator={onToggleSeparator}
             />
-            <ul className="resume-details-list">
+            <ul className="resume-details-list resume-open-source-list">
                 {safeOpenSource.map((item, index) => (
                     <ItemControls
                         key={item.id}
@@ -93,33 +118,58 @@ export function OpenSource({ openSource, isEditable = false, onUpdate, title = "
                         onDelete={() => deleteItem(index)}
                         onDuplicate={() => duplicateItem(index)}
                         isEditable={isEditable}
+                        className="!py-0"
                     >
-                        <li className="resume-list-item resume-text-justify group/item-content resume-relative">
+                        <li className="resume-list-item resume-open-source-item group/item-content resume-relative">
                             <span className="resume-bullet">•</span>
-                            <div className={`resume-flex-1 resume-flex ${isMobile ? 'resume-flex-col resume-gap-0.5' : 'resume-items-baseline'}`}>
-                                <span className={`resume-font-bold resume-text-dark ${isMobile ? 'resume-mb-0.5' : ''}`}>
+                            <div className={`resume-flex-1 resume-open-source-copy ${isMobile ? 'resume-flex resume-flex-col resume-gap-0.5' : ''}`}>
+                                {isMobile ? (
+                                    <>
+                                        <EditableField
+                                            tagName="span"
+                                            value={item.name}
+                                            onSave={(val) => updateItem(item.id, 'name', val)}
+                                            isEditable={isEditable}
+                                            className="resume-font-bold resume-text-dark resume-open-source-title-text resume-mb-0.5"
+                                            placeholder="Project Name"
+                                        />
+                                        <EditableField
+                                            tagName="span"
+                                            value={item.description || ''}
+                                            onSave={(val) => updateItem(item.id, 'description', val)}
+                                            isEditable={isEditable}
+                                            className="resume-text-dark resume-open-source-description-text"
+                                            placeholder="Contribution description & references..."
+                                            aiProps={{
+                                                type: 'bullet',
+                                                context: { projectName: item.name }
+                                            }}
+                                        />
+                                    </>
+                                ) : (
                                     <EditableField
                                         tagName="span"
-                                        value={item.name}
-                                        onSave={(val) => updateItem(item.id, 'name', val)}
+                                        mode="html"
+                                        value={`<strong>${stripHtml(item.name)}</strong>: ${sanitizeInlineHtml(item.description || '')}`}
+                                        onSave={(val) => {
+                                            const clean = sanitizeInlineHtml(val);
+                                            const colonIndex = clean.indexOf(':');
+                                            if (colonIndex === -1) {
+                                                updateItem(item.id, 'name', stripHtml(clean));
+                                                return;
+                                            }
+                                            updateItem(item.id, 'name', stripHtml(clean.slice(0, colonIndex)));
+                                            updateItem(item.id, 'description', clean.slice(colonIndex + 1).trim());
+                                        }}
                                         isEditable={isEditable}
-                                        placeholder="Project Name"
-                                    />
-                                </span>
-                                {!isMobile && <span className="opacity-70 text-[var(--resume-gray)] mx-1">:</span>}
-                                <span className="resume-text-dark">
-                                    <EditableField
-                                        tagName="span"
-                                        value={item.description || ''}
-                                        onSave={(val) => updateItem(item.id, 'description', val)}
-                                        isEditable={isEditable}
-                                        placeholder="Contribution description & references..."
+                                        className="resume-open-source-line"
+                                        placeholder="Project Name: Contribution description & references..."
                                         aiProps={{
                                             type: 'bullet',
                                             context: { projectName: item.name }
                                         }}
                                     />
-                                </span>
+                                )}
                             </div>
                         </li>
                     </ItemControls>

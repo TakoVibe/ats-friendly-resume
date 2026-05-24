@@ -277,10 +277,13 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                             {(project.metrics || isEditable) && (
                                 <ul className="resume-details-list">
                                     {project.metrics
-                                        ?.filter(metric => isEditable || (typeof metric === 'string' ? metric : metric.text)?.trim())
+                                        ?.filter(metric => {
+                                            const metricText = typeof metric === 'string' ? metric : metric?.text;
+                                            return isEditable || metricText?.trim();
+                                        })
                                         .map((metric, idx) => {
-                                            const metricText = typeof metric === 'string' ? metric : metric.text;
-                                            const hasBullet = typeof metric === 'string' ? true : (metric.hasBullet !== false);
+                                            const metricText = typeof metric === 'string' ? metric : (metric?.text || '');
+                                            const hasBullet = typeof metric === 'string' ? true : (metric?.hasBullet !== false);
 
                                             return (
                                                 <DraggableBullet
@@ -336,8 +339,10 @@ export function Projects({ projects, isEditable = false, onUpdate, title = "Proj
                                                                                 const current = nm[idx];
                                                                                 if (typeof current === 'string') {
                                                                                     nm[idx] = { text: current, hasBullet: false };
-                                                                                } else {
+                                                                                } else if (current && typeof current === 'object') {
                                                                                     nm[idx] = { ...current, hasBullet: !(current.hasBullet !== false) };
+                                                                                } else {
+                                                                                    nm[idx] = { text: '', hasBullet: false };
                                                                                 }
                                                                                 return { ...p, metrics: nm };
                                                                             });

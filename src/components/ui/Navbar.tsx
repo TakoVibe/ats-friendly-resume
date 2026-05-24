@@ -30,7 +30,7 @@ export function Navbar({ children }: NavbarProps) {
 
             {/* ── Zone 2: Page-specific actions (fluid center) ── */}
             {children && (
-                <div className="flex-1 min-w-0 flex items-center gap-2">
+                <div className="flex-1 min-w-0 flex items-center justify-center gap-2">
                     {children}
                 </div>
             )}

@@ -79,8 +79,9 @@ export interface ResumeSchema {
         accentColor?: string;
         fontFamily?: string;
 
-        margins?: 'compact' | 'standard' | 'relaxed';
+        margins?: 'compact' | 'narrow' | 'standard' | 'wide' | 'relaxed';
         lineHeight?: number; // 1.0 to 2.0
+        documentMode?: 'standard' | 'singlePage';
     };
 
     // Layout Configuration

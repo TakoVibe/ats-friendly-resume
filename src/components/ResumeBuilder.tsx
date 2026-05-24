@@ -44,7 +44,7 @@ function ResumeBuilderContent() {
     const [showOptimizeModal, setShowOptimizeModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [showSectionTypeModal, setShowSectionTypeModal] = useState(false);
-    const [showRecruiterAI, setShowRecruiterAI] = useState(true);
+    const [showRecruiterAI, setShowRecruiterAI] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [showGuidanceModal, setShowGuidanceModal] = useState(false);
     const [showCoverLetterModal, setShowCoverLetterModal] = useState(false);
@@ -167,7 +167,7 @@ function ResumeBuilderContent() {
         const element = document.getElementById('resume-preview-for-generation');
         if (!element) return null;
 
-        // Explicitly fetch the clean resume.css
+        // Explicitly fetch the print/export CSS used by Puppeteer.
         let resumeCss = '';
         try {
             const cssRes = await fetch('/resume.css');
@@ -175,6 +175,10 @@ function ResumeBuilderContent() {
                 resumeCss = await cssRes.text();
             } else {
                 console.error('Failed to fetch resume.css');
+            }
+            const singlePageCssRes = await fetch('/single-page-resume.css');
+            if (singlePageCssRes.ok) {
+                resumeCss += `\n${await singlePageCssRes.text()}`;
             }
         } catch (e) {
             console.error('Error fetching resume.css:', e);
@@ -190,7 +194,8 @@ function ResumeBuilderContent() {
             wide: '60pt',
             relaxed: '72pt'
         };
-        const currentMargin = marginMap[data.config?.margins || 'standard'] || '50pt';
+        const isSinglePageMode = data.config?.documentMode === 'singlePage';
+        const currentMargin = isSinglePageMode ? '0' : (marginMap[data.config?.margins || 'standard'] || '50pt');
 
         const dynamicStyles = `
             <style>
@@ -529,18 +534,52 @@ function ResumeBuilderContent() {
                     {/* Desktop Toolbar */}
                     {activeTab === 'editor' && <div className="hidden md:block"><EditorToolbar onAddSection={() => setShowSectionTypeModal(true)} /></div>}
 
+                    {activeTab === 'editor' && !showRecruiterAI && (
+                        <button
+                            onClick={() => setShowRecruiterAI(true)}
+                            className="hidden xl:flex fixed right-8 bottom-8 z-50 h-14 min-w-[196px] bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl shadow-[var(--shadow)] items-center gap-3 px-4 active:scale-95 hover:border-[var(--accent)]/40 hover:bg-[var(--bg-input)] transition-all group overflow-visible"
+                            aria-label="Tailor resume for a job"
+                        >
+                            <div className="absolute inset-0 rounded-[18px] overflow-hidden">
+                                <div className="absolute inset-y-0 left-0 w-1 bg-[var(--accent)] opacity-80" />
+                            </div>
+                            <div className="absolute right-0 bottom-[calc(100%+10px)] w-64 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 text-left text-[var(--text-main)] shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0 transition-all duration-200">
+                                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--text-muted)]">How it works</div>
+                                <div className="mt-2 space-y-1.5 text-[11px] font-semibold leading-snug">
+                                    <div>1. Paste a job description</div>
+                                    <div>2. AI finds missing keywords and gaps</div>
+                                    <div>3. Apply targeted resume edits</div>
+                                </div>
+                            </div>
+                            <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]/20">
+                                <Zap size={18} className="group-hover:rotate-12 transition-transform" />
+                            </span>
+                            <span className="relative flex flex-col items-start leading-none">
+                                <span className="text-[11px] font-black uppercase tracking-[0.18em]">Tailor for Job</span>
+                                <span className="mt-1 text-[9px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Paste JD {'>'} apply edits</span>
+                            </span>
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--accent)] rounded-full border-2 border-[var(--bg-main)] animate-pulse" />
+                        </button>
+                    )}
+
                     {/* Mobile Bottom Toolbar Spacer to prevent content overlapping */}
                     {activeTab === 'editor' && (
                         <div className="block xl:hidden fixed bottom-28 right-4 z-50 flex flex-col gap-4">
                             {/* Premium HUD FAB for AI Cockpit */}
                             <button
                                 onClick={() => setShowRecruiterAI(true)}
-                                className="w-14 h-14 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-[20px] shadow-[0_8px_30px_rgb(126,34,206,0.3)] flex items-center justify-center active:scale-90 transition-all group relative overflow-hidden ring-1 ring-white/20"
+                                className="h-14 w-[180px] max-w-[calc(100vw-2rem)] bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-color)] rounded-xl shadow-[var(--shadow)] flex items-center gap-2.5 px-3 active:scale-90 hover:border-[var(--accent)]/40 transition-all group relative overflow-hidden"
+                                aria-label="Tailor resume for a job"
                             >
-                                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] duration-700 transition-transform" />
-                                <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-                                <Zap size={22} className="group-hover:rotate-12 transition-transform fill-white/20" />
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[var(--bg-main)] animate-pulse" />
+                                <div className="absolute inset-y-0 left-0 w-1 bg-[var(--accent)] opacity-80" />
+                                <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]/20">
+                                    <Zap size={18} className="group-hover:rotate-12 transition-transform" />
+                                </span>
+                                <span className="relative flex min-w-0 flex-col items-start leading-none">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.14em]">Tailor for Job</span>
+                                    <span className="mt-1 text-[8px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)]">Paste JD {'>'} edits</span>
+                                </span>
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--accent)] rounded-full border-2 border-[var(--bg-main)] animate-pulse" />
                             </button>
 
                             <button
@@ -564,7 +603,7 @@ function ResumeBuilderContent() {
                             {/* Mobile-optimized Container - Fits Width Automatically */}
                             <div className="w-full md:w-auto relative mt-4 md:mt-8 px-2 md:px-0 flex justify-center">
                                 {/* Only apply transform scale on non-mobile, on mobile we use CSS Zoom or Width constraints */}
-                                <div className="hidden md:block scale-[0.7] md:scale-[0.85] lg:scale-100 origin-top transition-transform duration-300">
+                                <div className="hidden md:block scale-[0.8] md:scale-[0.95] lg:scale-[1.08] xl:scale-[1.12] origin-top transition-transform duration-300">
                                     <ResumePreview
                                         data={data}
                                         id="resume-preview-content"
@@ -731,6 +770,7 @@ function ResumeBuilderContent() {
                             onAuditResult={(result) => setGuidanceAuditResult(result)}
                             isAuthenticated={isAuthenticated}
                             onRequireAuth={() => setShowLoginModal(true)}
+                            onClose={() => setShowRecruiterAI(false)}
                         />
                     </div>
                 )}

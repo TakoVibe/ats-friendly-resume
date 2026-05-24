@@ -42,7 +42,7 @@ export function ATSWarning({ type, text, className = '' }: ATSWarningProps) {
     const config = warnings[type];
 
     return (
-        <div className={`flex gap-3 p-3 rounded-xl border ${config.bg} ${config.border} ${className} animate-in fade-in slide-in-from-top-1 duration-300`}>
+        <div className={`ats-warning flex gap-3 p-3 rounded-xl border ${config.bg} ${config.border} ${className} animate-in fade-in slide-in-from-top-1 duration-300`}>
             <div className={`${config.color} shrink-0 mt-0.5`}>
                 <AlertTriangle size={14} />
             </div>

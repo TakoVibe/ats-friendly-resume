@@ -1,5 +1,6 @@
 /* Resume CSS - Simple styles for PDF export */
 @import "/print.css";
+@import "/single-page-resume.css";
 
 /* Variables */
 :root {
@@ -308,16 +309,18 @@ li {
     display: flex;
     align-items: flex-start;
     line-height: inherit;
+    gap: 0;
 }
 
 .resume-bullet {
-    width: 1.2ch;
+    width: 1.6ch;
+    min-width: 1.6ch;
     display: inline-block;
-    text-align: center;
-    margin-right: 0.4ch;
-    font-size: 1.1em;
+    text-align: left;
+    padding-left: 0.2ch;
+    margin-right: 0;
+    font-size: inherit;
     line-height: inherit;
-    margin-top: 0;
     flex-shrink: 0;
 }
 
@@ -343,12 +346,57 @@ li {
 
 .resume-skill-group {
     margin-bottom: 2pt;
+    line-height: inherit;
 }
 
 .resume-skill-label {
     font-weight: 700;
     color: var(--resume-dark);
     margin-right: 0.4em;
+}
+
+/* Open Source */
+.resume-open-source-list {
+    font-size: 0.95em;
+    color: var(--resume-gray);
+    line-height: inherit;
+    margin-top: 0;
+}
+
+.resume-open-source-item {
+    line-height: inherit;
+}
+
+.resume-skills-content.resume-details-list,
+.resume-open-source-list {
+    margin-top: 0;
+}
+
+.resume-skills-content .resume-list-item,
+.resume-open-source-list .resume-list-item {
+    margin-bottom: 2pt;
+}
+
+.resume-skills-content .resume-bullet,
+.resume-open-source-list .resume-bullet {
+    width: 1.6ch;
+    min-width: 1.6ch;
+    padding-left: 0.2ch;
+}
+
+.resume-open-source-copy {
+    color: var(--resume-gray);
+    line-height: inherit;
+}
+
+.resume-open-source-line {
+    color: var(--resume-gray);
+    line-height: inherit;
+}
+
+.resume-open-source-line strong {
+    color: var(--resume-dark);
+    font-weight: 700;
 }
 
 /* Experience & Projects */
